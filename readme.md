@@ -81,3 +81,7 @@ table=100
 ## TIPS
 
 - `systemd-cgls` to see the cgroup hierarchical tree.
+
+## Licences
+
+cgproxy is licenced under [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0) 

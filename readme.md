@@ -20,7 +20,7 @@ cgproxy will **transparent** proxy anything running in specific cgroup. It resem
 mkdir build && cd build && cmake .. && make && make install
 ```
 
-It is alreay in archlinux AUR.
+It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy/).
 
 ## How to use
 

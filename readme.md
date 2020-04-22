@@ -59,15 +59,17 @@ enable_udp=true
 enable_ipv4=true
 enable_ipv6=true
 
-## v2ray outbound mark
+## v2ray outbound mark, depend on your v2ray setting
 ## only useful if v2ray process is also in proxy_cgroup, for example, you want to proxy whole userspace,
-## and v2ray is also running in userspace
+## and v2ray is also running in the same userspace
 ## otherwise ignore this
 v2ray_so_mark=255
 
 ## do not modify this if you don't known what you are doing
-mark=2333
 table=100
+mark=100
+mark_newin=1
+v2ray_so_mark=255
 ```
 
 

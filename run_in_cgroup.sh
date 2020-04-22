@@ -3,7 +3,7 @@
 print_help(){
 cat << 'DOC'
 usage:
-    run_in_cgroup --cggroup=CGROUP <COMMAND>
+    run_in_cgroup --cgroup=CGROUP <COMMAND>
     run_in_cgroup --help
 note:    
     CGROUP must start will slash '/' , and no special character

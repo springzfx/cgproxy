@@ -51,7 +51,7 @@ It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy/).
   sudo systemctl status cgproxy.service
   ```
 
-- Then prefix with cgproxy with you command, just like proxychains
+- Then prefix with cgproxy with your command, just like proxychains
 
   ```
   cgproxy <CMD>
@@ -89,7 +89,6 @@ v2ray_so_mark=255
 table=100
 mark=100
 mark_newin=1
-v2ray_so_mark=255
 ```
 
 If you changed config, remember to restart service
@@ -111,9 +110,9 @@ sudo systemctl restart cgproxy.service
 - `run_in_cgroup` run command in specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.
 
   ```bash
-  run_in_cgroup --cggroup=CGROUP <COMMAND>
+  run_in_cgroup --cgroup=CGROUP <COMMAND>
   # example
-  run_in_cgroup --cggroup=/mycgroup.slice ping 127.0.0.1
+  run_in_cgroup --cgroup=/mycgroup.slice ping 127.0.0.1
   ```
 
 

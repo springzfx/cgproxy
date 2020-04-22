@@ -78,7 +78,25 @@ If you changed config, remember to restart service
 sudo systemctl restart cgproxy.service
 ```
 
+## Other useful tools provided in this project
 
+- `cgattach` attach specific process pid to specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.
+
+  ```bash
+  cgattch <pid> <cgroup>
+  # example
+  cgattch 9999 /proxy.slice
+  ```
+
+- `run_in_cgroup` run command in specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.
+
+  ```bash
+  run_in_cgroup --cggroup=CGROUP <COMMAND>
+  # example
+  run_in_cgroup --cggroup=/mycgroup.slice ping 127.0.0.1
+  ```
+
+  
 
 ## NOTES
 

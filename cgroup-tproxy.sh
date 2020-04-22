@@ -41,8 +41,9 @@ enable_ipv4=true
 enable_ipv6=true
 
 ## do not modify this if you don't known what you are doing
-mark=2333
+mark=100
 table=100
+mark_newin=101
 v2ray_so_mark=255
 
 ## cgroup things
@@ -67,6 +68,8 @@ case $i in
         ip route flush table $table
         ip -6 rule delete fwmark $mark lookup $table
         ip -6 route flush table $table
+        iptables -t nat -A OUTPUT -F
+        ip6tables -t nat -A OUTPUT -F
         exit 0
         ;;
     --config=*)
@@ -91,14 +94,16 @@ ip route add local default dev lo table $table
 iptables -t mangle -N TPROXY_PRE
 iptables -t mangle -A TPROXY_PRE -p udp -m mark --mark $mark -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark
 iptables -t mangle -A TPROXY_PRE -p tcp -m mark --mark $mark -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark
+iptables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --set-mark $mark_newin
+iptables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --restore-mark
 iptables -t mangle -A PREROUTING -j TPROXY_PRE
 
 iptables -t mangle -N TPROXY_OUT
-iptables -t mangle -A TPROXY_OUT -p udp -o lo -j RETURN
+iptables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN # return incoming connection directly, v2ray tproxy seems not work for this situation, maybe a v2ray bug
+iptables -t mangle -A TPROXY_OUT -m mark --mark $v2ray_so_mark -j RETURN
 iptables -t mangle -A TPROXY_OUT -p udp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark
-iptables -t mangle -A TPROXY_OUT -p tcp -o lo -j RETURN
 iptables -t mangle -A TPROXY_OUT -p tcp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark
-iptables -t mangle -A OUTPUT -m mark ! --mark $v2ray_so_mark -j TPROXY_OUT
+iptables -t mangle -A OUTPUT ! -o lo -j TPROXY_OUT # exclude lo to avoid local bind problem, for example if your dns is 127.0.0.1:53, then v2ray can't bind to reply back result
 
 #ipv6#
 ip -6 rule add fwmark $mark table $table
@@ -106,14 +111,21 @@ ip -6 route add local default dev lo table $table
 ip6tables -t mangle -N TPROXY_PRE
 ip6tables -t mangle -A TPROXY_PRE -p udp -m mark --mark $mark -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark
 ip6tables -t mangle -A TPROXY_PRE -p tcp -m mark --mark $mark -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark
+ip6tables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --set-mark $mark_newin
+ip6tables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --restore-mark
 ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
 
 ip6tables -t mangle -N TPROXY_OUT
-ip6tables -t mangle -A TPROXY_OUT -p udp -o lo -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m mark --mark $v2ray_so_mark -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -p udp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark
-ip6tables -t mangle -A TPROXY_OUT -p tcp -o lo -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -p tcp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark
-ip6tables -t mangle -A OUTPUT -m mark ! --mark $v2ray_so_mark -j TPROXY_OUT
+ip6tables -t mangle -A OUTPUT ! -o lo -j TPROXY_OUT
+
+
+## use REDIRECT
+# iptables -t nat -A OUTPUT -p tcp -m cgroup --path $proxy_cgroup -j DNAT --to-destination 127.0.0.1:12345
+# ip6tables -t nat -A OUTPUT -p tcp -m cgroup --path $proxy_cgroup -j DNAT --to-destination [::1]:12345
 
 ## allow to disable, order is important
 $enable_udp 	|| iptables  -t mangle -I TPROXY_OUT -p udp -j RETURN

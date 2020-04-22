@@ -96,7 +96,20 @@ sudo systemctl restart cgproxy.service
   run_in_cgroup --cggroup=/mycgroup.slice ping 127.0.0.1
   ```
 
-  
+
+## Global transparent proxy
+
+- First run your proxy software (v2ray as example) in another cgroup that won't be proxid
+
+  ```bash
+  # qv2ray as example
+  run_in_cgroup --cgroup=/noproxy.slice qv2ray
+  # v2ray as example
+  run_in_cgroup --cgroup=/noproxy.slice v2ray --config config_file
+  ```
+
+- Second, set `proxy_cgroup=/user.slice` in `/etc/cgproxy.conf`, this will proxy your whole user space
+- restart service `sudo systemctl restart cgproxy.service`, that's all
 
 ## NOTES
 

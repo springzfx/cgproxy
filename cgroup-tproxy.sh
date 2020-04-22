@@ -99,7 +99,7 @@ iptables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --restor
 iptables -t mangle -A PREROUTING -j TPROXY_PRE
 
 iptables -t mangle -N TPROXY_OUT
-iptables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN # return incoming connection directly, v2ray tproxy seems not work for this situation, maybe a v2ray bug
+iptables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN # return incoming connection directly, v2ray tproxy not work for this situation, see this: https://github.com/Kr328/ClashForAndroid/issues/146
 iptables -t mangle -A TPROXY_OUT -m mark --mark $v2ray_so_mark -j RETURN
 iptables -t mangle -A TPROXY_OUT -p udp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark
 iptables -t mangle -A TPROXY_OUT -p tcp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark

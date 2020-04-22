@@ -8,7 +8,7 @@ cgproxy will **transparent** proxy anything running in specific cgroup. It resem
 
 - cgroup2
 
-  For now, linux default using cgroup v1 for compatibility, this project need cgroup v2, you need disable cgroup v1 and enable cgroup v2 in your system. 
+  For now, linux default using cgroup v1 for compatibility, this project need cgroup v2, you need disable cgroup v1 and enable cgroup v2 in your system.  see [Disabling v1 cgroups](https://wiki.archlinux.org/index.php/Cgroups#Disabling_v1_cgroups).
 
 - TPROXY
 

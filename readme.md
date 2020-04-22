@@ -72,6 +72,12 @@ mark_newin=1
 v2ray_so_mark=255
 ```
 
+If you changed config, remember to restart service
+
+```bash
+sudo systemctl restart cgproxy.service
+```
+
 
 
 ## NOTES

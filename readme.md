@@ -111,21 +111,21 @@ sudo systemctl restart cgproxy.service
 - Then,  run your proxy software in cgroup_noproxy to allow  direct to internet
 
   ```bash
-  nocgproxy  <PROXY PROGRAM>
+  cgnoproxy  <PROXY PROGRAM>
   # qv2ray as example
-  nocgproxy   qv2ray
+  cgnoproxy   qv2ray
   # v2ray as example
-  nocgproxy v2ray --config config_file
+  cgnoproxy v2ray --config config_file
   ```
 
 - Finally, restart service `sudo systemctl restart cgproxy.service`, that's all
 
 ## Other useful tools provided in this project
 
-- `nocgproxy` run program wihout proxy, very useful in global transparent proxy
+- `cgnoproxy` run program wihout proxy, very useful in global transparent proxy
 
   ```bash
-  nocgproxy <CMD> 
+  cgnoproxy <CMD> 
   ```
   
 - `run_in_cgroup` run command in specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.

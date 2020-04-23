@@ -8,8 +8,8 @@ install(TARGETS cgattach DESTINATION /usr/bin
 install(FILES  cgproxy.sh DESTINATION /usr/bin 
         RENAME cgproxy
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-install(FILES  nocgproxy.sh DESTINATION /usr/bin 
-        RENAME nocgproxy
+install(FILES  cgnoproxy.sh DESTINATION /usr/bin 
+        RENAME cgnoproxy
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 # install(FILES  run_in_cgroup.sh DESTINATION /usr/bin 
 #         RENAME run_in_cgroup

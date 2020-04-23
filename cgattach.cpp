@@ -22,10 +22,11 @@ bool exist(string path) {
 
 bool validate(string pid, string cgroup) {
   bool pid_v = regex_match(pid, regex("^[0-9]+$"));
-  bool cg_v = regex_match(cgroup, regex("^\\/[a-zA-Z0-9\\-_./@]+$"));
+  bool cg_v = regex_match(cgroup, regex("^\\/[a-zA-Z0-9\\-_./@]*$"));
   if (pid_v && cg_v)
     return true;
   // cout<<pid_v<<" "<<cg_v<<endl;
+  puts("paramater validate error\n");
   print_usage();
   exit(EXIT_FAILURE);
 }
@@ -39,6 +40,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (argc != 3) {
+    puts("only need 2 paramaters\n");
     print_usage();
     exit(EXIT_FAILURE);
   }

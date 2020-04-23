@@ -5,9 +5,9 @@ source $config
 
 # test suid bit
 if [ -u "$(which cgattach)" ]; then 
-    cgattach $$ $cgroup_proxy && attached=1
+    cgattach $$ $cgroup_noproxy && attached=1
 else
-    sudo cgattach $$ $cgroup_proxy && attached=1
+    sudo cgattach $$ $cgroup_noproxy && attached=1
 fi
 
 # test attach success or not

@@ -4,7 +4,9 @@
 
 ## Introduction
 
-cgproxy will **transparent** proxy anything running in specific cgroup. It resembles with *proxychains* and *tsock*, but without their disadvantages.
+cgproxy will transparent proxy anything running in specific cgroup. It resembles with *proxychains* and *tsock*, but without their disadvantages, and more powerfull.
+
+It aslo supports global transparent proxy. See [Global transparent proxy](#global-transparent-proxy)
 
 
 <!--ts-->
@@ -66,11 +68,17 @@ It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy/).
 More config in `/etc/cgproxy.conf`:
 
 ```bash
-## any process in this cgroup will be proxied
-## must start with slash '/'
-proxy_cgroup="/proxy.slice"
-# proxy_cgroup="/user.slice"
+########################################################################
+## cgroup transparent proxy
+## any process in cgroup_proxy will be proxied, and cgroup_noproxy is the opposite
+## note: v2ray should not run in a proxied cgroup
+## cgroup must start with slash '/'
+# cgroup_proxy="/" 
+cgroup_proxy="/proxy.slice" 
+cgroup_noproxy="/noproxy.slice"
 
+
+########################################################################
 ## listening port of another proxy process, for example v2ray 
 port=12345
 
@@ -79,16 +87,14 @@ enable_tcp=true
 enable_udp=true
 enable_ipv4=true
 enable_ipv6=true
+enable_dns=true # due to v2ray bug https://github.com/v2ray/v2ray-core/issues/1432
 
-## v2ray outbound mark, depend on your v2ray setting
-## only useful if v2ray process is also in proxy_cgroup, for example, you want to proxy whole userspace,
-## and v2ray is also running in the same userspace
-## otherwise ignore this
-v2ray_outbound_mark=0xff # 255
 
+########################################################################
 ## do not modify this if you don't known what you are doing
 table=100
-mark=0x01
+mark_proxy=0x01
+mark_noproxy=0xff
 mark_newin=0x02
 ```
 
@@ -100,41 +106,42 @@ sudo systemctl restart cgproxy.service
 
 ## Global transparent proxy
 
-- First, set `proxy_cgroup=/user.slice` in `/etc/cgproxy.conf`, this will proxy your whole user space
+- First, set **cgroup_proxy=/**  in `/etc/cgproxy.conf`, this will proxy all connection
 
-- Then, allow proxy software itself connect direct to internet, two available solutions:
+- Then,  run your proxy software in cgroup_noproxy to allow  direct to internet
 
-  - Sloution 1: set all outbound mark in v2ray, and set `v2ray_outbound_mark` in `/etc/cgproxy.conf`
-
-  - Sloution 2: run your proxy software in another cgroup that won't be proxyied
-
-    ```bash
-    # qv2ray as example
-    run_in_cgroup --cgroup=/noproxy.slice qv2ray
-    # v2ray as example
-    run_in_cgroup --cgroup=/noproxy.slice v2ray --config config_file
-    ```
+  ```bash
+  nocgproxy  <PROXY PROGRAM>
+  # qv2ray as example
+  nocgproxy   qv2ray
+  # v2ray as example
+  nocgproxy v2ray --config config_file
+  ```
 
 - Finally, restart service `sudo systemctl restart cgproxy.service`, that's all
 
-## 
-
 ## Other useful tools provided in this project
 
-- `cgattach` attach specific process pid to specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.
+- `nocgproxy` run program wihout proxy, very useful in global transparent proxy
 
   ```bash
-  cgattch <pid> <cgroup>
-  # example
-  cgattch 9999 /proxy.slice
+  nocgproxy <CMD> 
   ```
-
+  
 - `run_in_cgroup` run command in specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.
 
   ```bash
   run_in_cgroup --cgroup=CGROUP <COMMAND>
   # example
   run_in_cgroup --cgroup=/mycgroup.slice ping 127.0.0.1
+  ```
+  
+- `cgattach` attach specific process pid to specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.
+
+  ```bash
+  cgattch <pid> <cgroup>
+  # example
+  cgattch 9999 /proxy.slice
   ```
 
 ## NOTES

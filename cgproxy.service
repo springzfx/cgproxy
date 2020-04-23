@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh --config=/etc/cgproxy.conf
-ExecStop=sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh stop
+ExecStop= sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh stop
 RemainAfterExit=1
 
 [Install]

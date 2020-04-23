@@ -115,7 +115,7 @@ sudo systemctl restart cgproxy.service
   # qv2ray as example
   cgnoproxy   qv2ray
   # v2ray as example
-  cgnoproxy v2ray --config config_file
+  cgnoproxy sudo v2ray --config config_file
   ```
 
 - Finally, restart service `sudo systemctl restart cgproxy.service`, that's all

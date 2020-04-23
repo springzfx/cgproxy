@@ -13,13 +13,13 @@ cgproxy will **transparent** proxy anything running in specific cgroup. It resem
       * [Prerequest](#prerequest)
       * [How to install](#how-to-install)
       * [How to use](#how-to-use)
-      * [Other useful tools provided in this project](#other-useful-tools-provided-in-this-project)
       * [Global transparent proxy](#global-transparent-proxy)
+      * [Other useful tools provided in this project](#other-useful-tools-provided-in-this-project)
       * [NOTES](#notes)
       * [TIPS](#tips)
       * [Licences](#licences)
 
-<!-- Added by: fancy, at: Wed 22 Apr 2020 05:17:52 PM HKT -->
+<!-- Added by: fancy, at: Thu 23 Apr 2020 01:23:57 PM HKT -->
 
 <!--te-->
 

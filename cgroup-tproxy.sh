@@ -31,7 +31,7 @@ DOC
 }
 
 ## any process in this cgroup will be proxied
-proxy_cgroup="/user.slice/user-1000.slice/proxy.slice"
+proxy_cgroup="/proxy.slice"
 
 ## some variables
 port=12345
@@ -41,10 +41,10 @@ enable_ipv4=true
 enable_ipv6=true
 
 ## do not modify this if you don't known what you are doing
-mark=100
 table=100
-mark_newin=101
-v2ray_so_mark=255
+mark=0x01
+mark_newin=0x02
+v2ray_outbound_mark=0xff
 
 ## cgroup things
 # cgroup_mount_point=$(findmnt -t cgroup,cgroup2 -n -J|jq '.filesystems[0].target')
@@ -99,11 +99,12 @@ iptables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --restor
 iptables -t mangle -A PREROUTING -j TPROXY_PRE
 
 iptables -t mangle -N TPROXY_OUT
+iptables -t mangle -A TPROXY_OUT -o lo -j RETURN
+iptables -t mangle -A TPROXY_OUT -m mark --mark $v2ray_outbound_mark -j RETURN
 iptables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN # return incoming connection directly, v2ray tproxy not work for this situation, see this: https://github.com/Kr328/ClashForAndroid/issues/146
-iptables -t mangle -A TPROXY_OUT -m mark --mark $v2ray_so_mark -j RETURN
 iptables -t mangle -A TPROXY_OUT -p udp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark
 iptables -t mangle -A TPROXY_OUT -p tcp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark
-iptables -t mangle -A OUTPUT ! -o lo -j TPROXY_OUT # exclude lo to avoid local bind problem, for example if your dns is 127.0.0.1:53, then v2ray can't bind to reply back result
+iptables -t mangle -A OUTPUT -j TPROXY_OUT
 
 #ipv6#
 ip -6 rule add fwmark $mark table $table
@@ -116,11 +117,12 @@ ip6tables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --resto
 ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
 
 ip6tables -t mangle -N TPROXY_OUT
+ip6tables -t mangle -A TPROXY_OUT -o lo -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m mark --mark $v2ray_outbound_mark -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m mark --mark $v2ray_so_mark -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -p udp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark
 ip6tables -t mangle -A TPROXY_OUT -p tcp -m cgroup --path $proxy_cgroup -j MARK --set-mark $mark
-ip6tables -t mangle -A OUTPUT ! -o lo -j TPROXY_OUT
+ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 
 
 ## use REDIRECT

@@ -69,6 +69,7 @@ More config in `/etc/cgproxy.conf`:
 ## any process in this cgroup will be proxied
 ## must start with slash '/'
 proxy_cgroup="/proxy.slice"
+# proxy_cgroup="/user.slice"
 
 ## listening port of another proxy process, for example v2ray 
 port=12345
@@ -83,12 +84,12 @@ enable_ipv6=true
 ## only useful if v2ray process is also in proxy_cgroup, for example, you want to proxy whole userspace,
 ## and v2ray is also running in the same userspace
 ## otherwise ignore this
-v2ray_so_mark=255
+v2ray_outbound_mark=0xff # 255
 
 ## do not modify this if you don't known what you are doing
 table=100
-mark=100
-mark_newin=1
+mark=0x01
+mark_newin=0x02
 ```
 
 If you changed config, remember to restart service
@@ -96,6 +97,27 @@ If you changed config, remember to restart service
 ```bash
 sudo systemctl restart cgproxy.service
 ```
+
+## Global transparent proxy
+
+- First, set `proxy_cgroup=/user.slice` in `/etc/cgproxy.conf`, this will proxy your whole user space
+
+- Then, allow proxy software itself connect direct to internet, two available solutions:
+
+  - Sloution 1: set all outbound mark in v2ray, and set `v2ray_outbound_mark` in `/etc/cgproxy.conf`
+
+  - Sloution 2: run your proxy software in another cgroup that won't be proxyied
+
+    ```bash
+    # qv2ray as example
+    run_in_cgroup --cgroup=/noproxy.slice qv2ray
+    # v2ray as example
+    run_in_cgroup --cgroup=/noproxy.slice v2ray --config config_file
+    ```
+
+- Finally, restart service `sudo systemctl restart cgproxy.service`, that's all
+
+## 
 
 ## Other useful tools provided in this project
 
@@ -114,21 +136,6 @@ sudo systemctl restart cgproxy.service
   # example
   run_in_cgroup --cgroup=/mycgroup.slice ping 127.0.0.1
   ```
-
-
-## Global transparent proxy
-
-- First run your proxy software (v2ray as example) in another cgroup that won't be proxid
-
-  ```bash
-  # qv2ray as example
-  run_in_cgroup --cgroup=/noproxy.slice qv2ray
-  # v2ray as example
-  run_in_cgroup --cgroup=/noproxy.slice v2ray --config config_file
-  ```
-
-- Second, set `proxy_cgroup=/user.slice` in `/etc/cgproxy.conf`, this will proxy your whole user space
-- restart service `sudo systemctl restart cgproxy.service`, that's all
 
 ## NOTES
 

@@ -70,8 +70,7 @@ More config in `/etc/cgproxy.conf`:
 ```bash
 ########################################################################
 ## cgroup transparent proxy
-## any process in cgroup_proxy will be proxied, and cgroup_noproxy is the opposite
-## note: v2ray should not run in a proxied cgroup
+## any process in cgroup_proxy will be proxied, and cgroup_noproxy the opposite
 ## cgroup must start with slash '/'
 # cgroup_proxy="/" 
 cgroup_proxy="/proxy.slice" 
@@ -87,7 +86,7 @@ enable_tcp=true
 enable_udp=true
 enable_ipv4=true
 enable_ipv6=true
-enable_dns=true # due to v2ray bug https://github.com/v2ray/v2ray-core/issues/1432
+enable_dns=true
 
 
 ########################################################################
@@ -147,8 +146,12 @@ sudo systemctl restart cgproxy.service
 ## NOTES
 
 - `cgattach` attach pid to specific cgroup, and has *suid* bit set by default, be careful to use on multi-user server for securiry. To avoid this situation,  you can remove the *suid* bit , then it will fallback to use *sudo*, with *visudo* you can restrict permission or set NOPASSWD for youself.
-- TPROXY need root or cap_net_admin capability whatever process is listening on port,
-  v2ray as example: sudo setcap cap_net_admin+ep /usr/lib/v2ray/v2ray
+
+- v2ray TPROXY need root or special permiassion
+  
+  ```bash
+  sudo setcap "cap_net_bind_service=+ep cap_net_admin=+ep" /usr/lib/v2ray/v2ray
+  ```
 
 ## TIPS
 

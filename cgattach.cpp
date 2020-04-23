@@ -10,7 +10,7 @@
 #include <unistd.h>
 using namespace std;
 
-void print_usage() { fprintf(stderr, "usage: cgattach <pid> <cgroup>\n"); }
+void print_usage() { fprintf(stdout, "usage: cgattach <pid> <cgroup>\n"); }
 
 bool exist(string path) {
   struct stat st;
@@ -25,8 +25,8 @@ bool validate(string pid, string cgroup) {
   bool cg_v = regex_match(cgroup, regex("^\\/[a-zA-Z0-9\\-_./@]*$"));
   if (pid_v && cg_v)
     return true;
-  // cout<<pid_v<<" "<<cg_v<<endl;
-  puts("paramater validate error\n");
+ 
+  fprintf(stderr, "paramater validate error\n");
   print_usage();
   exit(EXIT_FAILURE);
 }
@@ -35,12 +35,12 @@ int main(int argc, char *argv[]) {
   setuid(0);
   setgid(0);
   if (getuid() != 0 || getgid() != 0) {
-    fprintf(stderr, "cgattach need setuid sticky bit\n");
+    fprintf(stderr, "cgattach need suid sticky bit or run with root\n");
     exit(EXIT_FAILURE);
   }
 
   if (argc != 3) {
-    puts("only need 2 paramaters\n");
+    fprintf(stderr, "only need 2 paramaters\n");
     print_usage();
     exit(EXIT_FAILURE);
   }
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
   string cgroup_target_path = cgroup_mount_point + cgroup_target;
   string cgroup_target_procs = cgroup_target_path + "/cgroup.procs";
 
-  // check if exist, we won't create it if not exist
+  // check if exist, we will create it if not exist
   if (!exist(cgroup_target_path)) {
     if (mkdir(cgroup_target_path.c_str(),
               S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0) {
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
   procs << pid.c_str() << endl;
   procs.close();
 
-  // maybe there some write error, for example process pid not exist
+  // maybe there some write error, for example process pid may not exist
   if (!procs) {
     fprintf(stderr, "write %s to %s failed, maybe process %s not exist\n",
             pid.c_str(), cgroup_target_procs.c_str(), pid.c_str());

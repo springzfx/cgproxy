@@ -25,16 +25,19 @@ It aslo supports global transparent proxy. See [Global transparent proxy](#globa
 
 <!--te-->
 
-
 ## Prerequest
 
 - cgroup2
+
+  Why cgroup v2?  Because simple, elegant and intuitive.
 
   For now, linux default using cgroup v1 for compatibility, this project need cgroup v2, you need disable cgroup v1 and enable cgroup v2 in your system.  see [Disabling v1 cgroups](https://wiki.archlinux.org/index.php/Cgroups#Disabling_v1_cgroups).
 
 - TPROXY
 
   A process listening on port (e.g.  12345)  to accept iptables TPROXY, for example v2ray's dokodemo-door  in tproxy mode.
+  
+  Why not REDIRECT? Because REDIRECT only supports tcp and ipv4.
 
 ## How to install
 
@@ -105,7 +108,7 @@ sudo systemctl restart cgproxy.service
 
 ## Global transparent proxy
 
-- First, set **cgroup_proxy=/**  in `/etc/cgproxy.conf`, this will proxy all connection
+- First, set **cgroup_proxy="/"**  in `/etc/cgproxy.conf`, this will proxy all connection
 
 - Then,  run your proxy software in cgroup_noproxy to allow  direct to internet
 

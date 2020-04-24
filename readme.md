@@ -29,18 +29,14 @@ It aslo supports global transparent proxy. See [Global transparent proxy](#globa
 
 - cgroup2
 
-  Why cgroup v2?  Because simple, elegant and intuitive.
-
-  For now, linux default using cgroup v1 for compatibility, this project need cgroup v2, you need disable cgroup v1 and enable cgroup v2 in your system.  see [Disabling v1 cgroups](https://wiki.archlinux.org/index.php/Cgroups#Disabling_v1_cgroups).
-  
-  - `findmnt -t cgroup,cgroup2` to find out your cgroup version
+  Both cgroup and cgroup2 are enable in linux by default. So you don't have to do anything about this.
   - `systemd-cgls` to see the cgroup hierarchical tree.
+  - Why cgroup v2?  Because simple, elegant and intuitive.
 
 - TPROXY
 
   A process listening on port (e.g.  12345)  to accept iptables TPROXY, for example v2ray's dokodemo-door  in tproxy mode.
-  
-  Why not REDIRECT? Because REDIRECT only supports tcp and ipv4.
+  - Why not REDIRECT? Because REDIRECT only supports tcp and ipv4.
 
 ## How to install
 

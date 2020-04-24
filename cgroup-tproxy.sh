@@ -3,14 +3,14 @@ print_help(){
 cat << 'DOC'
 #############################################################################
 # 
-# 1. For now, linux default using cgroup v1 for compatibility
-#    this script need cgroup v2, you need enable cgroup v2 in your system. 
+# 1. This script need cgroup v2 
 # 
 # 2. Listening port is expected to accept iptables TPROXY, while REDIRECT 
 #    will not work in this script, because REDIRECT only support tcp/ipv4
 # 
-# 3. TPROXY need root or cap_net_admin capability whatever process is listening on port
-#    v2ray as example: sudo setcap cap_net_admin+ep /usr/lib/v2ray/v2ray
+# 3. TPROXY need root or special capability whatever process is listening on port
+#    v2ray as example: 
+#       sudo setcap "cap_net_bind_service=+ep cap_net_admin=+ep" /usr/lib/v2ray/v2ray
 # 
 # 4. this script will proxy anything running in specific cgroup
 # 
@@ -51,11 +51,10 @@ make_newin=0x02
 ## cgroup things
 # cgroup_mount_point=$(findmnt -t cgroup,cgroup2 -n -J|jq '.filesystems[0].target')
 # cgroup_type=$(findmnt -t cgroup,cgroup2 -n -J|jq '.filesystems[0].fstype')
-cgroup_mount_point="/sys/fs/cgroup"
+cgroup_mount_point=$(findmnt -t cgroup2 -n |cut -d' ' -f 1)
 cgroup_type="cgroup2"
 cgroup_procs_file="cgroup.procs"
 
-set -x
 ## parse parameter
 for i in "$@"
 do

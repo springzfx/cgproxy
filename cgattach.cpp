@@ -31,6 +31,14 @@ bool validate(string pid, string cgroup) {
   exit(EXIT_FAILURE);
 }
 
+string get_cgroup2_mount_point(){
+  char cgroup2_mount_point[100];
+  FILE* fp = popen("findmnt -t cgroup2 -n |cut -d' '  -f 1", "r");
+  fscanf(fp,"%s",&cgroup2_mount_point);
+  fclose(fp);
+  return cgroup2_mount_point;
+}
+
 int main(int argc, char *argv[]) {
   setuid(0);
   setgid(0);
@@ -48,7 +56,8 @@ int main(int argc, char *argv[]) {
   string pid = string(argv[1]);
   string cgroup_target = string(argv[2]);
   validate(pid, cgroup_target);
-  string cgroup_mount_point = "/sys/fs/cgroup";
+  // string cgroup_mount_point = "/sys/fs/cgroup";
+  string cgroup_mount_point = get_cgroup2_mount_point();
   string cgroup_target_path = cgroup_mount_point + cgroup_target;
   string cgroup_target_procs = cgroup_target_path + "/cgroup.procs";
 

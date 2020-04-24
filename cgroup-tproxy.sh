@@ -40,6 +40,7 @@ enable_tcp=true
 enable_udp=true
 enable_ipv4=true
 enable_ipv6=true
+enable_dns=true
 
 ## do not modify this if you don't known what you are doing
 table=100

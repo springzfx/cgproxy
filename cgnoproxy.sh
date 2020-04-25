@@ -11,6 +11,6 @@ else
 fi
 
 # test attach success or not
-[[ -z "$attached" ]] && echo "config error" && exit 1
+[[ -z "$attached" ]] && echo "attach error" && exit 1
 
 exec "$@"

@@ -129,11 +129,6 @@ ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $mark_proxy
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 
-
-## use REDIRECT
-# iptables -t nat -A OUTPUT -p tcp -m cgroup --path $cgroup_proxy -j DNAT --to-destination 127.0.0.1:12345
-# ip6tables -t nat -A OUTPUT -p tcp -m cgroup --path $cgroup_proxy -j DNAT --to-destination [::1]:12345
-
 ## allow to disable, order is important
 $enable_dns    	|| iptables  -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
 $enable_dns    	|| ip6tables -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
@@ -144,19 +139,7 @@ $enable_tcp 	|| ip6tables -t mangle -I TPROXY_OUT -p tcp -j RETURN
 $enable_ipv4 	|| iptables  -t mangle -I TPROXY_OUT -j RETURN
 $enable_ipv6 	|| ip6tables -t mangle -I TPROXY_OUT -j RETURN
 
-
-## create proxy prefix command for easy use
-# cat << 'DOC' > /usr/bin/cgproxy
-# !/usr/bin/bash
-# systemd-run -q --slice proxy.slice --scope --user $@
-# DOC
-# chmod a+x /usr/bin/cgproxy
-
 ## message for user
 cat << DOC
 proxied cgroup: $cgroup_proxy
 DOC
-
-## tproxy need Root or cap_net_admin capability
-# setcap cap_net_admin+ep /usr/lib/v2ray/v2ray
-

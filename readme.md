@@ -36,7 +36,6 @@ It aslo supports global transparent proxy. See [Global transparent proxy](#globa
 - TPROXY
 
   A process listening on port (e.g.  12345)  to accept iptables TPROXY, for example v2ray's dokodemo-door  in tproxy mode.
-  - Why not REDIRECT? Because REDIRECT only supports tcp and ipv4.
 
 ## How to install
 

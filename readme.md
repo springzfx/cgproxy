@@ -69,6 +69,8 @@ It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy/).
 More config in `/etc/cgproxy.conf`:
 
 ```bash
+# see how to configure 
+# https://github.com/springzfx/cgproxy
 ########################################################################
 ## cgroup transparent proxy
 ## any process in cgroup_proxy will be proxied, and cgroup_noproxy the opposite
@@ -77,18 +79,21 @@ More config in `/etc/cgproxy.conf`:
 cgroup_proxy="/proxy.slice" 
 cgroup_noproxy="/noproxy.slice"
 
+########################################################################
+## allow as gateway for local network
+enable_gateway=false
 
 ########################################################################
 ## listening port of another proxy process, for example v2ray 
 port=12345
 
-## if you set to false, it's traffic won't go through proxy, but still can go direct to internet
+########################################################################
+## if you set to false, it's traffic won't go through proxy, but still can go direct to internet 
 enable_tcp=true
 enable_udp=true
 enable_ipv4=true
 enable_ipv6=true
 enable_dns=true
-
 
 ########################################################################
 ## do not modify this if you don't known what you are doing

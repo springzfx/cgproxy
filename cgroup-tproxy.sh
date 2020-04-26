@@ -34,6 +34,9 @@ DOC
 cgroup_proxy="/proxy.slice"
 cgroup_noproxy="/noproxy.slice"
 
+# allow as gateway for local network
+enable_gateway=true
+
 ## some variables
 port=12345
 enable_tcp=true
@@ -60,6 +63,7 @@ for i in "$@"
 do
 case $i in
     stop)
+        iptables -t nat -F
         iptables -t mangle -F
         iptables -t mangle -X TPROXY_PRE
         iptables -t mangle -X TPROXY_OUT
@@ -95,16 +99,18 @@ test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_
 ip rule add fwmark $mark_proxy table $table
 ip route add local default dev lo table $table
 iptables -t mangle -N TPROXY_PRE
-iptables -t mangle -A TPROXY_PRE -p udp -m mark --mark $mark_proxy -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
-iptables -t mangle -A TPROXY_PRE -p tcp -m mark --mark $mark_proxy -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
-iptables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
-iptables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --restore-mark
+iptables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
+iptables -t mangle -A TPROXY_PRE -m pkttype --pkt-type broadcast -j RETURN
+iptables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
+iptables -t mangle -A TPROXY_PRE -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
+iptables -t mangle -A TPROXY_PRE -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
 iptables -t mangle -A PREROUTING -j TPROXY_PRE
+iptables -t mangle -A PREROUTING -m addrtype --dst-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
 
 iptables -t mangle -N TPROXY_OUT
 iptables -t mangle -A TPROXY_OUT -o lo -j RETURN
 iptables -t mangle -A TPROXY_OUT -p icmp -j RETURN
-iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN # return incoming connection directly, v2ray tproxy not work for this situation, see this: https://github.com/Kr328/ClashForAndroid/issues/146
+iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN # return incoming connection directly
 iptables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $mark_proxy
@@ -114,22 +120,33 @@ iptables -t mangle -A OUTPUT -j TPROXY_OUT
 ip -6 rule add fwmark $mark_proxy table $table
 ip -6 route add local default dev lo table $table
 ip6tables -t mangle -N TPROXY_PRE
-ip6tables -t mangle -A TPROXY_PRE -p udp -m mark --mark $mark_proxy -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
-ip6tables -t mangle -A TPROXY_PRE -p tcp -m mark --mark $mark_proxy -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
-ip6tables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
-ip6tables -t mangle -A TPROXY_PRE -m conntrack --ctstate NEW -j CONNMARK --restore-mark
+ip6tables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
+ip6tables -t mangle -A TPROXY_PRE -m pkttype --pkt-type broadcast -j RETURN
+ip6tables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
+ip6tables -t mangle -A TPROXY_PRE -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
+ip6tables -t mangle -A TPROXY_PRE -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
 ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
+ip6tables -t mangle -A PREROUTING -m addrtype --dst-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
 
 ip6tables -t mangle -N TPROXY_OUT
 ip6tables -t mangle -A TPROXY_OUT -o lo -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -p icmp -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN # return incoming connection directly
 ip6tables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $mark_proxy
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 
 ## allow to disable, order is important
+$enable_dns    	|| iptables  -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
+$enable_dns    	|| ip6tables -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
+$enable_udp 	|| iptables  -t mangle -I TPROXY_PRE -p udp -j RETURN
+$enable_udp 	|| ip6tables -t mangle -I TPROXY_PRE -p udp -j RETURN
+$enable_tcp 	|| iptables  -t mangle -I TPROXY_PRE -p tcp -j RETURN
+$enable_tcp 	|| ip6tables -t mangle -I TPROXY_PRE -p tcp -j RETURN
+$enable_ipv4 	|| iptables  -t mangle -I TPROXY_PRE -j RETURN
+$enable_ipv6 	|| ip6tables -t mangle -I TPROXY_PRE -j RETURN
+
 $enable_dns    	|| iptables  -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
 $enable_dns    	|| ip6tables -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
 $enable_udp 	|| iptables  -t mangle -I TPROXY_OUT -p udp -j RETURN
@@ -139,7 +156,17 @@ $enable_tcp 	|| ip6tables -t mangle -I TPROXY_OUT -p tcp -j RETURN
 $enable_ipv4 	|| iptables  -t mangle -I TPROXY_OUT -j RETURN
 $enable_ipv6 	|| ip6tables -t mangle -I TPROXY_OUT -j RETURN
 
+
 ## message for user
 cat << DOC
 proxied cgroup: $cgroup_proxy
 DOC
+
+
+if [ $enable_gateway=true ]; then
+    iptables  -t nat -A POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE
+    ip6tables -t nat -A POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE
+    sysctl -w net.ipv4.ip_forward=1
+    sysctl -w net.ipv6.conf.all.forwarding=1
+    echo "gateway enabled"
+fi

@@ -35,7 +35,7 @@ cgroup_proxy="/proxy.slice"
 cgroup_noproxy="/noproxy.slice"
 
 # allow as gateway for local network
-enable_gateway=true
+enable_gateway=false
 
 ## some variables
 port=12345
@@ -63,18 +63,25 @@ for i in "$@"
 do
 case $i in
     stop)
-        iptables -t mangle -F
+        iptables -t mangle -D PREROUTING -j TPROXY_PRE
+        iptables -t mangle -D OUTPUT -j TPROXY_OUT
+        iptables -t mangle -F TPROXY_PRE
+        iptables -t mangle -F TPROXY_OUT
         iptables -t mangle -X TPROXY_PRE
         iptables -t mangle -X TPROXY_OUT
-        ip6tables -t mangle -F
+        ip6tables -t mangle -D PREROUTING -j TPROXY_PRE
+        ip6tables -t mangle -D OUTPUT -j TPROXY_OUT
+        ip6tables -t mangle -F TPROXY_PRE
+        ip6tables -t mangle -F TPROXY_OUT
         ip6tables -t mangle -X TPROXY_PRE
         ip6tables -t mangle -X TPROXY_OUT
         ip rule delete fwmark $mark_proxy lookup $table
         ip route flush table $table
         ip -6 rule delete fwmark $mark_proxy lookup $table
         ip -6 route flush table $table
-        iptables -t nat -F POSTROUTING
-        ip6tables -t nat -F POSTROUTING
+        ## may not exist, just ignore, and tracking their existence is reliable
+        iptables -t nat -D POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE &> /dev/null
+        ip6tables -t nat -D POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE &> /dev/null
         exit 0
         ;;
     --config=*)
@@ -104,7 +111,6 @@ iptables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
 iptables -t mangle -A TPROXY_PRE -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
 iptables -t mangle -A TPROXY_PRE -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
 iptables -t mangle -A PREROUTING -j TPROXY_PRE
-iptables -t mangle -A PREROUTING -m addrtype --dst-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
 
 iptables -t mangle -N TPROXY_OUT
 iptables -t mangle -A TPROXY_OUT -o lo -j RETURN
@@ -125,7 +131,6 @@ ip6tables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
 ip6tables -t mangle -A TPROXY_PRE -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
 ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
-ip6tables -t mangle -A PREROUTING -m addrtype --dst-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
 
 ip6tables -t mangle -N TPROXY_OUT
 ip6tables -t mangle -A TPROXY_OUT -o lo -j RETURN
@@ -163,6 +168,11 @@ $enable_gateway || ip6tables -t mangle -I TPROXY_PRE  -m addrtype ! --src-type L
 ## allow back to local device if gateway enabled, and avoid through tproxy again
 $enable_gateway && iptables  -t mangle -I TPROXY_OUT  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
 $enable_gateway && ip6tables -t mangle -I TPROXY_OUT  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
+
+## make sure following rules are the first in chain TPROXY_PRE to mark new incoming connection
+## so must put at last to insert first
+iptables  -t mangle -I TPROXY_PRE -m addrtype --dst-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
+ip6tables -t mangle -I TPROXY_PRE -m addrtype --dst-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
 
 ## message for user
 cat << DOC

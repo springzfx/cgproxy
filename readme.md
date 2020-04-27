@@ -30,7 +30,7 @@ It aslo supports global transparent proxy and gateway proxy. See [Global transpa
 
 - cgroup2
 
-  Both cgroup and cgroup2 are enable in linux by default. So you don't have to do anything about this.
+  Both cgroup and cgroup2 are enabled in linux by default. So you don't have to do anything about this.
   - `systemd-cgls` to see the cgroup hierarchical tree.
   - Why cgroup v2?  Because simple, elegant and intuitive.
 

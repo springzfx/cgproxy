@@ -138,15 +138,6 @@ ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-m
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 
 ## allow to disable, order is important
-$enable_dns    	|| iptables  -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
-$enable_dns    	|| ip6tables -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
-$enable_udp 	|| iptables  -t mangle -I TPROXY_PRE -p udp -j RETURN
-$enable_udp 	|| ip6tables -t mangle -I TPROXY_PRE -p udp -j RETURN
-$enable_tcp 	|| iptables  -t mangle -I TPROXY_PRE -p tcp -j RETURN
-$enable_tcp 	|| ip6tables -t mangle -I TPROXY_PRE -p tcp -j RETURN
-$enable_ipv4 	|| iptables  -t mangle -I TPROXY_PRE -j RETURN
-$enable_ipv6 	|| ip6tables -t mangle -I TPROXY_PRE -j RETURN
-
 $enable_dns    	|| iptables  -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
 $enable_dns    	|| ip6tables -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
 $enable_udp 	|| iptables  -t mangle -I TPROXY_OUT -p udp -j RETURN
@@ -156,6 +147,17 @@ $enable_tcp 	|| ip6tables -t mangle -I TPROXY_OUT -p tcp -j RETURN
 $enable_ipv4 	|| iptables  -t mangle -I TPROXY_OUT -j RETURN
 $enable_ipv6 	|| ip6tables -t mangle -I TPROXY_OUT -j RETURN
 
+if $enable_gateway; then
+$enable_dns    	|| iptables  -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
+$enable_dns    	|| ip6tables -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
+$enable_udp 	|| iptables  -t mangle -I TPROXY_PRE -p udp -j RETURN
+$enable_udp 	|| ip6tables -t mangle -I TPROXY_PRE -p udp -j RETURN
+$enable_tcp 	|| iptables  -t mangle -I TPROXY_PRE -p tcp -j RETURN
+$enable_tcp 	|| ip6tables -t mangle -I TPROXY_PRE -p tcp -j RETURN
+$enable_ipv4 	|| iptables  -t mangle -I TPROXY_PRE -j RETURN
+$enable_ipv6 	|| ip6tables -t mangle -I TPROXY_PRE -j RETURN
+fi
+
 
 ## message for user
 cat << DOC
@@ -163,7 +165,7 @@ proxied cgroup: $cgroup_proxy
 DOC
 
 
-if [ $enable_gateway=true ]; then
+if $enable_gateway; then
     iptables  -t nat -A POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE
     ip6tables -t nat -A POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE
     sysctl -w net.ipv4.ip_forward=1

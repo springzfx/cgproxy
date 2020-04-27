@@ -6,16 +6,17 @@
 
 cgproxy will transparent proxy anything running in specific cgroup. It resembles with *proxychains* and *tsock*, but without their disadvantages, and more powerfull.
 
-It aslo supports global transparent proxy. See [Global transparent proxy](#global-transparent-proxy)
-
+It aslo supports global transparent proxy and gateway proxy. See [Global transparent proxy](#global-transparent-proxy) and  [Gateway proxy](#gateway-proxy)
 
 <!--ts-->
+
    * [Transparent Proxy with cgroup v2](#transparent-proxy-with-cgroup-v2)
       * [Introduction](#introduction)
       * [Prerequest](#prerequest)
       * [How to install](#how-to-install)
       * [How to use](#how-to-use)
       * [Global transparent proxy](#global-transparent-proxy)
+      * [Gateway proxy](#gateway-proxy)
       * [Other useful tools provided in this project](#other-useful-tools-provided-in-this-project)
       * [NOTES](#notes)
       * [TIPS](#tips)
@@ -66,7 +67,8 @@ It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy/).
   cgproxy curl -vIs https://www.google.com
   ```
 
-More config in `/etc/cgproxy.conf`:
+<details>
+  <summary>More config in `/etc/cgproxy.conf`  (click to expand)</summary>
 
 ```bash
 # see how to configure 
@@ -102,7 +104,7 @@ mark_proxy=0x01
 mark_noproxy=0xff
 mark_newin=0x02
 ```
-
+</details>
 If you changed config, remember to restart service
 
 ```bash
@@ -124,6 +126,11 @@ sudo systemctl restart cgproxy.service
   ```
 
 - Finally, restart service `sudo systemctl restart cgproxy.service`, that's all
+
+## Gateway proxy
+
+- set **enable_gateway=true** in `/etc/cgproxy.conf` and restart service
+- other device set this host as gateway, and set public dns if necessary
 
 ## Other useful tools provided in this project
 

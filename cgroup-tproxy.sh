@@ -63,7 +63,6 @@ for i in "$@"
 do
 case $i in
     stop)
-        iptables -t nat -F
         iptables -t mangle -F
         iptables -t mangle -X TPROXY_PRE
         iptables -t mangle -X TPROXY_OUT
@@ -74,8 +73,8 @@ case $i in
         ip route flush table $table
         ip -6 rule delete fwmark $mark_proxy lookup $table
         ip -6 route flush table $table
-        iptables -t nat -A OUTPUT -F
-        ip6tables -t nat -A OUTPUT -F
+        iptables -t nat -F POSTROUTING
+        ip6tables -t nat -F POSTROUTING
         exit 0
         ;;
     --config=*)

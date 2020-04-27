@@ -111,6 +111,7 @@ iptables -t mangle -N TPROXY_OUT
 iptables -t mangle -A TPROXY_OUT -o lo -j RETURN
 iptables -t mangle -A TPROXY_OUT -p icmp -j RETURN
 iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN # return incoming connection directly
+iptables -t mangle -A TPROXY_OUT  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
 iptables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $mark_proxy
@@ -132,6 +133,7 @@ ip6tables -t mangle -N TPROXY_OUT
 ip6tables -t mangle -A TPROXY_OUT -o lo -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -p icmp -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN # return incoming connection directly
+iptables -t mangle -A TPROXY_OUT  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $mark_proxy

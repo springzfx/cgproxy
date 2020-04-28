@@ -115,7 +115,7 @@ iptables -t mangle -A PREROUTING -j TPROXY_PRE
 iptables -t mangle -N TPROXY_OUT
 iptables -t mangle -A TPROXY_OUT -o lo -j RETURN
 iptables -t mangle -A TPROXY_OUT -p icmp -j RETURN
-iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN # return incoming connection directly
+iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
 iptables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $mark_proxy
@@ -135,7 +135,7 @@ ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
 ip6tables -t mangle -N TPROXY_OUT
 ip6tables -t mangle -A TPROXY_OUT -o lo -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -p icmp -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN # return incoming connection directly
+ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $mark_proxy
@@ -165,14 +165,11 @@ fi
 ## do not handle local device connection through tproxy if gateway is not enabled
 $enable_gateway || iptables  -t mangle -I TPROXY_PRE  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
 $enable_gateway || ip6tables -t mangle -I TPROXY_PRE  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
-## allow back to local device if gateway enabled, and avoid through tproxy again
-$enable_gateway && iptables  -t mangle -I TPROXY_OUT  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
-$enable_gateway && ip6tables -t mangle -I TPROXY_OUT  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
 
-## make sure following rules are the first in chain TPROXY_PRE to mark new incoming connection
+## make sure following rules are the first in chain TPROXY_PRE to mark new incoming connection or gateway proxy connection
 ## so must put at last to insert first
-iptables  -t mangle -I TPROXY_PRE -m addrtype --dst-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
-ip6tables -t mangle -I TPROXY_PRE -m addrtype --dst-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
+iptables  -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
+ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
 
 ## message for user
 cat << DOC

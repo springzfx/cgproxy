@@ -83,7 +83,7 @@ case $i in
         ip route flush table $table
         ip -6 rule delete fwmark $mark_proxy lookup $table
         ip -6 route flush table $table
-        ## may not exist, just ignore, and tracking their existence is reliable
+        ## may not exist, just ignore, and tracking their existence is not reliable
         iptables -t nat -D POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE &> /dev/null
         ip6tables -t nat -D POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE &> /dev/null
         exit 0

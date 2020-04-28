@@ -44,7 +44,9 @@ It aslo supports global transparent proxy and gateway proxy. See [Global transpa
 mkdir build && cd build && cmake .. && make && make install
 ```
 
-It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy/).
+- It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy/). 
+
+- DEB and RPM are packaged in [release page](https://github.com/springzfx/cgproxy/releases).
 
 ## How to use
 
@@ -169,6 +171,11 @@ sudo systemctl restart cgproxy.service
 ## TIPS
 
 - `systemd-cgls` to see the cgroup hierarchical tree.
+
+- Qv2ray config example
+  
+
+![Qv2ray config example](https://i.loli.net/2020/04/28/bdQBzUD37FOgfvt.png)
 
 ## Licences
 

@@ -67,14 +67,18 @@ case $i in
         iptables -t mangle -D OUTPUT -j TPROXY_OUT
         iptables -t mangle -F TPROXY_PRE
         iptables -t mangle -F TPROXY_OUT
+        iptables -t mangle -F TPROXY_ENT
         iptables -t mangle -X TPROXY_PRE
         iptables -t mangle -X TPROXY_OUT
+        iptables -t mangle -X TPROXY_ENT
         ip6tables -t mangle -D PREROUTING -j TPROXY_PRE
         ip6tables -t mangle -D OUTPUT -j TPROXY_OUT
         ip6tables -t mangle -F TPROXY_PRE
         ip6tables -t mangle -F TPROXY_OUT
+        ip6tables -t mangle -F TPROXY_ENT
         ip6tables -t mangle -X TPROXY_PRE
         ip6tables -t mangle -X TPROXY_OUT
+        ip6tables -t mangle -X TPROXY_ENT
         ip rule delete fwmark $mark_proxy lookup $table
         ip route flush table $table
         ip -6 rule delete fwmark $mark_proxy lookup $table
@@ -104,12 +108,18 @@ test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_
 #ipv4#
 ip rule add fwmark $mark_proxy table $table
 ip route add local default dev lo table $table
+iptables -t mangle -N TPROXY_ENT
+iptables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
+iptables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
+
 iptables -t mangle -N TPROXY_PRE
+iptables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
+iptables -t mangle -A TPROXY_PRE -p tcp --dport 53 -j TPROXY_ENT
+iptables -t mangle -A TPROXY_PRE -p icmp -j RETURN
 iptables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
 iptables -t mangle -A TPROXY_PRE -m pkttype --pkt-type broadcast -j RETURN
 iptables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
-iptables -t mangle -A TPROXY_PRE -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
-iptables -t mangle -A TPROXY_PRE -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
+iptables -t mangle -A TPROXY_PRE -j TPROXY_ENT
 iptables -t mangle -A PREROUTING -j TPROXY_PRE
 
 iptables -t mangle -N TPROXY_OUT
@@ -124,12 +134,18 @@ iptables -t mangle -A OUTPUT -j TPROXY_OUT
 #ipv6#
 ip -6 rule add fwmark $mark_proxy table $table
 ip -6 route add local default dev lo table $table
+ip6tables -t mangle -N TPROXY_ENT
+ip6tables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
+ip6tables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
+
 ip6tables -t mangle -N TPROXY_PRE
+ip6tables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
+ip6tables -t mangle -A TPROXY_PRE -p tcp --dport 53 -j TPROXY_ENT
+ip6tables -t mangle -A TPROXY_PRE -p icmp -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -m pkttype --pkt-type broadcast -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
-ip6tables -t mangle -A TPROXY_PRE -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
-ip6tables -t mangle -A TPROXY_PRE -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
+ip6tables -t mangle -A TPROXY_PRE -j TPROXY_ENT
 ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
 
 ip6tables -t mangle -N TPROXY_OUT

@@ -73,14 +73,12 @@ mkdir build && cd build && cmake .. && make && make install
   <summary>More config in `/etc/cgproxy.conf`  (click to expand)</summary>
 
 ```bash
-# see how to configure 
-# https://github.com/springzfx/cgproxy
 ########################################################################
 ## cgroup transparent proxy
 ## any process in cgroup_proxy will be proxied, and cgroup_noproxy the opposite
 ## cgroup must start with slash '/'
-# cgroup_proxy="/" 
-cgroup_proxy="/proxy.slice" 
+# cgroup_proxy="/"
+cgroup_proxy="/proxy.slice"
 cgroup_noproxy="/noproxy.slice"
 
 ########################################################################
@@ -102,7 +100,7 @@ enable_dns=true
 ########################################################################
 ## do not modify this if you don't known what you are doing
 table=100
-mark_proxy=0x01
+fwmark=0x01
 mark_noproxy=0xff
 mark_newin=0x02
 ```

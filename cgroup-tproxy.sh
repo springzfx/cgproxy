@@ -47,7 +47,7 @@ enable_dns=true
 
 ## do not modify this if you don't known what you are doing
 table=100
-mark_proxy=0x01
+fwmark=0x01
 mark_noproxy=0xff
 make_newin=0x02
 
@@ -79,9 +79,9 @@ case $i in
         ip6tables -t mangle -X TPROXY_PRE
         ip6tables -t mangle -X TPROXY_OUT
         ip6tables -t mangle -X TPROXY_ENT
-        ip rule delete fwmark $mark_proxy lookup $table
+        ip rule delete fwmark $fwmark lookup $table
         ip route flush table $table
-        ip -6 rule delete fwmark $mark_proxy lookup $table
+        ip -6 rule delete fwmark $fwmark lookup $table
         ip -6 route flush table $table
         ## may not exist, just ignore, and tracking their existence is not reliable
         iptables -t nat -D POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE &> /dev/null
@@ -106,16 +106,18 @@ test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_
 
 ## use TPROXY
 #ipv4#
-ip rule add fwmark $mark_proxy table $table
+ip rule add fwmark $fwmark table $table
 ip route add local default dev lo table $table
 iptables -t mangle -N TPROXY_ENT
-iptables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
-iptables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $mark_proxy
+iptables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark
+iptables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark
 
 iptables -t mangle -N TPROXY_PRE
+iptables -t mangle -A TPROXY_PRE -m socket -j MARK --set-mark $fwmark
+iptables -t mangle -A TPROXY_PRE -m socket -j RETURN
+iptables -t mangle -A TPROXY_PRE -p icmp -j RETURN
 iptables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
 iptables -t mangle -A TPROXY_PRE -p tcp --dport 53 -j TPROXY_ENT
-iptables -t mangle -A TPROXY_PRE -p icmp -j RETURN
 iptables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
 iptables -t mangle -A TPROXY_PRE -m pkttype --pkt-type broadcast -j RETURN
 iptables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
@@ -128,20 +130,22 @@ iptables -t mangle -A TPROXY_OUT -p icmp -j RETURN
 iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
 iptables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
-iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $mark_proxy
+iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $fwmark
 iptables -t mangle -A OUTPUT -j TPROXY_OUT
 
 #ipv6#
-ip -6 rule add fwmark $mark_proxy table $table
+ip -6 rule add fwmark $fwmark table $table
 ip -6 route add local default dev lo table $table
 ip6tables -t mangle -N TPROXY_ENT
-ip6tables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
-ip6tables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $mark_proxy
+ip6tables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark
+ip6tables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark
 
 ip6tables -t mangle -N TPROXY_PRE
+ip6tables -t mangle -A TPROXY_PRE -m socket -j MARK --set-mark $fwmark
+ip6tables -t mangle -A TPROXY_PRE -m socket -j RETURN
+ip6tables -t mangle -A TPROXY_PRE -p icmp -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
 ip6tables -t mangle -A TPROXY_PRE -p tcp --dport 53 -j TPROXY_ENT
-ip6tables -t mangle -A TPROXY_PRE -p icmp -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -m pkttype --pkt-type broadcast -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
@@ -154,7 +158,7 @@ ip6tables -t mangle -A TPROXY_OUT -p icmp -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $mark_proxy
+ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $fwmark
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 
 ## allow to disable, order is important

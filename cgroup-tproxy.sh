@@ -113,8 +113,8 @@ iptables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $p
 iptables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark
 
 iptables -t mangle -N TPROXY_PRE
-iptables -t mangle -A TPROXY_PRE -m socket -j MARK --set-mark $fwmark
-iptables -t mangle -A TPROXY_PRE -m socket -j RETURN
+iptables -t mangle -A TPROXY_PRE -m socket --transparent -j MARK --set-mark $fwmark
+iptables -t mangle -A TPROXY_PRE -m socket --transparent -j RETURN
 iptables -t mangle -A TPROXY_PRE -p icmp -j RETURN
 iptables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
 iptables -t mangle -A TPROXY_PRE -p tcp --dport 53 -j TPROXY_ENT
@@ -141,8 +141,8 @@ ip6tables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip ::1 --on-port $port -
 ip6tables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark
 
 ip6tables -t mangle -N TPROXY_PRE
-ip6tables -t mangle -A TPROXY_PRE -m socket -j MARK --set-mark $fwmark
-ip6tables -t mangle -A TPROXY_PRE -m socket -j RETURN
+ip6tables -t mangle -A TPROXY_PRE -m socket --transparent -j MARK --set-mark $fwmark
+ip6tables -t mangle -A TPROXY_PRE -m socket --transparent -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -p icmp -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
 ip6tables -t mangle -A TPROXY_PRE -p tcp --dport 53 -j TPROXY_ENT

@@ -76,7 +76,7 @@ mkdir build && cd build && cmake .. && make && sudo make install
   ```
 ----
 <details>
-  <summary>More config in `/etc/cgproxy.conf`  (click to expand)</summary>
+  <summary>More config in <i>/etc/cgproxy.conf</i>  (click to expand)</summary>
 
 ```bash
 ########################################################################

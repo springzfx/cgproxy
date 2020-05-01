@@ -129,8 +129,9 @@ sudo systemctl restart cgproxy.service
 
 ## Gateway proxy
 
-- set **enable_gateway=true** in `/etc/cgproxy.conf` and restart service
-- other device set this host as gateway, and set public dns if necessary
+- Set **enable_gateway=true** in `/etc/cgproxy.conf` and restart service
+- Run your proxy software in cgroup_noproxy to allow  direct to internet as above. This is necessary when you use global transparent proxy the same time.
+- Other device set this host as gateway, and set public dns if necessary
 
 ## Other useful tools provided in this project
 
@@ -165,6 +166,8 @@ sudo systemctl restart cgproxy.service
   ```bash
   sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/lib/v2ray/v2ray
   ```
+
+- Why not outbound mark solution, because in v2ray [when `"localhost"` is used, out-going DNS traffic is not controlled by V2Ray](https://www.v2fly.org/en/configuration/dns.html), so no mark at all, that's pitty.
 
 ## TIPS
 

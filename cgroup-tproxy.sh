@@ -84,8 +84,8 @@ case $i in
         ip -6 rule delete fwmark $fwmark lookup $table
         ip -6 route flush table $table
         ## may not exist, just ignore, and tracking their existence is not reliable
-        iptables -t nat -D POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE &> /dev/null
-        ip6tables -t nat -D POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE &> /dev/null
+        iptables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
+        ip6tables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
         exit 0
         ;;
     --config=*)
@@ -128,6 +128,8 @@ iptables -t mangle -N TPROXY_OUT
 iptables -t mangle -A TPROXY_OUT -o lo -j RETURN
 iptables -t mangle -A TPROXY_OUT -p icmp -j RETURN
 iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
+iptables -t mangle -A TPROXY_OUT -m pkttype --pkt-type broadcast -j RETURN
+iptables -t mangle -A TPROXY_OUT -m pkttype --pkt-type multicast -j RETURN
 iptables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $fwmark
@@ -155,6 +157,8 @@ ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
 ip6tables -t mangle -N TPROXY_OUT
 ip6tables -t mangle -A TPROXY_OUT -o lo -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -p icmp -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m pkttype --pkt-type broadcast -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m pkttype --pkt-type multicast -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
@@ -193,13 +197,14 @@ ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --
 
 ## message for user
 cat << DOC
+noproxy cgroup: $cgroup_noproxy
 proxied cgroup: $cgroup_proxy
 DOC
 
 
 if $enable_gateway; then
-    iptables  -t nat -A POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE
-    ip6tables -t nat -A POSTROUTING -m addrtype ! --src-type LOCAL -j MASQUERADE
+    iptables  -t nat -A POSTROUTING -m owner ! --socket-exists -j MASQUERADE
+    ip6tables -t nat -A POSTROUTING -m owner ! --socket-exists -j MASQUERADE
     sysctl -w net.ipv4.ip_forward=1
     sysctl -w net.ipv6.conf.all.forwarding=1
     echo "gateway enabled"

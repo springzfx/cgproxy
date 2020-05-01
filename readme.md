@@ -169,7 +169,7 @@ sudo systemctl restart cgproxy.service
 
 ## NOTES
 
-- `cgattach` attach pid to specific cgroup, and has *suid* bit set by default, be careful to use on multi-user server for securiry. To avoid this situation,  you can remove the *suid* bit , then it will fallback to use *sudo*, with *visudo* you can restrict permission or set NOPASSWD for youself.
+- `cgattach` has *suid* bit set by default, be careful to use on multi-user server for securiry. To avoid this situation,  you can remove the *suid* bit , then it will fallback to use *sudo*, with *sudoer* you can restrict permission or set NOPASSWD for youself.
 
 - v2ray TPROXY need root or special permission
   

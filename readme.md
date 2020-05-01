@@ -1,3 +1,5 @@
+
+
 # Transparent Proxy with cgroup v2
 
 
@@ -36,12 +38,12 @@ It aslo supports global transparent proxy and gateway proxy. See [Global transpa
 
 - TPROXY
 
-  A process listening on port (e.g.  12345)  to accept iptables TPROXY, for example v2ray's dokodemo-door  in tproxy mode.
+  A process listening on port (e.g.  12345)  to accept iptables TPROXY, for example v2ray's dokodemo-door in tproxy mode.
 
 ## How to install
 
 ```bash
-mkdir build && cd build && cmake .. && make && make install
+mkdir build && cd build && cmake .. && make && sudo make install
 ```
 
 - It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy/). 
@@ -50,13 +52,12 @@ mkdir build && cd build && cmake .. && make && make install
 
 ## How to use
 
-- First enable service
+- First enable and start service
 
   ```bash
   sudo systemctl enable --now cgproxy.service
-  sudo systemctl status cgproxy.service
   ```
-
+  
 - Then prefix with cgproxy with your command, just like proxychains
 
   ```
@@ -69,6 +70,11 @@ mkdir build && cd build && cmake .. && make && make install
   cgproxy curl -vIs https://www.google.com
   ```
 
+- To completely stop
+  ```
+  sudo systemctl disable --now cgproxy.service
+  ```
+----
 <details>
   <summary>More config in `/etc/cgproxy.conf`  (click to expand)</summary>
 
@@ -78,6 +84,7 @@ mkdir build && cd build && cmake .. && make && make install
 ## any process in cgroup_proxy will be proxied, and cgroup_noproxy the opposite
 ## cgroup must start with slash '/'
 # cgroup_proxy="/"
+# cgroup_noproxy="/system.slice/v2ray.service"
 cgroup_proxy="/proxy.slice"
 cgroup_noproxy="/noproxy.slice"
 
@@ -113,24 +120,27 @@ sudo systemctl restart cgproxy.service
 
 ## Global transparent proxy
 
-- First, set **cgroup_proxy="/"**  in `/etc/cgproxy.conf`, this will proxy all connection
+- Set `cgroup_proxy="/"`  in */etc/cgproxy.conf*, this will proxy all connection
 
-- Then,  run your proxy software in cgroup_noproxy to allow  direct to internet
+- And allow your proxy program (v2ray) direct to internet, two ways:
+  - active way
 
-  ```bash
-  cgnoproxy  <PROXY PROGRAM>
-  # qv2ray as example
-  cgnoproxy   qv2ray
-  # v2ray as example
-  cgnoproxy sudo v2ray --config config_file
-  ```
-
-- Finally, restart service `sudo systemctl restart cgproxy.service`, that's all
+      run `cgnoproxy <PROXY PROGRAM>`
+      
+      example: `cgnoproxy sudo v2ray -config config_file`
+      
+  - passive way
+  
+  set `cgroup_noproxy="<PROXY PROGRAM's CGROUP>"`
+  
+  example:  `cgroup_noproxy="/system.slice/v2ray.service"`
+  
+- Finally, restart cgproxy service, that's all
 
 ## Gateway proxy
 
-- Set **enable_gateway=true** in `/etc/cgproxy.conf` and restart service
-- Run your proxy software in cgroup_noproxy to allow  direct to internet as above. This is necessary when you use global transparent proxy the same time.
+- Set `enable_gateway=true` in */etc/cgproxy.conf*
+- And allow your proxy software (v2ray) direct to internet, described above
 - Other device set this host as gateway, and set public dns if necessary
 
 ## Other useful tools provided in this project
@@ -167,13 +177,14 @@ sudo systemctl restart cgproxy.service
   sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/lib/v2ray/v2ray
   ```
 
-- Why not outbound mark solution, because in v2ray [when `"localhost"` is used, out-going DNS traffic is not controlled by V2Ray](https://www.v2fly.org/en/configuration/dns.html), so no mark at all, that's pitty.
+- Why not outbound mark solution, because in v2ray [when `"localhost"` is used, out-going DNS traffic is not controlled by V2Ray](https://www.v2fly.org/en/configuration/dns.html), so no mark at all, that's pity.
 
 ## TIPS
 
 - `systemd-cgls` to see the cgroup hierarchical tree.
-- v2ray full config exmaple in [v2ray_config](https://github.com/springzfx/cgproxy/tree/master/v2ray_config), more to see [v2ray multi-file config](https://www.v2fly.org/chapter_02/multiple_config.html)
-- Qv2ray config example
+- Check cgroup2 support `findmnt -t cgroup2`
+- Offer you v2ray service and full config exmaple in [v2ray_config](https://github.com/springzfx/cgproxy/tree/master/v2ray_config)
+- Offer you qv2ray config example
   
 
 ![Qv2ray config example](https://i.loli.net/2020/04/28/bdQBzUD37FOgfvt.png)

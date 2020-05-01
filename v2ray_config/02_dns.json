@@ -1,0 +1,19 @@
+{
+  "dns": {
+    "servers": [
+      {
+        "address": "localhost",
+        "port": 53,
+        "domains": [
+          "geosite:cn"
+        ],
+        "expectIPs": [
+          "geoip:cn"
+        ]
+      },
+      "https+local://1.1.1.1/dns-query",
+      "223.6.6.6"
+    ],
+    "tag": "dns_inbound"
+  }
+}

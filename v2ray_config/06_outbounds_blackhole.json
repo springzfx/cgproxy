@@ -1,0 +1,19 @@
+{
+  "outbounds": [
+    {
+      "protocol": "blackhole",
+      "sendThrough": "0.0.0.0",
+      "settings": {
+        "response": {
+          "type": "none"
+        }
+      },
+      "streamSettings": {
+        "sockopt": {
+          "mark": 255
+        }
+      },
+      "tag": "outBound_BLACKHOLE"
+    }
+  ]
+}

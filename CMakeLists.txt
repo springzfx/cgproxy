@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(cgproxy VERSION 3.4)
+project(cgproxy VERSION 3.5)
 add_executable(cgattach cgattach.cpp)
 
 install(TARGETS cgattach DESTINATION /usr/bin 

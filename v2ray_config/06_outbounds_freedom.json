@@ -1,0 +1,19 @@
+{
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "sendThrough": "0.0.0.0",
+      "settings": {
+        "domainStrategy": "UseIP",
+        "redirect": ":0",
+        "userLevel": 0
+      },
+      "streamSettings": {
+        "sockopt": {
+          "mark": 255
+        }
+      },
+      "tag": "outBound_DIRECT"
+    }
+  ]
+}

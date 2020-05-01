@@ -1,0 +1,14 @@
+{
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 15490,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      },
+      "sniffing": {},
+      "tag": "inbound_API"
+    }
+  ]
+}

@@ -32,10 +32,14 @@ bool validate(string pid, string cgroup) {
 }
 
 string get_cgroup2_mount_point(){
-  char cgroup2_mount_point[100];
-  FILE* fp = popen("findmnt -t cgroup2 -n |cut -d' '  -f 1", "r");
-  fscanf(fp,"%s",&cgroup2_mount_point);
+  char cgroup2_mount_point[100]="";
+  FILE* fp = popen("findmnt -t cgroup2 -n -o TARGET", "r");
+  int count=fscanf(fp,"%s",&cgroup2_mount_point);
   fclose(fp);
+  if (count=0){
+    fprintf(stderr, "cgroup2 not supported\n");
+    exit(EXIT_FAILURE);
+  }
   return cgroup2_mount_point;
 }
 

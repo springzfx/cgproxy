@@ -3,6 +3,20 @@
     "domainStrategy": "IPIfNonMatch",
     "rules": [
       {
+        "domain": [
+          "geosite:category-ads-all"
+        ],
+        "outboundTag": "outBound_BLACKHOLE",
+        "type": "field"
+      },
+      {
+        "inboundTag": [
+          "inbound_API"
+        ],
+        "outboundTag": "API",
+        "type": "field"
+      },
+      {
         "outboundTag": "dns-out",
         "port": "53",
         "type": "field"
@@ -21,27 +35,6 @@
         "type": "field"
       },
       {
-        "ip": [
-          "geoip:private"
-        ],
-        "outboundTag": "outBound_DIRECT",
-        "type": "field"
-      },
-      {
-        "domain": [
-          "geosite:category-ads-all"
-        ],
-        "outboundTag": "outBound_BLACKHOLE",
-        "type": "field"
-      },
-      {
-        "ip": [
-          "geoip:cn"
-        ],
-        "outboundTag": "outBound_DIRECT",
-        "type": "field"
-      },
-      {
         "domain": [
           "geosite:cn"
         ],
@@ -49,10 +42,11 @@
         "type": "field"
       },
       {
-        "inboundTag": [
-          "inbound_API"
+        "ip": [
+          "geoip:cn",
+          "geoip:private"
         ],
-        "outboundTag": "API",
+        "outboundTag": "outBound_DIRECT",
         "type": "field"
       }
     ]

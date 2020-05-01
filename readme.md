@@ -131,9 +131,9 @@ sudo systemctl restart cgproxy.service
       
   - passive way
   
-  set `cgroup_noproxy="<PROXY PROGRAM's CGROUP>"`
+      set `cgroup_noproxy="<PROXY PROGRAM's CGROUP>"`
   
-  example:  `cgroup_noproxy="/system.slice/v2ray.service"`
+      example:  `cgroup_noproxy="/system.slice/v2ray.service"`
   
 - Finally, restart cgproxy service, that's all
 

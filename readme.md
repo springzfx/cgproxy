@@ -172,7 +172,7 @@ sudo systemctl restart cgproxy.service
 ## TIPS
 
 - `systemd-cgls` to see the cgroup hierarchical tree.
-- v2ray full config exmaple in [v2ray_buid](https://github.com/springzfx/cgproxy/tree/master/v2ray_buid), more to see [v2ray multi-file config](https://www.v2fly.org/chapter_02/multiple_config.html)
+- v2ray full config exmaple in [v2ray_config](https://github.com/springzfx/cgproxy/tree/master/v2ray_config), more to see [v2ray multi-file config](https://www.v2fly.org/chapter_02/multiple_config.html)
 - Qv2ray config example
   
 

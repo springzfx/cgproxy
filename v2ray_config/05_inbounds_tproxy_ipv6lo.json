@@ -1,0 +1,30 @@
+{
+  "inbounds": [
+    {
+      "listen": "::1",
+      "port": 12345,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "",
+        "followRedirect": true,
+        "network": "tcp,udp",
+        "port": 0,
+        "timeout": 0,
+        "userLevel": 0
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "sockopt": {
+          "tproxy": "tproxy"
+        }
+      },
+      "tag": "tproxy_IN_ipv6lo"
+    }
+  ]
+}

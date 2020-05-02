@@ -1,6 +1,8 @@
 {
   "dns": {
     "servers": [
+      "https+local://1.1.1.1/dns-query",
+      "223.5.5.5",
       {
         "address": "localhost",
         "port": 53,
@@ -10,9 +12,7 @@
         "expectIPs": [
           "geoip:cn"
         ]
-      },
-      "https+local://1.1.1.1/dns-query",
-      "223.6.6.6"
+      }
     ],
     "tag": "dns_inbound"
   }

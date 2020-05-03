@@ -9,7 +9,7 @@
         "followRedirect": true,
         "network": "tcp,udp",
         "port": 0,
-        "timeout": 0,
+        "timeout": 300,
         "userLevel": 0
       },
       "sniffing": {

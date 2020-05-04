@@ -5,12 +5,11 @@ After=network.target nss-lookup.target
 Wants=network-online.target
 
 [Service]
-Type=simple
+Type=exec
+ExecStart=/usr/lib/v2ray/v2ray -config /etc/v2ray/config.json
 User=nobody
-#AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=yes
-ExecStart=+/usr/lib/v2ray/v2ray -config /etc/v2ray/config.json
 Restart=on-failure
 # Don't restart in the case of configuration error
 RestartPreventExitStatus=23

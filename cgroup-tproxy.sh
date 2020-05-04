@@ -39,16 +39,17 @@ enable_gateway=false
 
 ## some variables
 port=12345
+
+## some options
+enable_dns=true
 enable_tcp=true
 enable_udp=true
 enable_ipv4=true
 enable_ipv6=true
-enable_dns=true
 
 ## do not modify this if you don't known what you are doing
 table=100
 fwmark=0x01
-mark_noproxy=0xff
 make_newin=0x02
 
 ## cgroup things
@@ -119,18 +120,15 @@ iptables -t mangle -A TPROXY_PRE -p icmp -j RETURN
 iptables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
 iptables -t mangle -A TPROXY_PRE -p tcp --dport 53 -j TPROXY_ENT
 iptables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
-iptables -t mangle -A TPROXY_PRE -m pkttype --pkt-type broadcast -j RETURN
-iptables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
+iptables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
 iptables -t mangle -A TPROXY_PRE -j TPROXY_ENT
 iptables -t mangle -A PREROUTING -j TPROXY_PRE
 
 iptables -t mangle -N TPROXY_OUT
-iptables -t mangle -A TPROXY_OUT -o lo -j RETURN
 iptables -t mangle -A TPROXY_OUT -p icmp -j RETURN
 iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
-iptables -t mangle -A TPROXY_OUT -m pkttype --pkt-type broadcast -j RETURN
-iptables -t mangle -A TPROXY_OUT -m pkttype --pkt-type multicast -j RETURN
-iptables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
+iptables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
+iptables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $fwmark
 iptables -t mangle -A OUTPUT -j TPROXY_OUT
@@ -145,50 +143,47 @@ ip6tables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip localhost --on-port $
 ip6tables -t mangle -N TPROXY_PRE
 ip6tables -t mangle -A TPROXY_PRE -m socket --transparent -j MARK --set-mark $fwmark
 ip6tables -t mangle -A TPROXY_PRE -m socket --transparent -j RETURN
-ip6tables -t mangle -A TPROXY_PRE -p icmp -j RETURN
+ip6tables -t mangle -A TPROXY_PRE -p icmpv6 -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
 ip6tables -t mangle -A TPROXY_PRE -p tcp --dport 53 -j TPROXY_ENT
 ip6tables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
-ip6tables -t mangle -A TPROXY_PRE -m pkttype --pkt-type broadcast -j RETURN
-ip6tables -t mangle -A TPROXY_PRE -m pkttype --pkt-type multicast -j RETURN
+ip6tables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -j TPROXY_ENT
 ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
 
 ip6tables -t mangle -N TPROXY_OUT
-ip6tables -t mangle -A TPROXY_OUT -o lo -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -p icmp -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m pkttype --pkt-type broadcast -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m pkttype --pkt-type multicast -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -p icmpv6 -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m mark --mark $mark_noproxy -j RETURN
+ip6tables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
+ip6tables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $fwmark
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 
 ## allow to disable, order is important
-$enable_dns    	|| iptables  -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
-$enable_dns    	|| ip6tables -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
-$enable_udp 	|| iptables  -t mangle -I TPROXY_OUT -p udp -j RETURN
-$enable_udp 	|| ip6tables -t mangle -I TPROXY_OUT -p udp -j RETURN
-$enable_tcp 	|| iptables  -t mangle -I TPROXY_OUT -p tcp -j RETURN
-$enable_tcp 	|| ip6tables -t mangle -I TPROXY_OUT -p tcp -j RETURN
-$enable_ipv4 	|| iptables  -t mangle -I TPROXY_OUT -j RETURN
-$enable_ipv6 	|| ip6tables -t mangle -I TPROXY_OUT -j RETURN
+$enable_dns     || iptables  -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
+$enable_dns     || ip6tables -t mangle -I TPROXY_OUT -p udp --dport 53 -j RETURN
+$enable_udp     || iptables  -t mangle -I TPROXY_OUT -p udp -j RETURN
+$enable_udp     || ip6tables -t mangle -I TPROXY_OUT -p udp -j RETURN
+$enable_tcp     || iptables  -t mangle -I TPROXY_OUT -p tcp -j RETURN
+$enable_tcp     || ip6tables -t mangle -I TPROXY_OUT -p tcp -j RETURN
+$enable_ipv4    || iptables  -t mangle -I TPROXY_OUT -j RETURN
+$enable_ipv6    || ip6tables -t mangle -I TPROXY_OUT -j RETURN
 
 if $enable_gateway; then
-$enable_dns    	|| iptables  -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
-$enable_dns    	|| ip6tables -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
-$enable_udp 	|| iptables  -t mangle -I TPROXY_PRE -p udp -j RETURN
-$enable_udp 	|| ip6tables -t mangle -I TPROXY_PRE -p udp -j RETURN
-$enable_tcp 	|| iptables  -t mangle -I TPROXY_PRE -p tcp -j RETURN
-$enable_tcp 	|| ip6tables -t mangle -I TPROXY_PRE -p tcp -j RETURN
-$enable_ipv4 	|| iptables  -t mangle -I TPROXY_PRE -j RETURN
-$enable_ipv6 	|| ip6tables -t mangle -I TPROXY_PRE -j RETURN
+$enable_dns     || iptables  -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
+$enable_dns     || ip6tables -t mangle -I TPROXY_PRE -p udp --dport 53 -j RETURN
+$enable_udp     || iptables  -t mangle -I TPROXY_PRE -p udp -j RETURN
+$enable_udp     || ip6tables -t mangle -I TPROXY_PRE -p udp -j RETURN
+$enable_tcp     || iptables  -t mangle -I TPROXY_PRE -p tcp -j RETURN
+$enable_tcp     || ip6tables -t mangle -I TPROXY_PRE -p tcp -j RETURN
+$enable_ipv4    || iptables  -t mangle -I TPROXY_PRE -j RETURN
+$enable_ipv6    || ip6tables -t mangle -I TPROXY_PRE -j RETURN
 fi
 
 ## do not handle local device connection through tproxy if gateway is not enabled
-$enable_gateway || iptables  -t mangle -I TPROXY_PRE  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
-$enable_gateway || ip6tables -t mangle -I TPROXY_PRE  -m addrtype ! --src-type LOCAL -m addrtype ! --dst-type LOCAL -j RETURN
+$enable_gateway || iptables  -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -j RETURN
+$enable_gateway || ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -j RETURN
 
 ## make sure following rules are the first in chain TPROXY_PRE to mark new incoming connection or gateway proxy connection
 ## so must put at last to insert first

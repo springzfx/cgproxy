@@ -98,17 +98,16 @@ port=12345
 
 ########################################################################
 ## if you set to false, it's traffic won't go through proxy, but still can go direct to internet 
+enable_dns=true
 enable_tcp=true
 enable_udp=true
 enable_ipv4=true
 enable_ipv6=true
-enable_dns=true
 
 ########################################################################
 ## do not modify this if you don't known what you are doing
 table=100
 fwmark=0x01
-mark_noproxy=0xff
 mark_newin=0x02
 ```
 </details>

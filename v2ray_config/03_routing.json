@@ -22,13 +22,6 @@
         "type": "field"
       },
       {
-        "inboundTag": [
-          "dns_inbound"
-        ],
-        "outboundTag": "outBound_DIRECT",
-        "type": "field"
-      },
-      {
         "domain": [
           "geosite:google",
           "geosite:github",

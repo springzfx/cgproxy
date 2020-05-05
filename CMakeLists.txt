@@ -21,6 +21,9 @@ install(FILES cgproxy.conf
         DESTINATION /etc/)
 install(FILES cgroup-tproxy.sh 
         DESTINATION /usr/share/cgproxy/scripts/)
+        
+install(FILES readme.md
+        DESTINATION /share/doc/cgproxy/)
 
 
 ## package for deb and rpm

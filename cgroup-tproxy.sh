@@ -53,9 +53,7 @@ fwmark=0x01
 make_newin=0x02
 
 ## cgroup things
-# cgroup_mount_point=$(findmnt -t cgroup,cgroup2 -n -J|jq '.filesystems[0].target')
-# cgroup_type=$(findmnt -t cgroup,cgroup2 -n -J|jq '.filesystems[0].fstype')
-cgroup_mount_point=$(findmnt -t cgroup2 -n |cut -d' ' -f 1)
+cgroup_mount_point=$(findmnt -t cgroup2 -n -o TARGET)
 cgroup_type="cgroup2"
 cgroup_procs_file="cgroup.procs"
 
@@ -127,8 +125,8 @@ iptables -t mangle -A PREROUTING -j TPROXY_PRE
 iptables -t mangle -N TPROXY_OUT
 iptables -t mangle -A TPROXY_OUT -p icmp -j RETURN
 iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
-iptables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
-iptables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
+iptables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
+iptables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $fwmark
 iptables -t mangle -A OUTPUT -j TPROXY_OUT
@@ -154,8 +152,8 @@ ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
 ip6tables -t mangle -N TPROXY_OUT
 ip6tables -t mangle -A TPROXY_OUT -p icmpv6 -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
-ip6tables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
-ip6tables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $fwmark
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT

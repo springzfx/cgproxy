@@ -8,7 +8,7 @@
 
 cgproxy will transparent proxy anything running in specific cgroup. It resembles with *proxychains* and *tsock*, but without their disadvantages, and more powerfull.
 
-It aslo supports global transparent proxy and gateway proxy. See [Global transparent proxy](#global-transparent-proxy) and  [Gateway proxy](#gateway-proxy)
+It aslo supports global transparent proxy and gateway proxy. See [Global transparent proxy](#global-transparent-proxy) and  [Gateway proxy](#gateway-proxy).
 
 <!--ts-->
 

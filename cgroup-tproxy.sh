@@ -84,7 +84,7 @@ case $i in
         ip -6 route flush table $table
         ## may not exist, just ignore, and tracking their existence is not reliable
         iptables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
-        ip6tables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
+        ip6tables -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
         exit 0
         ;;
     --config=*)
@@ -197,7 +197,7 @@ DOC
 
 if $enable_gateway; then
     iptables  -t nat -A POSTROUTING -m owner ! --socket-exists -j MASQUERADE
-    ip6tables -t nat -A POSTROUTING -m owner ! --socket-exists -j MASQUERADE
+    ip6tables -t nat -A POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE # only masquerade ipv6 private address
     sysctl -w net.ipv4.ip_forward=1
     sysctl -w net.ipv6.conf.all.forwarding=1
     echo "gateway enabled"

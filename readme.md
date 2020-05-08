@@ -46,7 +46,7 @@ It aslo supports global transparent proxy and gateway proxy. See [Global transpa
 mkdir build && cd build && cmake .. && make && sudo make install
 ```
 
-- It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy/). 
+- It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/cgproxy-git/). 
 
 - DEB and RPM are packaged in [release page](https://github.com/springzfx/cgproxy/releases).
 

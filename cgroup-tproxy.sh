@@ -30,6 +30,13 @@ cat << 'DOC'
 DOC
 }
 
+check_root(){
+    uid=$(id -u)
+    [ ! $uid -eq 0 ] && { >&2 echo "permission denied, need root";exit 0; }
+}
+
+check_root
+
 ## any process in this cgroup will be proxied
 cgroup_proxy="/proxy.slice"
 cgroup_noproxy="/noproxy.slice"
@@ -62,6 +69,8 @@ for i in "$@"
 do
 case $i in
     stop)
+        iptables -t mangle -L TPROXY_PRE &> /dev/null || exit 0
+        echo "stopping tproxy iptables"
         iptables -t mangle -D PREROUTING -j TPROXY_PRE
         iptables -t mangle -D OUTPUT -j TPROXY_OUT
         iptables -t mangle -F TPROXY_PRE

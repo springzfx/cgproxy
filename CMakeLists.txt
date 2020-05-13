@@ -1,7 +1,25 @@
 cmake_minimum_required(VERSION 3.10)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE DEBUG)
+add_compile_options(-Wno-return-type)
 
 project(cgproxy VERSION 3.7)
+
+
+find_package(Threads REQUIRED)
+find_package(libconfig++ REQUIRED)
+find_package(nlohmann_json REQUIRED)
+include_directories(${PROJECT_SOURCE_DIR})
+
 add_executable(cgattach cgattach.cpp)
+
+add_executable(main main.cpp)
+target_link_libraries(main Threads::Threads ${LIBCONFIG++_LIBRARIES} nlohmann_json::nlohmann_json)
+
+add_executable(client socket_client.cpp)
+target_link_libraries(client nlohmann_json::nlohmann_json)
+
 
 install(TARGETS cgattach DESTINATION /usr/bin 
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE SETUID)
@@ -24,6 +42,8 @@ install(FILES cgroup-tproxy.sh
         
 install(FILES readme.md
         DESTINATION /share/doc/cgproxy/)
+
+
 
 
 ## package for deb and rpm

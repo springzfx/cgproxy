@@ -69,7 +69,6 @@ for i in "$@"
 do
 case $i in
     stop)
-        iptables -t mangle -L TPROXY_PRE &> /dev/null || exit 0
         echo "stopping tproxy iptables"
         iptables -t mangle -D PREROUTING -j TPROXY_PRE
         iptables -t mangle -D OUTPUT -j TPROXY_OUT
@@ -99,7 +98,6 @@ case $i in
     --config=*)
         config=${i#*=}
         source $config
-        shift
         ;;
     --help)
         print_help
@@ -136,8 +134,12 @@ iptables -t mangle -A TPROXY_OUT -p icmp -j RETURN
 iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
 iptables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
 iptables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
-iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
-iptables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $fwmark
+for cg in ${cgroup_noproxy[@]}; do
+iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
+done
+for cg in ${cgroup_proxy[@]}; do
+iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark
+done
 iptables -t mangle -A OUTPUT -j TPROXY_OUT
 
 #ipv6#
@@ -163,8 +165,12 @@ ip6tables -t mangle -A TPROXY_OUT -p icmpv6 -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_noproxy -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cgroup_proxy -j MARK --set-mark $fwmark
+for cg in ${cgroup_noproxy[@]}; do
+ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
+done
+for cg in ${cgroup_proxy[@]}; do
+ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark
+done
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 
 ## allow to disable, order is important
@@ -199,8 +205,8 @@ ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --
 
 ## message for user
 cat << DOC
-noproxy cgroup: $cgroup_noproxy
-proxied cgroup: $cgroup_proxy
+noproxy cgroup: ${cgroup_noproxy[@]}
+proxied cgroup: ${cgroup_proxy[@]}
 DOC
 
 

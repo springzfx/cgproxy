@@ -128,7 +128,9 @@ sudo systemctl restart cgproxy.service
       
       example: `cgnoproxy sudo v2ray -config config_file`
       
-  - passive way
+      example: `cgnoproxy qv2ray`
+      
+  - passive way, useful if you run v2ray as service
   
       set `cgroup_noproxy="<PROXY PROGRAM's CGROUP>"`
   

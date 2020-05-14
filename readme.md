@@ -84,7 +84,7 @@ mkdir build && cd build && cmake .. && make && sudo make install
 ## note, cgroup must start with slash '/'
 ## the value can be string or bash array
 ## for array, only the first element will be created if not exist
-## and the rest elements will not, so won't be applied
+## and the rest elements will not, so won't be applied if not exist
 
 ### global proxy with v2ray service
 # cgroup_proxy="/"

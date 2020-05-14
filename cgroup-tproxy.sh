@@ -107,6 +107,7 @@ esac
 done
 
 ## TODO cgroup need to exists before using in iptables since 5.6.5, maybe it's bug
+## only create the first one in arrary
 test -d $cgroup_mount_point$cgroup_proxy    || mkdir $cgroup_mount_point$cgroup_proxy   || exit -1; 
 test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_noproxy || exit -1; 
 

@@ -10,6 +10,10 @@
 #include <unistd.h>
 using namespace std;
 
+
+#define error(...) {fprintf(stderr, __VA_ARGS__);fprintf(stderr, "\n");}
+#define debug(...) {fprintf(stdout, __VA_ARGS__);fprintf(stdout, "\n");}
+
 void print_usage() { fprintf(stdout, "usage: cgattach <pid> <cgroup>\n"); }
 
 bool exist(string path) {
@@ -26,7 +30,7 @@ bool validate(string pid, string cgroup) {
   if (pid_v && cg_v)
     return true;
  
-  fprintf(stderr, "paramater validate error\n");
+  error("paramater validate error");
   print_usage();
   exit(EXIT_FAILURE);
 }
@@ -37,22 +41,21 @@ string get_cgroup2_mount_point(){
   int count=fscanf(fp,"%s",&cgroup2_mount_point);
   fclose(fp);
   if (count=0){
-    fprintf(stderr, "cgroup2 not supported\n");
+    error("cgroup2 not supported");
     exit(EXIT_FAILURE);
   }
   return cgroup2_mount_point;
 }
 
 int main(int argc, char *argv[]) {
-  setuid(0);
-  setgid(0);
-  if (getuid() != 0 || getgid() != 0) {
-    fprintf(stderr, "cgattach need suid sticky bit or run with root\n");
+  int flag=setuid(0);
+  if (flag!=0) {
+    perror("cgattach setuid");
     exit(EXIT_FAILURE);
   }
 
   if (argc != 3) {
-    fprintf(stderr, "only need 2 paramaters\n");
+    error("only need 2 paramaters");
     print_usage();
     exit(EXIT_FAILURE);
   }
@@ -69,20 +72,19 @@ int main(int argc, char *argv[]) {
   if (!exist(cgroup_target_path)) {
     if (mkdir(cgroup_target_path.c_str(),
               S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0) {
-      fprintf(stdout, "created cgroup %s success\n", cgroup_target.c_str());
+      debug("created cgroup %s success", cgroup_target.c_str());
     } else {
-      fprintf(stderr, "created cgroup %s failed, errno %d\n",
-              cgroup_target.c_str(), errno);
+      error("created cgroup %s failed, errno %d", cgroup_target.c_str(), errno);
       exit(EXIT_FAILURE);
     }
-    // fprintf(stderr, "cgroup %s not exist\n",cgroup_target.c_str());
+    // error("cgroup %s not exist",cgroup_target.c_str());
     // exit(EXIT_FAILURE);
   }
 
   // put pid to target cgroup
   ofstream procs(cgroup_target_procs, ofstream::app);
   if (!procs.is_open()) {
-    fprintf(stderr, "open file %s failed\n", cgroup_target_procs.c_str());
+    error("open file %s failed", cgroup_target_procs.c_str());
     exit(EXIT_FAILURE);
   }
   procs << pid.c_str() << endl;
@@ -90,7 +92,7 @@ int main(int argc, char *argv[]) {
 
   // maybe there some write error, for example process pid may not exist
   if (!procs) {
-    fprintf(stderr, "write %s to %s failed, maybe process %s not exist\n",
+    error("write %s to %s failed, maybe process %s not exist",
             pid.c_str(), cgroup_target_procs.c_str(), pid.c_str());
     exit(EXIT_FAILURE);
   }

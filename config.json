@@ -1,0 +1,11 @@
+{
+    "cgroup_noproxy": [],
+    "cgroup_proxy": [],
+    "enable_dns": true,
+    "enable_gateway": false,
+    "enable_ipv4": true,
+    "enable_ipv6": true,
+    "enable_tcp": true,
+    "enable_udp": true,
+    "port": 12345
+}

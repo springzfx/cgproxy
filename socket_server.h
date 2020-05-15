@@ -1,25 +1,21 @@
 #ifndef SOCKET_SERVER_H
 #define SOCKET_SERVER_H
 
-#include "common.h"
 #include <functional>
 #include <iostream>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include "common.h"
 using namespace std;
 
-#define SOCKET_PATH "/tmp/unix_socket"
-#define LISTEN_BACKLOG 5
-
-class SocketControl;
-struct thread_arg;
+namespace CGPROXY::SOCKET{
 
 #define continue_if_error(flag, msg)                                           \
   if (flag == -1) {                                                            \
@@ -27,12 +23,13 @@ struct thread_arg;
     continue;                                                                  \
   }
 
+class SocketServer;
 struct thread_arg {
-  SocketControl *sc;
+  SocketServer *sc;
   function<int(char *)> handle_msg;
 };
 
-class SocketControl {
+class SocketServer {
 public:
   int sfd = -1, cfd = -1, flag = -1;
   struct sockaddr_un unix_socket;
@@ -41,7 +38,8 @@ public:
     debug("starting socket listening");
     sfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
-    unlink(SOCKET_PATH);
+    flag=unlink(SOCKET_PATH);
+    if (flag==-1) {error("%s exist, and can't unlink",SOCKET_PATH); exit(EXIT_FAILURE);}
     memset(&unix_socket, '\0', sizeof(struct sockaddr_un));
     unix_socket.sun_family = AF_UNIX;
     strncpy(unix_socket.sun_path, SOCKET_PATH,
@@ -75,7 +73,7 @@ public:
     }
   }
 
-  ~SocketControl() {
+  ~SocketServer() {
     close(sfd);
     close(cfd);
     unlink(SOCKET_PATH);
@@ -84,7 +82,10 @@ public:
   static void *startThread(void *arg) {
     thread_arg *p = (thread_arg *)arg;
     p->sc->socketListening(p->handle_msg);
+    return (void *)0;
   }
 };
+
+}
 
 #endif

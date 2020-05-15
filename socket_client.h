@@ -1,25 +1,29 @@
-#include "common.h"
+#ifndef SOCKET_CLIENT_H
+#define SOCKET_CLIENT_H
+
 #include <iostream>
-#include <nlohmann/json.hpp>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include "common.h"
 
 using namespace std;
-using json = nlohmann::json;
+
+namespace CGPROXY::SOCKET{
 
 #define return_if_error(flag, msg)                                             \
   if (flag == -1) {                                                            \
     perror(msg);                                                               \
     status = CONN_ERROR;                                                       \
+    close(sfd); \
     return;                                                                    \
   }
 
-void send(char *msg, int &status) {
+void send(const char *msg, int &status) {
   debug("send msg: %s", msg);
   status = UNKNOWN_ERROR;
 
@@ -47,8 +51,7 @@ void send(char *msg, int &status) {
   close(sfd);
 }
 
-void send(const json &j, int &status) {
-  string msg = j.dump();
+void send(const string msg, int &status) {
   int msg_len = msg.length();
   char buff[msg_len];
   msg.copy(buff, msg_len, 0);
@@ -57,24 +60,5 @@ void send(const json &j, int &status) {
   debug("return status: %d", status);
 }
 
-int test_json() {
-  json j;
-  j["type"] = MSG_TYPE_JSON;
-  j["data"]["cgroup_proxy"] = "/";
-  j["data"]["enable_dns"] = false;
-  int status;
-  send(j, status);
 }
-
-void test_file() {
-  json j;
-  j["type"] = MSG_TYPE_CONFIG_PATH;
-  j["data"] = "/etc/cgproxy.conf";
-  int status;
-  send(j, status);
-}
-
-int main() {
-  test_file();
-  test_json();
-}
+#endif

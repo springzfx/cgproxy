@@ -36,8 +36,8 @@ struct Config {
 public:
   void toEnv() {
     mergeReserved();
-    setenv("cgroup_proxy", join2str(cgroup_proxy).c_str(), 1);
-    setenv("cgroup_noproxy", join2str(cgroup_noproxy).c_str(), 1);
+    setenv("cgroup_proxy", join2str(cgroup_proxy,':').c_str(), 1);
+    setenv("cgroup_noproxy", join2str(cgroup_noproxy, ':').c_str(), 1);
     setenv("enable_gateway", to_str(enable_gateway).c_str(), 1);
     setenv("port", to_str(port).c_str(), 1);
     setenv("enable_dns", to_str(enable_dns).c_str(), 1);
@@ -122,9 +122,9 @@ public:
         if (value.is_array()&&!validCgroup((vector<string>)value)) status=false;
         if (!value.is_string()&&!value.is_array()) status=false;
       }else if (key=="port"){
-        if (validPort(value)) status=false;
+        if (!validPort(value)) status=false;
       }else if (boolset.find(key)!=boolset.end()){
-        if (value.is_boolean()) status=false;
+        if (!value.is_boolean()) status=false;
       }else{
         error("unknown key: %s", key.c_str());
         return false;

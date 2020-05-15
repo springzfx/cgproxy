@@ -1,11 +1,10 @@
 [Unit]
-Description=proxy cgroup
+Description=cgproxy service
 After=network.target
 
 [Service]
-ExecStart=sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh --config=/etc/cgproxy.conf
-ExecStop= sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh stop
-RemainAfterExit=1
+Type=simple
+ExecStart=/usr/bin/cgproxyd
 
 [Install]
 WantedBy=multi-user.target

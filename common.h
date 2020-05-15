@@ -1,9 +1,9 @@
 #ifndef COMMON_H
-#define COMMON_H
+#define COMMON_H 1
 
-#define SOCKET_PATH "/tmp/unix_socket"
+#define SOCKET_PATH "/tmp/cgproxy_unix_socket"
 #define LISTEN_BACKLOG 64
-#define DEFAULT_CONFIG_FILE "/etc/cgproxy.conf"
+#define DEFAULT_CONFIG_FILE "/etc/cgproxy/config.json"
 
 #define CGROUP_PROXY_PRESVERED "/proxy.slice"
 #define CGROUP_NOPROXY_PRESVERED "/noproxy.slice"
@@ -31,27 +31,53 @@
 #include <regex>
 using namespace std;
 
+extern bool enable_debug=false;
+extern bool print_help=false;
+
 #define error(...) {fprintf(stderr, __VA_ARGS__);fprintf(stderr, "\n");}
-#define debug(...) {fprintf(stdout, __VA_ARGS__);fprintf(stdout, "\n");}
+#define debug(...) if (enable_debug) {fprintf(stdout, __VA_ARGS__);fprintf(stdout, "\n");}
 #define return_error return -1;
 #define return_success return 0;
 
+
+void processArgs(const int argc, char *argv[], int &shift){
+    for (int i=1;i<argc;i++){
+        if (strcmp(argv[i], "--debug")==0){
+            enable_debug=true;
+        }
+        if (strcmp(argv[i], "--help")==0){
+            print_help=true;
+        }
+        if (argv[i][0]!='-') {
+            break;
+        }
+        shift+=1;
+    }
+}
 
 template <typename... T> 
 string to_str(T... args) {
   stringstream ss;
   ss.clear();
-  (ss << ... << args) << endl;
+  ss << std::boolalpha;
+  (ss << ... << args);
   return ss.str();
 }
 
-template <typename T>
-string join2str(const T t){
+string join2str(const vector<string> t,  const char delm=' '){
     string s;
-    string delm=" ", prefix="(", tail=")", wrap="\"";
     for (const auto &e : t) 
-        e!=*(t.end()-1)?s+=wrap+e+wrap+delm:s+=wrap+e+wrap;
-    return prefix+s+tail;
+        e!=*(t.end()-1)?s+=e+delm:s+=e;
+    return s;
+}
+
+string join2str(const int argc,char** argv, const char delm=' '){
+    string s;
+    for (int i=0;i<argc;i++){ 
+       s+=argv[i];
+       if (i!=argc-1) s+=delm;
+    }
+    return s;
 }
 
 bool validCgroup(const string cgroup){
@@ -71,8 +97,8 @@ bool validPid(const string pid){
   return regex_match(pid, regex("^[0-9]+$"));
 }
 
-bool validPort(const string port){
-  return regex_match(port, regex("^[0-9]+$"));
+bool validPort(const int port){
+  return port>0;
 }
 
 #endif

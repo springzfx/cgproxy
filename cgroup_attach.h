@@ -30,7 +30,7 @@ bool validate(string pid, string cgroup) {
   if (pid_v && cg_v)
     return true;
  
-  error("paramater validate error");
+  error("attach paramater validate error");
   return_error
 }
 
@@ -53,8 +53,11 @@ int attach(const string pid, const string cgroup_target) {
     error("need root to attach cgroup");
     return_error
   }
+
+  debug("attaching %s to %s",pid.c_str(),cgroup_target.c_str());
+  
   int status;
-  validate(pid, cgroup_target);
+  if (!validate(pid, cgroup_target)) return_error
   string cgroup_mount_point = get_cgroup2_mount_point(status);
   if (status!=0) return_error
   string cgroup_target_path = cgroup_mount_point + cgroup_target;
@@ -89,6 +92,10 @@ int attach(const string pid, const string cgroup_target) {
     return_error
   }
   return_success
+}
+
+int attach(const int pid, const string cgroup_target){
+  return attach(to_str(pid), cgroup_target);
 }
 
 }

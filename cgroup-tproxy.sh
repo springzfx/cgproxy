@@ -30,29 +30,35 @@ cat << 'DOC'
 DOC
 }
 
-check_root(){
-    uid=$(id -u)
-    [ ! $uid -eq 0 ] && { >&2 echo "permission denied, need root";exit 0; }
-}
-
-check_root
+## check root
+[ ! $(id -u) -eq 0 ] && { >&2 echo "need root to modify iptables";exit -1; }
 
 ## any process in this cgroup will be proxied
-cgroup_proxy="/proxy.slice"
-cgroup_noproxy="/noproxy.slice"
+if [ -z ${cgroup_proxy+x} ]; then  
+    cgroup_proxy="/proxy.slice"
+else
+    IFS=':' read -r -a cgroup_proxy     <<< "$cgroup_proxy"
+fi
+
+## any process in this cgroup will not be proxied
+if [ -z ${cgroup_noproxy+x} ]; then  
+    cgroup_noproxy="/noproxy.slice"
+else
+    IFS=':' read -r -a cgroup_noproxy   <<< "$cgroup_noproxy"
+fi
 
 # allow as gateway for local network
-enable_gateway=false
+[ -z ${enable_gateway+x} ] && enable_gateway=false
 
 ## some variables
-port=12345
+[ -z ${port+x} ] && port=12345
 
 ## some options
-enable_dns=true
-enable_tcp=true
-enable_udp=true
-enable_ipv4=true
-enable_ipv6=true
+[ -z ${enable_dns+x} ]  && enable_dns=true
+[ -z ${enable_tcp+x} ]  && enable_tcp=true
+[ -z ${enable_udp+x} ]  && enable_udp=true
+[ -z ${enable_ipv4+x} ] && enable_ipv4=true
+[ -z ${enable_ipv6+x} ] && enable_ipv6=true
 
 ## do not modify this if you don't known what you are doing
 table=100

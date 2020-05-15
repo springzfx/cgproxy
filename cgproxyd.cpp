@@ -36,7 +36,7 @@ int handle_msg(char *msg) {
   try{ j = json::parse(msg); }catch(exception& e){debug("msg paser error");return MSG_ERROR;}
 
   int type, status;
-  string pid, cgroup_target;
+  int pid, cgroup_target;
   try {
     type = j.at("type").get<int>();
     switch (type)
@@ -52,12 +52,12 @@ int handle_msg(char *msg) {
       return status;
       break;
     case MSG_TYPE_PROXY_PID:
-      pid=j.at("data").get<string>();
+      pid=j.at("data").get<int>();
       status=attach(pid, config.cgroup_proxy_preserved);
       return status;
       break;
     case MSG_TYPE_NOPROXY_PID:
-      pid=j.at("data").get<string>();
+      pid=j.at("data").get<int>();
       status=attach(pid, config.cgroup_noproxy_preserved);
       return status;
       break;
@@ -83,7 +83,10 @@ pthread_t startSocketListeningThread() {
   return thread_id;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  int shift=1;
+  processArgs(argc,argv,shift);
+
   bool enable_socket = true;
   string config_path = DEFAULT_CONFIG_FILE;
   config.loadFromFile(config_path);

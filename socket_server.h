@@ -12,8 +12,10 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <filesystem>
 #include "common.h"
 using namespace std;
+namespace fs = std::filesystem;
 
 namespace CGPROXY::SOCKET{
 
@@ -38,8 +40,10 @@ public:
     debug("starting socket listening");
     sfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
-    flag=unlink(SOCKET_PATH);
-    if (flag==-1) {error("%s exist, and can't unlink",SOCKET_PATH); exit(EXIT_FAILURE);}
+    if (fs::exists(SOCKET_PATH)&&unlink(SOCKET_PATH)==-1){
+      error("%s exist, and can't unlink",SOCKET_PATH); 
+      exit(EXIT_FAILURE);
+    }
     memset(&unix_socket, '\0', sizeof(struct sockaddr_un));
     unix_socket.sun_family = AF_UNIX;
     strncpy(unix_socket.sun_path, SOCKET_PATH,

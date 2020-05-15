@@ -1,5 +1,5 @@
 {
-    "cgroup_noproxy": [],
+    "cgroup_noproxy": ["/system.slice/v2ray.service"],
     "cgroup_proxy": [],
     "enable_dns": true,
     "enable_gateway": false,

@@ -1,6 +1,6 @@
 # Maintainer: Fancy Zhang <springzfx@gmail.com>
 pkgname=cgproxy-git
-pkgver=v3.8.r1.gc0668fd
+pkgver=v4.0.r1.g3fde647
 pkgrel=1
 pkgdesc="A transparent proxy program with cgroup2, like proxychains"
 arch=('x86_64')
@@ -13,8 +13,8 @@ provides=('cgproxy')
 conflicts=('cgproxy')
 
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source=("${pkgname}::git+file://${curr_dir}/../.git")
-# source=("${pkgname}::git+file:///home/fancy/workspace/cgproxy/.git")
+# source=("${pkgname}::git+file://${curr_dir}/../.git")
+source=("${pkgname}::git+file:///home/fancy/workspace/cgproxy#branch=dev")
 md5sums=('SKIP')
 
 pkgver() {

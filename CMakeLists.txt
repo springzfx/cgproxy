@@ -31,7 +31,7 @@ install(FILES  cgnoproxy.sh DESTINATION /usr/bin
 
 install(FILES cgproxy.service 
         DESTINATION /usr/lib/systemd/system/)
-install(FILES cgproxy.json
+install(FILES config.json
         DESTINATION /etc/cgproxy/)
 install(FILES cgroup-tproxy.sh 
         DESTINATION /usr/share/cgproxy/scripts/)

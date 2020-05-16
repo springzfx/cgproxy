@@ -30,29 +30,35 @@ cat << 'DOC'
 DOC
 }
 
-check_root(){
-    uid=$(id -u)
-    [ ! $uid -eq 0 ] && { >&2 echo "permission denied, need root";exit 0; }
-}
-
-check_root
+## check root
+[ ! $(id -u) -eq 0 ] && { >&2 echo "need root to modify iptables";exit -1; }
 
 ## any process in this cgroup will be proxied
-cgroup_proxy="/proxy.slice"
-cgroup_noproxy="/noproxy.slice"
+if [ -z ${cgroup_proxy+x} ]; then  
+    cgroup_proxy="/proxy.slice"
+else
+    IFS=':' read -r -a cgroup_proxy     <<< "$cgroup_proxy"
+fi
+
+## any process in this cgroup will not be proxied
+if [ -z ${cgroup_noproxy+x} ]; then  
+    cgroup_noproxy="/noproxy.slice"
+else
+    IFS=':' read -r -a cgroup_noproxy   <<< "$cgroup_noproxy"
+fi
 
 # allow as gateway for local network
-enable_gateway=false
+[ -z ${enable_gateway+x} ] && enable_gateway=false
 
 ## some variables
-port=12345
+[ -z ${port+x} ] && port=12345
 
 ## some options
-enable_dns=true
-enable_tcp=true
-enable_udp=true
-enable_ipv4=true
-enable_ipv6=true
+[ -z ${enable_dns+x} ]  && enable_dns=true
+[ -z ${enable_tcp+x} ]  && enable_tcp=true
+[ -z ${enable_udp+x} ]  && enable_udp=true
+[ -z ${enable_ipv4+x} ] && enable_ipv4=true
+[ -z ${enable_ipv6+x} ] && enable_ipv6=true
 
 ## do not modify this if you don't known what you are doing
 table=100
@@ -64,35 +70,41 @@ cgroup_mount_point=$(findmnt -t cgroup2 -n -o TARGET)
 cgroup_type="cgroup2"
 cgroup_procs_file="cgroup.procs"
 
+
+stop(){
+    iptables -t mangle -L TPROXY_PRE &> /dev/null || return
+    echo "cleaning tproxy iptables"
+    iptables -t mangle -D PREROUTING -j TPROXY_PRE
+    iptables -t mangle -D OUTPUT -j TPROXY_OUT
+    iptables -t mangle -F TPROXY_PRE
+    iptables -t mangle -F TPROXY_OUT
+    iptables -t mangle -F TPROXY_ENT
+    iptables -t mangle -X TPROXY_PRE
+    iptables -t mangle -X TPROXY_OUT
+    iptables -t mangle -X TPROXY_ENT
+    ip6tables -t mangle -D PREROUTING -j TPROXY_PRE
+    ip6tables -t mangle -D OUTPUT -j TPROXY_OUT
+    ip6tables -t mangle -F TPROXY_PRE
+    ip6tables -t mangle -F TPROXY_OUT
+    ip6tables -t mangle -F TPROXY_ENT
+    ip6tables -t mangle -X TPROXY_PRE
+    ip6tables -t mangle -X TPROXY_OUT
+    ip6tables -t mangle -X TPROXY_ENT
+    ip rule delete fwmark $fwmark lookup $table
+    ip route flush table $table
+    ip -6 rule delete fwmark $fwmark lookup $table
+    ip -6 route flush table $table
+    ## may not exist, just ignore, and tracking their existence is not reliable
+    iptables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
+    ip6tables -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
+}
+
 ## parse parameter
 for i in "$@"
 do
 case $i in
     stop)
-        echo "stopping tproxy iptables"
-        iptables -t mangle -D PREROUTING -j TPROXY_PRE
-        iptables -t mangle -D OUTPUT -j TPROXY_OUT
-        iptables -t mangle -F TPROXY_PRE
-        iptables -t mangle -F TPROXY_OUT
-        iptables -t mangle -F TPROXY_ENT
-        iptables -t mangle -X TPROXY_PRE
-        iptables -t mangle -X TPROXY_OUT
-        iptables -t mangle -X TPROXY_ENT
-        ip6tables -t mangle -D PREROUTING -j TPROXY_PRE
-        ip6tables -t mangle -D OUTPUT -j TPROXY_OUT
-        ip6tables -t mangle -F TPROXY_PRE
-        ip6tables -t mangle -F TPROXY_OUT
-        ip6tables -t mangle -F TPROXY_ENT
-        ip6tables -t mangle -X TPROXY_PRE
-        ip6tables -t mangle -X TPROXY_OUT
-        ip6tables -t mangle -X TPROXY_ENT
-        ip rule delete fwmark $fwmark lookup $table
-        ip route flush table $table
-        ip -6 rule delete fwmark $fwmark lookup $table
-        ip -6 route flush table $table
-        ## may not exist, just ignore, and tracking their existence is not reliable
-        iptables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
-        ip6tables -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
+        stop
         exit 0
         ;;
     --config=*)
@@ -111,6 +123,8 @@ done
 test -d $cgroup_mount_point$cgroup_proxy    || mkdir $cgroup_mount_point$cgroup_proxy   || exit -1; 
 test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_noproxy || exit -1; 
 
+
+echo "applying tproxy iptables"
 ## use TPROXY
 #ipv4#
 ip rule add fwmark $fwmark table $table

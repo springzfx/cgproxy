@@ -70,35 +70,41 @@ cgroup_mount_point=$(findmnt -t cgroup2 -n -o TARGET)
 cgroup_type="cgroup2"
 cgroup_procs_file="cgroup.procs"
 
+
+stop(){
+    iptables -t mangle -L TPROXY_PRE &> /dev/null || return
+    echo "cleaning tproxy iptables"
+    iptables -t mangle -D PREROUTING -j TPROXY_PRE
+    iptables -t mangle -D OUTPUT -j TPROXY_OUT
+    iptables -t mangle -F TPROXY_PRE
+    iptables -t mangle -F TPROXY_OUT
+    iptables -t mangle -F TPROXY_ENT
+    iptables -t mangle -X TPROXY_PRE
+    iptables -t mangle -X TPROXY_OUT
+    iptables -t mangle -X TPROXY_ENT
+    ip6tables -t mangle -D PREROUTING -j TPROXY_PRE
+    ip6tables -t mangle -D OUTPUT -j TPROXY_OUT
+    ip6tables -t mangle -F TPROXY_PRE
+    ip6tables -t mangle -F TPROXY_OUT
+    ip6tables -t mangle -F TPROXY_ENT
+    ip6tables -t mangle -X TPROXY_PRE
+    ip6tables -t mangle -X TPROXY_OUT
+    ip6tables -t mangle -X TPROXY_ENT
+    ip rule delete fwmark $fwmark lookup $table
+    ip route flush table $table
+    ip -6 rule delete fwmark $fwmark lookup $table
+    ip -6 route flush table $table
+    ## may not exist, just ignore, and tracking their existence is not reliable
+    iptables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
+    ip6tables -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
+}
+
 ## parse parameter
 for i in "$@"
 do
 case $i in
     stop)
-        echo "stopping tproxy iptables"
-        iptables -t mangle -D PREROUTING -j TPROXY_PRE
-        iptables -t mangle -D OUTPUT -j TPROXY_OUT
-        iptables -t mangle -F TPROXY_PRE
-        iptables -t mangle -F TPROXY_OUT
-        iptables -t mangle -F TPROXY_ENT
-        iptables -t mangle -X TPROXY_PRE
-        iptables -t mangle -X TPROXY_OUT
-        iptables -t mangle -X TPROXY_ENT
-        ip6tables -t mangle -D PREROUTING -j TPROXY_PRE
-        ip6tables -t mangle -D OUTPUT -j TPROXY_OUT
-        ip6tables -t mangle -F TPROXY_PRE
-        ip6tables -t mangle -F TPROXY_OUT
-        ip6tables -t mangle -F TPROXY_ENT
-        ip6tables -t mangle -X TPROXY_PRE
-        ip6tables -t mangle -X TPROXY_OUT
-        ip6tables -t mangle -X TPROXY_ENT
-        ip rule delete fwmark $fwmark lookup $table
-        ip route flush table $table
-        ip -6 rule delete fwmark $fwmark lookup $table
-        ip -6 route flush table $table
-        ## may not exist, just ignore, and tracking their existence is not reliable
-        iptables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
-        ip6tables -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
+        stop
         exit 0
         ;;
     --config=*)
@@ -117,6 +123,8 @@ done
 test -d $cgroup_mount_point$cgroup_proxy    || mkdir $cgroup_mount_point$cgroup_proxy   || exit -1; 
 test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_noproxy || exit -1; 
 
+
+echo "applying tproxy iptables"
 ## use TPROXY
 #ipv4#
 ip rule add fwmark $fwmark table $table

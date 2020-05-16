@@ -1,6 +1,9 @@
 #ifndef COMMON_H
 #define COMMON_H 1
 
+#define TPROXY_IPTABLS_START "sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh"
+#define TPROXY_IPTABLS_CLEAN "sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh stop"
+
 #define SOCKET_PATH "/tmp/cgproxy_unix_socket"
 #define LISTEN_BACKLOG 64
 #define DEFAULT_CONFIG_FILE "/etc/cgproxy/config.json"

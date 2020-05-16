@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <csignal>
 #include "config.hpp"
 #include "cgroup_attach.hpp"
 
@@ -24,7 +25,7 @@ class cgproxyd{
   thread_arg arg_t;
   Config config;
   pthread_t socket_thread_id = -1;
-  
+
   static cgproxyd* instance;
   static int handle_msg_static(char* msg){
     if (!instance) {
@@ -33,12 +34,11 @@ class cgproxyd{
     }
     return instance->handle_msg(msg);
   }
-
-  int applyConfig(Config *c) {
-    system("sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh stop");
-    c->toEnv();
-    system("sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh");
-    return 0;
+  static void signalHandler( int signum ){
+    debug("Signal %d received.", &signum);
+    if (!instance){ error("no cgproxyd instance assigned");}
+    else { instance->stop(); }
+    exit(signum);
   }
 
   int handle_msg(char *msg) {
@@ -99,22 +99,34 @@ class cgproxyd{
 
   public:
   int start(int argc, char* argv[]) {
+    signal(SIGINT, &signalHandler);
+    signal(SIGTERM,&signalHandler);
+    signal(SIGHUP,&signalHandler);
+
     int shift=1;
     processArgs(argc,argv,shift);
 
-    bool enable_socket = true;
-    string config_path = DEFAULT_CONFIG_FILE;
-    config.loadFromFile(config_path);
+    config.loadFromFile(DEFAULT_CONFIG_FILE);
     applyConfig(&config);
-    if (enable_socket) {
-      assignStaticInstance();
-      socket_thread_id = startSocketListeningThread();
-      pthread_join(socket_thread_id, NULL);
-    }
+
+    assignStaticInstance();
+    socket_thread_id = startSocketListeningThread();
+    pthread_join(socket_thread_id, NULL);
     return 0;
   }
+  int applyConfig(Config *c) {
+    system(TPROXY_IPTABLS_CLEAN);
+    c->toEnv();
+    system(TPROXY_IPTABLS_START);
+    // no need to track running status
+    return 0;
+  }
+  void stop(){
+    debug("stopping");
+    system(TPROXY_IPTABLS_CLEAN);
+  }
   ~cgproxyd(){
-
+    stop();
   }
 };
 

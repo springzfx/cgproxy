@@ -1,5 +1,5 @@
-#include "common.h"
-#include "socket_server.h"
+#include "common.hpp"
+#include "socket_server.hpp"
 #include <fstream>
 #include <iostream>
 #include <libconfig.h++>
@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include "config.h"
-#include "cgroup_attach.h"
+#include "config.hpp"
+#include "cgroup_attach.hpp"
 
 using namespace std;
 using json = nlohmann::json;

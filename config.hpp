@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
-#include "common.h"
-#include "socket_server.h"
+#include "common.hpp"
+#include "socket_server.hpp"
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>

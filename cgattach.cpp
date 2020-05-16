@@ -1,4 +1,4 @@
-#include "cgroup_attach.h"
+#include "cgroup_attach.hpp"
 using namespace std;
 
 void print_usage() { fprintf(stdout, "usage: cgattach <pid> <cgroup>\n"); }

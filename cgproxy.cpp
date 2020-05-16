@@ -1,5 +1,5 @@
 #include <nlohmann/json.hpp>
-#include "socket_client.h"
+#include "socket_client.hpp"
 using json = nlohmann::json;
 using namespace CGPROXY;
 
@@ -15,10 +15,10 @@ bool attach2cgproxy(){
 
 int main(int argc, char *argv[]){
     int shift=1;
-    // if (argc==1){
-    //     error("usage: cgproxy [--debug] <CMD>\nexample: cgroxy curl -I https://www.google.com");
-    //     exit(EXIT_FAILURE);
-    // }
+    if (argc==1){
+        error("usage: cgproxy [--debug] <CMD>\nexample: cgroxy curl -I https://www.google.com");
+        exit(EXIT_FAILURE);
+    }
     processArgs(argc,argv,shift);
     
     if (!attach2cgproxy()){

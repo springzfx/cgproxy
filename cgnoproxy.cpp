@@ -1,5 +1,5 @@
 #include <nlohmann/json.hpp>
-#include "socket_client.h"
+#include "socket_client.hpp"
 using json = nlohmann::json;
 using namespace CGPROXY;
 

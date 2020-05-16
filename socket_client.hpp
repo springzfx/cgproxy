@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include "common.h"
+#include "common.hpp"
 
 using namespace std;
 

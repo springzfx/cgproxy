@@ -31,8 +31,8 @@
 #include <regex>
 using namespace std;
 
-extern bool enable_debug=false;
-extern bool print_help=false;
+static bool enable_debug=false;
+static bool print_help=false;
 
 #define error(...) {fprintf(stderr, __VA_ARGS__);fprintf(stderr, "\n");}
 #define debug(...) if (enable_debug) {fprintf(stdout, __VA_ARGS__);fprintf(stdout, "\n");}

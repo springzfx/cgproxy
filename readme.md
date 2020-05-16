@@ -117,12 +117,12 @@ sudo systemctl restart cgproxy.service
 
 - Allow your proxy program (v2ray) direct to internet to avoid loop. Two ways:
   
-- active way, run command
-  
-      example: `cgnoproxy sudo v2ray -config config_file`
-      
-      example: `cgnoproxy qv2ray`
-      
+  - active way, run command
+    
+    example: `cgnoproxy sudo v2ray -config config_file`
+    
+    example: `cgnoproxy qv2ray`
+    
   - passive way,  set it's cgroup in configuration,  very useful for service
   
       example:  `"cgroup_noproxy":["/system.slice/v2ray.service"]`

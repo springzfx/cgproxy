@@ -25,9 +25,7 @@ namespace CGPROXY::SOCKET{
     continue;                                                                  \
   }
 
-class SocketServer;
 struct thread_arg {
-  SocketServer *sc;
   function<int(char *)> handle_msg;
 };
 
@@ -42,7 +40,7 @@ public:
 
     if (fs::exists(SOCKET_PATH)&&unlink(SOCKET_PATH)==-1){
       error("%s exist, and can't unlink",SOCKET_PATH); 
-      exit(EXIT_FAILURE);
+      return;
     }
     memset(&unix_socket, '\0', sizeof(struct sockaddr_un));
     unix_socket.sun_family = AF_UNIX;
@@ -85,7 +83,8 @@ public:
 
   static void *startThread(void *arg) {
     thread_arg *p = (thread_arg *)arg;
-    p->sc->socketListening(p->handle_msg);
+    SocketServer server;
+    server.socketListening(p->handle_msg);
     return (void *)0;
   }
 };

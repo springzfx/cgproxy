@@ -119,6 +119,7 @@ public:
     for (auto& [key, value] : j.items()) {
       if (key=="cgroup_proxy"||key=="cgroup_noproxy"){
         if (value.is_string()&&!validCgroup((string)value)) status=false;
+        // TODO what if vector<int> etc.
         if (value.is_array()&&!validCgroup((vector<string>)value)) status=false;
         if (!value.is_string()&&!value.is_array()) status=false;
       }else if (key=="port"){

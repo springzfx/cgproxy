@@ -19,10 +19,7 @@ int main(int argc, char *argv[]){
         error("usage: cgnoproxy [--debug] <CMD>\nexample: cgnoproxy curl -I https://www.google.com");
         exit(EXIT_FAILURE);
     }
-    if (argv[1]=="--debug"){
-        enable_debug=true;
-        shift+=1;
-    }
+    processArgs(argc,argv,shift);
 
     if (!attach2cgproxy()){
         error("attach process failed");

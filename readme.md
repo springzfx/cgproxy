@@ -11,12 +11,12 @@ cgproxy will transparent proxy anything running in specific cgroup. It resembles
 It aslo supports global transparent proxy and gateway proxy. See [Global transparent proxy](#global-transparent-proxy) and  [Gateway proxy](#gateway-proxy).
 
 <!--ts-->
-
    * [Transparent Proxy with cgroup v2](#transparent-proxy-with-cgroup-v2)
       * [Introduction](#introduction)
       * [Prerequest](#prerequest)
       * [How to install](#how-to-install)
-      * [How to use](#how-to-use)
+      * [Default usage](#default-usage)
+      * [Configuration](#configuration)
       * [Global transparent proxy](#global-transparent-proxy)
       * [Gateway proxy](#gateway-proxy)
       * [Other useful tools provided in this project](#other-useful-tools-provided-in-this-project)
@@ -24,7 +24,7 @@ It aslo supports global transparent proxy and gateway proxy. See [Global transpa
       * [TIPS](#tips)
       * [Licences](#licences)
 
-<!-- Added by: fancy, at: Thu 23 Apr 2020 01:23:57 PM HKT -->
+<!-- Added by: fancy, at: Sat 16 May 2020 03:12:07 PM HKT -->
 
 <!--te-->
 
@@ -43,14 +43,14 @@ It aslo supports global transparent proxy and gateway proxy. See [Global transpa
 ## How to install
 
 ```bash
-mkdir build && cd build && cmake .. && make && sudo make install
+mkdir build && cd build && cmake .. && make && make install
 ```
 
 - It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy). 
 
 - DEB and RPM are packaged in [release page](https://github.com/springzfx/cgproxy/releases).
 
-## How to use
+## Default usage
 
 - First enable and start service
 
@@ -60,72 +60,51 @@ mkdir build && cd build && cmake .. && make && sudo make install
   
 - Then prefix with cgproxy with your command, just like proxychains
 
-  ```
-  cgproxy <CMD>
+  ```bash
+  cgproxy [--debug] <CMD>
   ```
 
 - For example, test proxy
 
   ```bash
-  cgproxy curl -vIs https://www.google.com
+  cgproxy curl -I https://www.google.com
   ```
 
 - To completely stop
   ```
   sudo systemctl disable --now cgproxy.service
   ```
-----
-<details>
-  <summary>More config in <i>/etc/cgproxy.conf</i>  (click to expand)</summary>
 
-```bash
-###################################################################################
-## any process in cgroup_proxy will be proxied, and cgroup_noproxy the opposite
-## note, cgroup must start with slash '/'
-## the value can be string or bash array
-## for array, only the first element will be created if not exist
-## and the rest elements will not, so won't be applied if not exist
+## Configuration
 
-### global proxy with v2ray service
-# cgroup_proxy="/"
-# cgroup_noproxy=("/noproxy.slice" "/system.slice/v2ray.service")
+Config file: **/etc/cgproxy/config.json**
 
-### global proxy with manual `cgnoporxy qv2ray`
-# cgroup_proxy="/"
-# cgroup_noproxy="/noproxy.slice"
-
-### default
-cgroup_proxy="/proxy.slice"
-cgroup_noproxy="/noproxy.slice"
-
-
-###################################################################################
-## allow as gateway for local network
-enable_gateway=false
-
-
-###################################################################################
-## listening port of another proxy process, for example v2ray 
-port=12345
-
-
-###################################################################################
-## if you set to false, it's traffic won't go through proxy,
-## but still can go direct to internet
-enable_dns=true
-enable_tcp=true
-enable_udp=true
-enable_ipv4=true
-enable_ipv6=true
-
-
-###################################################################################
-## do not modify this if you don't known what you are doing
-table=100
-fwmark=0x01
-mark_newin=0x02
+```json
+{
+    "cgroup_noproxy": ["/system.slice/v2ray.service"],
+    "cgroup_proxy": [],
+    "enable_dns": true,
+    "enable_gateway": false,
+    "enable_ipv4": true,
+    "enable_ipv6": true,
+    "enable_tcp": true,
+    "enable_udp": true,
+    "port": 12345
+}
 ```
-</details>
+
+- **port** tproxy listenning port
+- **cgroup_noproxy** cgroup array that no need to proxy, `/noproxy.slice` is preserved
+- **cgroup_proxy** cgroup array that need to proxy, `/proxy.slice` is preserved
+- **enable_gateway** enable gateway proxy for local devices
+- **enable_dns** enable dns to go to proxy
+- **enable_tcp**
+- **enable_udp**
+- **enable_ipv4**
+- **enable_ipv6**
+
+**Note**: cgroup in configuration need to be exist, otherwise ignored
+
 If you changed config, remember to restart service
 
 ```bash
@@ -134,45 +113,34 @@ sudo systemctl restart cgproxy.service
 
 ## Global transparent proxy
 
-- Set `cgroup_proxy="/"`  in */etc/cgproxy.conf*, this will proxy all connection
+- Set `"cgroup_proxy":["/"]`  in configuration, this will proxy all connection
 
-- And allow your proxy program (v2ray) direct to internet, two ways:
-  - active way
-
-      run `cgnoproxy <PROXY PROGRAM>`
-      
+- Allow your proxy program (v2ray) direct to internet to avoid loop. Two ways:
+  
+- active way, run command
+  
       example: `cgnoproxy sudo v2ray -config config_file`
       
       example: `cgnoproxy qv2ray`
       
-  - passive way, useful if you run v2ray as service
+  - passive way,  set it's cgroup in configuration,  very useful for service
   
-      set `cgroup_noproxy="<PROXY PROGRAM's CGROUP>"`
-  
-      example:  `cgroup_noproxy=("/noproxy.slice" "/system.slice/v2ray.service")`
+      example:  `"cgroup_noproxy":["/system.slice/v2ray.service"]`
   
 - Finally, restart cgproxy service, that's all
 
 ## Gateway proxy
 
-- Set `enable_gateway=true` in */etc/cgproxy.conf*
-- And allow your proxy software (v2ray) direct to internet, described above
-- Other device set this host as gateway, and set public dns if necessary
+- Set `"enable_gateway":true` in configuration
+- And allow your proxy software (v2ray) direct to internet if necessary, described above
+- Other device set this host as gateway, and set public dns if need
 
 ## Other useful tools provided in this project
 
 - `cgnoproxy` run program wihout proxy, very useful in global transparent proxy
 
   ```bash
-  cgnoproxy <CMD> 
-  ```
-  
-- `run_in_cgroup` run command in specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.
-
-  ```bash
-  run_in_cgroup --cgroup=CGROUP <COMMAND>
-  # example
-  run_in_cgroup --cgroup=/mycgroup.slice ping 127.0.0.1
+  cgnoproxy [--debug] <CMD> 
   ```
   
 - `cgattach` attach specific process pid to specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.
@@ -184,8 +152,6 @@ sudo systemctl restart cgproxy.service
   ```
 
 ## NOTES
-
-- `cgattach` has *suid* bit set by default, be careful to use on multi-user server for securiry. To avoid this situation,  you can remove the *suid* bit , then it will fallback to use *sudo*, with *sudoer* you can restrict permission or set NOPASSWD for youself.
 
 - v2ray TPROXY need root or special permission
   

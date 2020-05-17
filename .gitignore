@@ -1,6 +1,7 @@
 build
 .directory
 .vscode
+.clangd
 v2ray_config/proxy
 v2ray_config/06_outbounds_proxy.json
 aur-*

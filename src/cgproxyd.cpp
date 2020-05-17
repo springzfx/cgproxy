@@ -121,13 +121,17 @@ public:
     debug("stopping");
     system(TPROXY_IPTABLS_CLEAN);
   }
-  
+
   ~cgproxyd() { stop(); }
 };
 
 cgproxyd *cgproxyd::instance = NULL;
 
 } // namespace CGPROXY
+
+bool print_help = false;
+
+void print_usage() { printf("cgproxyd [--help] [--debug]\n"); }
 
 void processArgs(const int argc, char *argv[]) {
   for (int i = 1; i < argc; i++) {
@@ -139,6 +143,10 @@ void processArgs(const int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
   processArgs(argc, argv);
+  if (print_help) {
+    print_usage();
+    exit(0);
+  }
   CGPROXY::cgproxyd d;
   return d.start();
 }

@@ -34,7 +34,6 @@
 using namespace std;
 
 static bool enable_debug = false;
-static bool print_help = false;
 
 #define error(...)                                                                       \
   {                                                                                      \

@@ -1,4 +1,9 @@
-#include "config.hpp"
+#include "config.h"
+#include <fstream>
+#include <iomanip>
+#include <nlohmann/json.hpp>
+#include <set>
+using json = nlohmann::json;
 
 #define add2json(v) j[#v] = v;
 #define tryassign(v)                                                                     \
@@ -29,13 +34,13 @@ void Config::toEnv() {
 int Config::saveToFile(const string f) {
   ofstream o(f);
   if (!o.is_open()) return FILE_ERROR;
-  json j = toJson();
-  o << setw(4) << j << endl;
+  string js = toJsonStr();
+  o << setw(4) << js << endl;
   o.close();
   return 0;
 }
 
-json Config::toJson() {
+string Config::toJsonStr() {
   json j;
   add2json(cgroup_proxy);
   add2json(cgroup_noproxy);
@@ -46,34 +51,35 @@ json Config::toJson() {
   add2json(enable_udp);
   add2json(enable_ipv4);
   add2json(enable_ipv6);
-  return j;
+  return j.dump();
 }
 
 int Config::loadFromFile(const string f) {
   debug("loading config: %s", f.c_str());
   ifstream ifs(f);
   if (ifs.is_open()) {
-    json j;
+    string js;
     try {
-      ifs >> j;
+      ifs >> js;
     } catch (exception &e) {
       error("parse error: %s", f.c_str());
       ifs.close();
       return PARSE_ERROR;
     }
     ifs.close();
-    return loadFromJson(j);
+    return loadFromJsonStr(js);
   } else {
     error("open failed: %s", f.c_str());
     return FILE_ERROR;
   }
 }
 
-int Config::loadFromJson(const json &j) {
-  if (!validateJson(j)) {
+int Config::loadFromJsonStr(const string js) {
+  if (!validateJsonStr(js)) {
     error("json validate fail");
     return PARAM_ERROR;
   }
+  json j = json::parse(js);
   tryassign(cgroup_proxy);
   tryassign(cgroup_noproxy);
   tryassign(enable_gateway);
@@ -91,7 +97,8 @@ void Config::mergeReserved() {
   merge(cgroup_noproxy);
 }
 
-bool Config::validateJson(const json &j) {
+bool Config::validateJsonStr(const string js) {
+  json j = json::parse(js);
   bool status = true;
   const set<string> boolset = {"enable_gateway", "enable_dns",  "enable_tcp",
                                "enable_udp",     "enable_ipv4", "enable_ipv6"};

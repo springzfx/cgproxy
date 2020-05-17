@@ -1,18 +1,12 @@
-#include "cgroup_attach.hpp"
-#include "common.hpp"
-#include "config.hpp"
-#include "socket_server.hpp"
+#include "cgroup_attach.h"
+#include "common.h"
+#include "config.h"
+#include "socket_server.h"
 #include <csignal>
-#include <errno.h>
 #include <fstream>
-#include <iostream>
 #include <nlohmann/json.hpp>
-#include <pthread.h>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
 #include <sys/file.h>
+#include <unistd.h>
 
 using namespace std;
 using json = nlohmann::json;
@@ -81,8 +75,8 @@ class cgproxyd {
     try {
       type = j.at("type").get<int>();
       switch (type) {
-      case MSG_TYPE_JSON:
-        status = config.loadFromJson(j.at("data"));
+      case MSG_TYPE_CONFIG_JSON:
+        status = config.loadFromJsonStr(j.at("data").dump());
         if (status == SUCCESS) status = applyConfig(&config);
         return status;
         break;

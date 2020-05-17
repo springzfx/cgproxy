@@ -1,11 +1,14 @@
-#include "common.hpp"
-#include "socket_client.hpp"
+#include "common.h"
+#include "config.h"
+#include "socket_client.h"
 #include <nlohmann/json.hpp>
+#include <unistd.h>
 using json = nlohmann::json;
 using namespace CGPROXY;
+using namespace CGPROXY::CONFIG;
 
 bool print_help = false, proxy = true;
-void print_usage() {
+inline void print_usage() {
   fprintf(stdout, "Usage: cgproxy [--help] [--debug] [--noproxy] <CMD>\n");
   fprintf(stdout, "Alias: cgnoproxy = cgproxy --noproxy\n");
 }
@@ -20,13 +23,11 @@ void processArgs(const int argc, char *argv[], int &shift) {
   }
 }
 
-bool attach2cgroup(pid_t pid, bool proxy) {
+void send_pid(const pid_t pid, bool proxy, int &status) {
   json j;
   j["type"] = proxy ? MSG_TYPE_PROXY_PID : MSG_TYPE_NOPROXY_PID;
   j["data"] = pid;
-  int status;
   SOCKET::send(j.dump(), status);
-  return status == 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -38,8 +39,9 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
 
-  pid_t pid = getpid();
-  if (!attach2cgroup(pid, proxy)) {
+  int status = -1;
+  send_pid(getpid(), proxy, status);
+  if (status != 0) {
     error("attach process failed");
     exit(EXIT_FAILURE);
   }

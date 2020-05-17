@@ -1,21 +1,10 @@
 #ifndef SOCKET_SERVER_H
 #define SOCKET_SERVER_H
 
-#include "common.hpp"
-#include <filesystem>
 #include <functional>
-#include <iostream>
-#include <signal.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/un.h>
-#include <unistd.h>
 using namespace std;
-namespace fs = std::filesystem;
 
 namespace CGPROXY::SOCKET {
 

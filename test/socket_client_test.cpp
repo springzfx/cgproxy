@@ -1,48 +1,49 @@
-#include "socket_client.hpp"
+#include "common.h"
+#include "config.h"
+#include "socket_client.h"
 #include <nlohmann/json.hpp>
 
 using namespace std;
 using json = nlohmann::json;
 using namespace CGPROXY;
+using namespace CGPROXY::CONFIG;
 
-void test_json() {
+void send_config(Config &config, int &status) {
   json j;
-  j["type"] = MSG_TYPE_JSON;
-  j["data"]["cgroup_proxy"] = "/";
-  j["data"]["enable_dns"] = false;
-  int status;
+  j["type"] = MSG_TYPE_CONFIG_JSON;
+  j["data"] = config.toJsonStr();
   SOCKET::send(j.dump(), status);
 }
 
-void test_json_array() {
-  json j;
-  j["type"] = MSG_TYPE_JSON;
-  j["data"]["cgroup_proxy"] = "/proxy.slice";
-  j["data"]["cgroup_noproxy"] = {"/noproxy.slice", "/system.slice/v2ray.service"};
-  int status;
-  SOCKET::send(j.dump(), status);
-}
-
-void test_file() {
+void send_config_path(const string s, int &status) {
   json j;
   j["type"] = MSG_TYPE_CONFIG_PATH;
-  j["data"] = "/etc/cgproxy.conf";
-  int status;
+  j["data"] = s;
   SOCKET::send(j.dump(), status);
 }
 
-void test_pid() {
+void send_pid(const pid_t pid, bool proxy, int &status) {
   json j;
-  j["type"] = MSG_TYPE_PROXY_PID;
-  j["data"] = "9999";
-  int status;
+  j["type"] = proxy ? MSG_TYPE_PROXY_PID : MSG_TYPE_NOPROXY_PID;
+  j["data"] = pid;
   SOCKET::send(j.dump(), status);
+}
+
+
+void test_config(){
+  Config config;
+  config.cgroup_proxy={"/"};
+  int status;
+  send_config(config, status);
+}
+
+void test_config_path(){
+  string path="/etc/cgproxy/config.json";
+  int status;
+  send_config_path(path, status);
 }
 
 int main() {
-  test_json_array();
-  test_file();
-  test_json();
-  test_pid();
+  test_config();
   return 0;
 }

@@ -1,4 +1,16 @@
-#include "socket_client.hpp"
+#include "socket_client.h"
+#include "common.h"
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
+
+#define return_if_error(flag, msg)                                                       \
+  if (flag == -1) {                                                                      \
+    perror(msg);                                                                         \
+    status = CONN_ERROR;                                                                 \
+    close(sfd);                                                                          \
+    return;                                                                              \
+  }
 
 namespace CGPROXY::SOCKET {
 

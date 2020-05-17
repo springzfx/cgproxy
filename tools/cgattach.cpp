@@ -1,6 +1,7 @@
-#include "cgroup_attach.hpp"
-#include "common.hpp"
+#include "cgroup_attach.h"
+#include "common.h"
 #include <cstdlib>
+#include <unistd.h>
 using namespace std;
 
 void print_usage() { fprintf(stdout, "usage: cgattach <pid> <cgroup>\n"); }

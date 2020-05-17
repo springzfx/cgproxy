@@ -1,6 +1,14 @@
-#include "socket_server.hpp"
+#include "socket_server.h"
+#include "common.h"
+#include <filesystem>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+namespace fs = std::filesystem;
 
 namespace CGPROXY::SOCKET {
+
 void SocketServer::socketListening(function<int(char *)> callback) {
   debug("starting socket listening");
   sfd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -40,15 +48,18 @@ void SocketServer::socketListening(function<int(char *)> callback) {
     continue_if_error(flag, "write back");
   }
 }
+
 void *SocketServer::startThread(void *arg) {
   thread_arg *p = (thread_arg *)arg;
   SocketServer server;
   server.socketListening(p->handle_msg);
   return (void *)0;
 }
+
 SocketServer::~SocketServer() {
   close(sfd);
   close(cfd);
   unlink(SOCKET_PATH);
 }
+
 } // namespace CGPROXY::SOCKET

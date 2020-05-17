@@ -1,4 +1,15 @@
-#include "cgroup_attach.hpp"
+#include "cgroup_attach.h"
+#include "common.h"
+#include <errno.h>
+#include <fstream>
+#include <iostream>
+#include <regex>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace CGPROXY::CGROUP {
 

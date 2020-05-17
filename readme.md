@@ -67,7 +67,7 @@ mkdir build && cd build && cmake .. && make && make install
 - For example, test proxy
 
   ```bash
-  cgproxy curl -I https://www.google.com
+  cgproxy curl -vI https://www.google.com
   ```
 
 - To completely stop
@@ -153,7 +153,7 @@ sudo systemctl restart cgproxy.service
 
 ## NOTES
 
-- v2ray TPROXY need root or special permission
+- v2ray TPROXY need root or special permission, use [service](https://github.com/springzfx/cgproxy/blob/v3.x/v2ray_config/v2ray.service) or
   
   ```bash
   sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/lib/v2ray/v2ray

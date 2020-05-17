@@ -1,4 +1,6 @@
 #include "cgroup_attach.hpp"
+#include "common.hpp"
+#include <cstdlib>
 using namespace std;
 
 void print_usage() { fprintf(stdout, "usage: cgattach <pid> <cgroup>\n"); }
@@ -19,5 +21,10 @@ int main(int argc, char *argv[]) {
   string pid = string(argv[1]);
   string cgroup_target = string(argv[2]);
 
-  CGPROXY::CGROUP::attach(pid, cgroup_target);
+  if (validPid(pid)&&validCgroup(cgroup_target)){
+    CGPROXY::CGROUP::attach(pid, cgroup_target);
+  }else{
+    error("param not valid");
+    exit(EXIT_FAILURE);
+  }
 }

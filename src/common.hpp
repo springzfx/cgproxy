@@ -49,15 +49,6 @@ static bool print_help = false;
 #define return_error return -1;
 #define return_success return 0;
 
-void processArgs(const int argc, char *argv[], int &shift) {
-  for (int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "--debug") == 0) { enable_debug = true; }
-    if (strcmp(argv[i], "--help") == 0) { print_help = true; }
-    if (argv[i][0] != '-') { break; }
-    shift += 1;
-  }
-}
-
 template <typename... T> string to_str(T... args) {
   stringstream ss;
   ss.clear();

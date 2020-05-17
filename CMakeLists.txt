@@ -1,38 +1,29 @@
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# set(CMAKE_BUILD_TYPE DEBUG)
-# set(CMAKE_BUILD_TYPE RELEASE)
 
 project(cgproxy VERSION 4.0)
-
-find_package(Threads REQUIRED)
-find_package(nlohmann_json REQUIRED)
-include_directories(${PROJECT_SOURCE_DIR})
-
-add_executable(cgattach cgattach.cpp)
-add_executable(cgproxyd cgproxyd.cpp)
-add_executable(cgproxy cgproxy.cpp)
-add_executable(cgnoproxy cgnoproxy.cpp)
-target_link_libraries(cgproxyd Threads::Threads nlohmann_json::nlohmann_json)
-target_link_libraries(cgproxy nlohmann_json::nlohmann_json)
-target_link_libraries(cgnoproxy nlohmann_json::nlohmann_json)
-
-# add_executable(client_test socket_client_test.cpp)
-# target_link_libraries(client_test nlohmann_json::nlohmann_json)
+set(build_tools OFF)
+# set(build_tools ON)
+set(build_test  OFF)
+# set(build_test  ON)
 
 set(basic_permission OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-install(TARGETS cgattach  DESTINATION /usr/bin PERMISSIONS ${basic_permission})
-install(TARGETS cgproxyd  DESTINATION /usr/bin PERMISSIONS ${basic_permission})
-install(TARGETS cgproxy   DESTINATION /usr/bin PERMISSIONS ${basic_permission})
-install(TARGETS cgnoproxy DESTINATION /usr/bin PERMISSIONS ${basic_permission})
+add_subdirectory(src)
+if (build_tools)
+    add_subdirectory(tools)
+endif()
+if (build_test)
+    add_subdirectory(test)
+endif()
 
+
+install(FILES cgnoproxy DESTINATION /usr/bin PERMISSIONS ${basic_permission})
 install(FILES cgproxy.service DESTINATION /usr/lib/systemd/system/)
 install(FILES config.json DESTINATION /etc/cgproxy/)
 install(FILES cgroup-tproxy.sh DESTINATION /usr/share/cgproxy/scripts/)
 install(FILES readme.md DESTINATION /share/doc/cgproxy/)
-
 
 ## package for deb and rpm
 set(CPACK_GENERATOR "DEB;RPM")

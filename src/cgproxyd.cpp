@@ -96,13 +96,10 @@ class cgproxyd {
   void assignStaticInstance() { instance = this; }
 
 public:
-  int start(int argc, char *argv[]) {
+  int start() {
     signal(SIGINT, &signalHandler);
     signal(SIGTERM, &signalHandler);
     signal(SIGHUP, &signalHandler);
-
-    int shift = 1;
-    processArgs(argc, argv, shift);
 
     config.loadFromFile(DEFAULT_CONFIG_FILE);
     applyConfig(&config);
@@ -119,10 +116,12 @@ public:
     // no need to track running status
     return 0;
   }
+
   void stop() {
     debug("stopping");
     system(TPROXY_IPTABLS_CLEAN);
   }
+  
   ~cgproxyd() { stop(); }
 };
 
@@ -130,7 +129,16 @@ cgproxyd *cgproxyd::instance = NULL;
 
 } // namespace CGPROXY
 
+void processArgs(const int argc, char *argv[]) {
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "--debug") == 0) { enable_debug = true; }
+    if (strcmp(argv[i], "--help") == 0) { print_help = true; }
+    if (argv[i][0] != '-') { break; }
+  }
+}
+
 int main(int argc, char *argv[]) {
+  processArgs(argc, argv);
   CGPROXY::cgproxyd d;
-  return d.start(argc, argv);
+  return d.start();
 }

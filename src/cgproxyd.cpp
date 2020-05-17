@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "socket_server.hpp"
 #include <csignal>
+#include <errno.h>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -11,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <sys/file.h>
 
 using namespace std;
 using json = nlohmann::json;
@@ -33,6 +35,7 @@ class cgproxyd {
     }
     return instance->handle_msg(msg);
   }
+
   static void signalHandler(int signum) {
     debug("Signal %d received.", signum);
     if (!instance) {
@@ -41,6 +44,26 @@ class cgproxyd {
       instance->stop();
     }
     exit(signum);
+  }
+
+  // single process instance
+  int lock_fd;
+  void lock() {
+    lock_fd = open(PID_LOCK_FILE, O_CREAT | O_RDWR, 0666);
+    int rc = flock(lock_fd, LOCK_EX | LOCK_NB);
+    if (rc == -1) {
+      perror(PID_LOCK_FILE);
+      error("maybe another cgproxyd is running");
+      exit(EXIT_FAILURE);
+    } else {
+      ofstream ofs(PID_LOCK_FILE);
+      ofs << getpid() << endl;
+      ofs.close();
+    }
+  }
+  void unlock() {
+    close(lock_fd);
+    unlink(PID_LOCK_FILE);
   }
 
   int handle_msg(char *msg) {
@@ -97,6 +120,7 @@ class cgproxyd {
 
 public:
   int start() {
+    lock();
     signal(SIGINT, &signalHandler);
     signal(SIGTERM, &signalHandler);
     signal(SIGHUP, &signalHandler);
@@ -120,6 +144,7 @@ public:
   void stop() {
     debug("stopping");
     system(TPROXY_IPTABLS_CLEAN);
+    unlock();
   }
 
   ~cgproxyd() { stop(); }
@@ -147,6 +172,13 @@ int main(int argc, char *argv[]) {
     print_usage();
     exit(0);
   }
+
+  if (getuid() != 0) {
+    error("permission denied, need root");
+    print_usage();
+    exit(EXIT_FAILURE);
+  }
+
   CGPROXY::cgproxyd d;
   return d.start();
 }

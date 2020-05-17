@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
   int shift = 1;
   processArgs(argc, argv, shift);
 
-  if (argc==shift||print_help) {
+  if (argc == shift || print_help) {
     print_usage();
     exit(0);
   }

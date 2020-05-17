@@ -1,6 +1,8 @@
 #ifndef SOCKET_SERVER_H
 #define SOCKET_SERVER_H
 
+#include "common.hpp"
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <signal.h>
@@ -8,21 +10,19 @@
 #include <stdlib.h>
 #include <string>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <filesystem>
-#include "common.hpp"
 using namespace std;
 namespace fs = std::filesystem;
 
-namespace CGPROXY::SOCKET{
+namespace CGPROXY::SOCKET {
 
-#define continue_if_error(flag, msg)                                           \
-  if (flag == -1) {                                                            \
-    perror(msg);                                                               \
-    continue;                                                                  \
+#define continue_if_error(flag, msg)                                                     \
+  if (flag == -1) {                                                                      \
+    perror(msg);                                                                         \
+    continue;                                                                            \
   }
 
 struct thread_arg {
@@ -38,19 +38,18 @@ public:
     debug("starting socket listening");
     sfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
-    if (fs::exists(SOCKET_PATH)&&unlink(SOCKET_PATH)==-1){
-      error("%s exist, and can't unlink",SOCKET_PATH); 
+    if (fs::exists(SOCKET_PATH) && unlink(SOCKET_PATH) == -1) {
+      error("%s exist, and can't unlink", SOCKET_PATH);
       return;
     }
     memset(&unix_socket, '\0', sizeof(struct sockaddr_un));
     unix_socket.sun_family = AF_UNIX;
-    strncpy(unix_socket.sun_path, SOCKET_PATH,
-            sizeof(unix_socket.sun_path) - 1);
+    strncpy(unix_socket.sun_path, SOCKET_PATH, sizeof(unix_socket.sun_path) - 1);
 
     bind(sfd, (struct sockaddr *)&unix_socket, sizeof(struct sockaddr_un));
 
     listen(sfd, LISTEN_BACKLOG);
-    chmod(SOCKET_PATH,S_IRWXU|S_IRWXG|S_IRWXO);
+    chmod(SOCKET_PATH, S_IRWXU | S_IRWXG | S_IRWXO);
 
     while (true) {
       close(cfd);
@@ -66,7 +65,7 @@ public:
       char msg[msg_len];
       flag = read(cfd, msg, msg_len * sizeof(char));
       continue_if_error(flag, "read msg");
-      msg[msg_len]='\0';
+      msg[msg_len] = '\0';
       // handle msg
       int status = callback(msg);
       // send back flag
@@ -89,6 +88,6 @@ public:
   }
 };
 
-}
+} // namespace CGPROXY::SOCKET
 
 #endif

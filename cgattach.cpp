@@ -4,8 +4,8 @@ using namespace std;
 void print_usage() { fprintf(stdout, "usage: cgattach <pid> <cgroup>\n"); }
 
 int main(int argc, char *argv[]) {
-  int flag=setuid(0);
-  if (flag!=0) {
+  int flag = setuid(0);
+  if (flag != 0) {
     perror("cgattach need root");
     exit(EXIT_FAILURE);
   }
@@ -19,5 +19,5 @@ int main(int argc, char *argv[]) {
   string pid = string(argv[1]);
   string cgroup_target = string(argv[2]);
 
-  CGPROXY::CGROUP::attach(pid,cgroup_target);
+  CGPROXY::CGROUP::attach(pid, cgroup_target);
 }

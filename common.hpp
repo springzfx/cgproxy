@@ -27,39 +27,38 @@
 #define CGROUP_ERROR 6
 #define FILE_ERROR 7
 
-
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
-#include <regex>
 using namespace std;
 
-static bool enable_debug=false;
-static bool print_help=false;
+static bool enable_debug = false;
+static bool print_help = false;
 
-#define error(...) {fprintf(stderr, __VA_ARGS__);fprintf(stderr, "\n");}
-#define debug(...) if (enable_debug) {fprintf(stdout, __VA_ARGS__);fprintf(stdout, "\n");}
+#define error(...)                                                                       \
+  {                                                                                      \
+    fprintf(stderr, __VA_ARGS__);                                                        \
+    fprintf(stderr, "\n");                                                               \
+  }
+#define debug(...)                                                                       \
+  if (enable_debug) {                                                                    \
+    fprintf(stdout, __VA_ARGS__);                                                        \
+    fprintf(stdout, "\n");                                                               \
+  }
 #define return_error return -1;
 #define return_success return 0;
 
-
-void processArgs(const int argc, char *argv[], int &shift){
-    for (int i=1;i<argc;i++){
-        if (strcmp(argv[i], "--debug")==0){
-            enable_debug=true;
-        }
-        if (strcmp(argv[i], "--help")==0){
-            print_help=true;
-        }
-        if (argv[i][0]!='-') {
-            break;
-        }
-        shift+=1;
-    }
+void processArgs(const int argc, char *argv[], int &shift) {
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "--debug") == 0) { enable_debug = true; }
+    if (strcmp(argv[i], "--help") == 0) { print_help = true; }
+    if (argv[i][0] != '-') { break; }
+    shift += 1;
+  }
 }
 
-template <typename... T> 
-string to_str(T... args) {
+template <typename... T> string to_str(T... args) {
   stringstream ss;
   ss.clear();
   ss << std::boolalpha;
@@ -67,41 +66,34 @@ string to_str(T... args) {
   return ss.str();
 }
 
-string join2str(const vector<string> t,  const char delm=' '){
-    string s;
-    for (const auto &e : t) 
-        e!=*(t.end()-1)?s+=e+delm:s+=e;
-    return s;
+string join2str(const vector<string> t, const char delm = ' ') {
+  string s;
+  for (const auto &e : t) e != *(t.end() - 1) ? s += e + delm : s += e;
+  return s;
 }
 
-string join2str(const int argc,char** argv, const char delm=' '){
-    string s;
-    for (int i=0;i<argc;i++){ 
-       s+=argv[i];
-       if (i!=argc-1) s+=delm;
-    }
-    return s;
+string join2str(const int argc, char **argv, const char delm = ' ') {
+  string s;
+  for (int i = 0; i < argc; i++) {
+    s += argv[i];
+    if (i != argc - 1) s += delm;
+  }
+  return s;
 }
 
-bool validCgroup(const string cgroup){
+bool validCgroup(const string cgroup) {
   return regex_match(cgroup, regex("^/[a-zA-Z0-9\\-_./@]*$"));
 }
 
-bool validCgroup(const vector<string> cgroup){
-  for (auto &e:cgroup){
-    if (!regex_match(e, regex("^/[a-zA-Z0-9\\-_./@]*$"))){
-      return false;
-    }
+bool validCgroup(const vector<string> cgroup) {
+  for (auto &e : cgroup) {
+    if (!regex_match(e, regex("^/[a-zA-Z0-9\\-_./@]*$"))) { return false; }
   }
   return true;
 }
 
-bool validPid(const string pid){
-  return regex_match(pid, regex("^[0-9]+$"));
-}
+bool validPid(const string pid) { return regex_match(pid, regex("^[0-9]+$")); }
 
-bool validPort(const int port){
-  return port>0;
-}
+bool validPort(const int port) { return port > 0; }
 
 #endif

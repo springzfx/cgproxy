@@ -1,4 +1,5 @@
 #include "config.h"
+#include "common.h"
 #include <fstream>
 #include <iomanip>
 #include <nlohmann/json.hpp>
@@ -58,14 +59,7 @@ int Config::loadFromFile(const string f) {
   debug("loading config: %s", f.c_str());
   ifstream ifs(f);
   if (ifs.is_open()) {
-    string js;
-    try {
-      ifs >> js;
-    } catch (exception &e) {
-      error("parse error: %s", f.c_str());
-      ifs.close();
-      return PARSE_ERROR;
-    }
+    string js = to_str(ifs.rdbuf());
     ifs.close();
     return loadFromJsonStr(js);
   } else {

@@ -19,6 +19,7 @@ if (build_test)
     add_subdirectory(test)
 endif()
 
+install(FILES cgproxyd DESTINATION /usr/bin PERMISSIONS ${basic_permission})
 install(FILES cgnoproxy DESTINATION /usr/bin PERMISSIONS ${basic_permission})
 install(FILES cgproxy.service DESTINATION /usr/lib/systemd/system/)
 install(FILES config.json DESTINATION /etc/cgproxy/)

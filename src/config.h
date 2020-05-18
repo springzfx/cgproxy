@@ -32,7 +32,6 @@ public:
 private:
   void mergeReserved();
   bool validateJsonStr(const string js);
-
 };
 
 } // namespace CGPROXY::CONFIG

@@ -38,12 +38,14 @@ extern bool enable_debug;
 
 #define error(...)                                                                       \
   {                                                                                      \
+    fprintf(stderr, "error: ");                                                          \
     fprintf(stderr, __VA_ARGS__);                                                        \
     fprintf(stderr, "\n");                                                               \
   }
 
 #define debug(...)                                                                       \
   if (enable_debug) {                                                                    \
+    fprintf(stderr, "debug: ");                                                          \
     fprintf(stdout, __VA_ARGS__);                                                        \
     fprintf(stdout, "\n");                                                               \
   }

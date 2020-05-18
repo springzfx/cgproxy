@@ -29,16 +29,15 @@ void send_pid(const pid_t pid, bool proxy, int &status) {
   SOCKET::send(j.dump(), status);
 }
 
-
-void test_config(){
+void test_config() {
   Config config;
-  config.cgroup_proxy={"/"};
+  config.cgroup_proxy = {"/"};
   int status;
   send_config(config, status);
 }
 
-void test_config_path(){
-  string path="/etc/cgproxy/config.json";
+void test_config_path() {
+  string path = "/etc/cgproxy/config.json";
   int status;
   send_config_path(path, status);
 }

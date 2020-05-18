@@ -1,16 +1,25 @@
 #include "common.h"
 #include "config.h"
 #include "socket_client.h"
+#include <cstdlib>
 #include <nlohmann/json.hpp>
 #include <unistd.h>
 using json = nlohmann::json;
 using namespace CGPROXY;
 using namespace CGPROXY::CONFIG;
 
+namespace CGPROXY::CGPROXY {
+
 bool print_help = false, proxy = true;
 inline void print_usage() {
-  fprintf(stdout, "Usage: cgproxy [--help] [--debug] [--noproxy] <CMD>\n");
-  fprintf(stdout, "Alias: cgnoproxy = cgproxy --noproxy\n");
+  if (proxy) {
+    cout << "Run program with proxy" << endl;
+    cout << "Usage: cgproxy [--help] [--debug] <CMD>" << endl;
+  } else {
+    cout << "Run program without proxy" << endl;
+    cout << "Usage: cgpnoroxy [--help] [--debug] <CMD>" << endl;
+    cout << "Alias: cgnoproxy = cgproxy --noproxy" << endl;
+  }
 }
 
 void processArgs(const int argc, char *argv[], int &shift) {
@@ -34,9 +43,14 @@ int main(int argc, char *argv[]) {
   int shift = 1;
   processArgs(argc, argv, shift);
 
-  if (argc == shift || print_help) {
+  if (print_help) {
     print_usage();
     exit(0);
+  }
+
+  if (argc == shift) {
+    error("no program specified");
+    exit(EXIT_FAILURE);
   }
 
   int status = -1;
@@ -49,3 +63,4 @@ int main(int argc, char *argv[]) {
   string s = join2str(argc - shift, argv + shift, ' ');
   return system(s.c_str());
 }
+} // namespace CGPROXY::CGPROXY

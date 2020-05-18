@@ -1,3 +1,6 @@
+#ifndef CGPROXYD_HPP
+#define CGPROXYD_HPP
+
 #include "cgroup_attach.h"
 #include "common.h"
 #include "config.h"
@@ -10,11 +13,11 @@
 
 using namespace std;
 using json = nlohmann::json;
-using namespace CGPROXY::SOCKET;
-using namespace CGPROXY::CONFIG;
-using namespace CGPROXY::CGROUP;
+using namespace ::CGPROXY::SOCKET;
+using namespace ::CGPROXY::CONFIG;
+using namespace ::CGPROXY::CGROUP;
 
-namespace CGPROXY {
+namespace CGPROXY::CGPROXYD {
 
 class cgproxyd {
   thread_arg arg_t;
@@ -146,11 +149,13 @@ public:
 
 cgproxyd *cgproxyd::instance = NULL;
 
-} // namespace CGPROXY
-
 bool print_help = false;
 
-void print_usage() { printf("cgproxyd [--help] [--debug]\n"); }
+void print_usage() {
+  cout << "Start a daemon with unix socket to accept control" << endl;
+  cout << "Usage: cgproxyd [--help] [--debug]" << endl;
+  cout << "Alias: cgproxyd = cgproxy --daemon" << endl;
+}
 
 void processArgs(const int argc, char *argv[]) {
   for (int i = 1; i < argc; i++) {
@@ -169,10 +174,11 @@ int main(int argc, char *argv[]) {
 
   if (getuid() != 0) {
     error("permission denied, need root");
-    print_usage();
     exit(EXIT_FAILURE);
   }
 
-  CGPROXY::cgproxyd d;
+  cgproxyd d;
   return d.start();
 }
+} // namespace CGPROXY::CGPROXYD
+#endif

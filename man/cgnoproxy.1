@@ -1,0 +1,14 @@
+.\" Manpage for cgproxyd
+.TH man 1 "19 May 2020" "1.0" "cgnoproxy man page"
+.SH NAME
+cgnoproxy \- Run program without proxy
+.SH SYNOPSIS
+cgnoproxy [--help] [--debug] <CMD>
+.SH ALIAS
+cgnoproxy = cgproxy --noproxy
+.SH DESCRIPTION
+cgnoproxy send current running process pid to cgproxyd through unix socket, then pid is attached to non-proxied cgroup 
+.SH EXAMPLES
+cgnoproxy sudo v2ray -config config_file
+.SH SEE ALSO
+cgproxyd(1), cgproxy(1), cgnoproxy(1)

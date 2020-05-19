@@ -1,0 +1,30 @@
+.\" Manpage for cgproxyd
+.TH man 1 "19 May 2020" "1.0" "cgproxyd man page"
+.SH NAME
+cgproxyd \- Start a daemon with unix socket to accept control from cgproxy/cgnoproxy
+.SH SYNOPSIS
+cgproxyd [--help] [--debug]
+.SH ALIAS
+cgproxyd = cgproxy --daemon
+.SH CONFIGURATION
+.I /etc/cgproxy/config.json
+.br
+.B port 
+tproxy listenning port
+.br
+.B cgroup_noproxy
+cgroup array that no need to proxy, /noproxy.slice is preserved.
+.br
+.B cgroup_proxy
+cgroup array that need to proxy, /proxy.slice is preserved.
+.br
+.B enable_gateway
+enable gateway proxy for local devices.
+.br
+.B enable_dns
+enable dns to go to proxy.
+.br
+.B enable_tcp enable_udp enable_ipv4 enable_ipv6
+.SH SEE ALSO
+cgproxyd(1), cgproxy(1), cgnoproxy(1)
+

@@ -1,0 +1,12 @@
+.\" Manpage for cgproxyd
+.TH man 1 "19 May 2020" "1.0" "cgproxy man page"
+.SH NAME
+cgproxy \- Run program with proxy
+.SH SYNOPSIS
+cgproxy [--help] [--debug] <CMD>
+.SH DESCRIPTION
+cgproxy send current running process pid to cgproxyd through unix socket, then pid is attached to proxied cgroup 
+.SH EXAMPLES
+cgproxy curl -vI https://www.google.com
+.SH SEE ALSO
+cgproxyd(1), cgproxy(1), cgnoproxy(1)

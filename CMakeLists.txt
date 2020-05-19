@@ -25,3 +25,17 @@ install(FILES cgproxy.service DESTINATION /usr/lib/systemd/system/)
 install(FILES config.json DESTINATION /etc/cgproxy/)
 install(FILES cgroup-tproxy.sh DESTINATION /usr/share/cgproxy/scripts/)
 install(FILES readme.md DESTINATION /usr/share/doc/cgproxy/)
+
+# man pages
+set(man_gz
+${PROJECT_BINARY_DIR}/cgproxyd.1.gz
+${PROJECT_BINARY_DIR}/cgproxy.1.gz
+${PROJECT_BINARY_DIR}/cgnoproxy.1.gz
+)
+add_custom_target(man
+    COMMAND gzip -fk cgproxyd.1 cgproxy.1 cgnoproxy.1
+    COMMAND mv *.gz ${PROJECT_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/man
+)
+add_dependencies(main man)
+install(FILES ${man_gz} DESTINATION /usr/share/man/man1/)

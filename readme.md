@@ -6,7 +6,7 @@
 
 ## Introduction
 
-cgproxy will transparent proxy anything running in specific cgroup. It resembles with *proxychains* and *tsock*, but without their disadvantages, and more powerfull.
+cgproxy will transparent proxy anything running in specific cgroup. It resembles with *proxychains* and *tsock*s in default setting.
 
 It aslo supports global transparent proxy and gateway proxy. See [Global transparent proxy](#global-transparent-proxy) and  [Gateway proxy](#gateway-proxy).
 
@@ -143,8 +143,10 @@ sudo systemctl restart cgproxy.service
   cgnoproxy [--debug] <CMD> 
   ```
   
-- `cgattach` attach specific process pid to specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail.
+- `cgattach` attach specific process pid to specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail. 
 
+  You need to set `set(build_tools ON)` in *CmakeLists.txt* to build this.
+  
   ```bash
   cgattch <pid> <cgroup>
   # example

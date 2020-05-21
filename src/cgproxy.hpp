@@ -57,6 +57,7 @@ int main(int argc, char *argv[]) {
   send_pid(getpid(), proxy, status);
   if (status != 0) {
     error("attach process failed");
+    if (status==1) error("maybe cgproxy.service not running");
     exit(EXIT_FAILURE);
   }
 

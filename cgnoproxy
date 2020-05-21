@@ -1,2 +1,2 @@
 #!/bin/sh
-/usr/bin/cgproxy --noproxy $@
+exec /usr/bin/cgproxy --noproxy $@

@@ -1,2 +1,2 @@
 #!/bin/sh
-/usr/bin/cgproxy --daemon $@
+exec /usr/bin/cgproxy --daemon $@

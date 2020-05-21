@@ -40,6 +40,12 @@ It aslo supports global transparent proxy and gateway proxy. See [Global transpa
 
   A process listening on port (e.g.  12345)  to accept iptables TPROXY, for example v2ray's dokodemo-door in tproxy mode.
 
+- Iptables
+
+  Iptables version should be at least 1.6.0, run `iptables --version` to check.
+
+  ubuntu 16.04, debian 9, fedora 27 and later are desired
+
 ## How to install
 
 ```bash

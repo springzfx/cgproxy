@@ -7,8 +7,9 @@
 #include <vector>
 using namespace std;
 
-#define TPROXY_IPTABLS_START "sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh"
-#define TPROXY_IPTABLS_CLEAN "sh /usr/share/cgproxy/scripts/cgroup-tproxy.sh stop"
+#define TPROXY_IPTABLS_START "/usr/share/cgproxy/scripts/cgroup-tproxy.sh"
+#define TPROXY_IPTABLS_CLEAN "/usr/share/cgproxy/scripts/cgroup-tproxy.sh stop"
+#define BPF_EXEC_SNOOP_START "/usr/share/cgproxy/scripts/execsnoop.py"
 
 #define PID_LOCK_FILE "/var/run/cgproxyd.pid"
 #define SOCKET_PATH "/tmp/cgproxy_unix_socket"

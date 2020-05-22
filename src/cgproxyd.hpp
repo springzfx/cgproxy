@@ -8,6 +8,7 @@
 #include <csignal>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <sched.h>
 #include <sys/file.h>
 #include <unistd.h>
 
@@ -19,10 +20,14 @@ using namespace ::CGPROXY::CGROUP;
 
 namespace CGPROXY::CGPROXYD {
 
+bool print_help = false;
+bool enable_execsnoop = false;
+
 class cgproxyd {
   thread_arg arg_t;
   Config config;
   pthread_t socket_thread_id = -1;
+  pid_t exec_snoop_pid = -1;
 
   static cgproxyd *instance;
   static int handle_msg_static(char *msg) {
@@ -40,7 +45,7 @@ class cgproxyd {
     } else {
       instance->stop();
     }
-    exit(signum);
+    exit(0);
   }
 
   // single process instance
@@ -113,6 +118,22 @@ class cgproxyd {
     return thread_id;
   }
 
+  void startExecSnoopProc() {
+    if (exec_snoop_pid != -1){ 
+      kill(exec_snoop_pid, SIGINT);
+      exec_snoop_pid=-1;
+    }
+    pid_t pid = fork();
+    if (pid == 0) {
+      execl(BPF_EXEC_SNOOP_START, (char *) NULL);
+      exit(0);
+    } else if (pid<0){
+      error("fork precess failed");
+    }else {
+      exec_snoop_pid = pid;
+    }
+  }
+
   void assignStaticInstance() { instance = this; }
 
 public:
@@ -134,6 +155,7 @@ public:
     system(TPROXY_IPTABLS_CLEAN);
     c->toEnv();
     system(TPROXY_IPTABLS_START);
+    if (enable_execsnoop) startExecSnoopProc();
     // no need to track running status
     return 0;
   }
@@ -141,6 +163,7 @@ public:
   void stop() {
     debug("stopping");
     system(TPROXY_IPTABLS_CLEAN);
+    // if (exec_snoop_pid != -1) kill(exec_snoop_pid, SIGINT);
     unlock();
   }
 
@@ -148,8 +171,6 @@ public:
 };
 
 cgproxyd *cgproxyd::instance = NULL;
-
-bool print_help = false;
 
 void print_usage() {
   cout << "Start a daemon with unix socket to accept control" << endl;
@@ -161,6 +182,7 @@ void processArgs(const int argc, char *argv[]) {
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "--debug") == 0) { enable_debug = true; }
     if (strcmp(argv[i], "--help") == 0) { print_help = true; }
+    if (strcmp(argv[i], "--execsnoop") == 0) { enable_execsnoop = true; }
     if (argv[i][0] != '-') { break; }
   }
 }

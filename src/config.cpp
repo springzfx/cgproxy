@@ -21,6 +21,8 @@ namespace CGPROXY::CONFIG {
 
 void Config::toEnv() {
   mergeReserved();
+  setenv("program_proxy", join2str(program_proxy, ':').c_str(), 1);
+  setenv("program_noproxy", join2str(program_noproxy, ':').c_str(), 1);
   setenv("cgroup_proxy", join2str(cgroup_proxy, ':').c_str(), 1);
   setenv("cgroup_noproxy", join2str(cgroup_noproxy, ':').c_str(), 1);
   setenv("enable_gateway", to_str(enable_gateway).c_str(), 1);
@@ -43,6 +45,8 @@ int Config::saveToFile(const string f) {
 
 string Config::toJsonStr() {
   json j;
+  add2json(program_proxy);
+  add2json(program_noproxy);
   add2json(cgroup_proxy);
   add2json(cgroup_noproxy);
   add2json(enable_gateway);
@@ -74,6 +78,8 @@ int Config::loadFromJsonStr(const string js) {
     return PARAM_ERROR;
   }
   json j = json::parse(js);
+  tryassign(program_proxy);
+  tryassign(program_noproxy);
   tryassign(cgroup_proxy);
   tryassign(cgroup_noproxy);
   tryassign(enable_gateway);
@@ -96,6 +102,7 @@ bool Config::validateJsonStr(const string js) {
   bool status = true;
   const set<string> boolset = {"enable_gateway", "enable_dns",  "enable_tcp",
                                "enable_udp",     "enable_ipv4", "enable_ipv6"};
+  const set<string> allowset = {"program_proxy", "program_noproxy"};
   for (auto &[key, value] : j.items()) {
     if (key == "cgroup_proxy" || key == "cgroup_noproxy") {
       if (value.is_string() && !validCgroup((string)value)) status = false;
@@ -106,6 +113,8 @@ bool Config::validateJsonStr(const string js) {
       if (!validPort(value)) status = false;
     } else if (boolset.find(key) != boolset.end()) {
       if (!value.is_boolean()) status = false;
+    } else if (allowset.find(key) != allowset.end()) {
+
     } else {
       error("unknown key: %s", key.c_str());
       return false;

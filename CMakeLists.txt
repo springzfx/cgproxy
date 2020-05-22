@@ -23,7 +23,8 @@ install(FILES cgproxyd DESTINATION /usr/bin PERMISSIONS ${basic_permission})
 install(FILES cgnoproxy DESTINATION /usr/bin PERMISSIONS ${basic_permission})
 install(FILES cgproxy.service DESTINATION /usr/lib/systemd/system/)
 install(FILES config.json DESTINATION /etc/cgproxy/)
-install(FILES cgroup-tproxy.sh DESTINATION /usr/share/cgproxy/scripts/)
+install(FILES cgroup-tproxy.sh DESTINATION /usr/share/cgproxy/scripts/ PERMISSIONS ${basic_permission})
+install(FILES execsnoop.py DESTINATION /usr/share/cgproxy/scripts/ PERMISSIONS ${basic_permission})
 install(FILES readme.md DESTINATION /usr/share/doc/cgproxy/)
 
 # man pages

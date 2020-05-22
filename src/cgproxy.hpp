@@ -11,7 +11,8 @@ using namespace CGPROXY::CONFIG;
 namespace CGPROXY::CGPROXY {
 
 bool print_help = false, proxy = true;
-bool attach_pid=false; string arg_pid;
+bool attach_pid = false;
+string arg_pid;
 inline void print_usage() {
   if (proxy) {
     cout << "Run program with proxy" << endl;
@@ -29,8 +30,8 @@ bool processArgs(const int argc, char *argv[], int &shift) {
     if (strcmp(argv[i], "--pid") == 0) {
       attach_pid = true;
       i++;
-      if (i==argc) return false;
-      arg_pid=argv[i];
+      if (i == argc) return false;
+      arg_pid = argv[i];
       if (!validPid(arg_pid)) return false;
       continue;
     }
@@ -52,7 +53,7 @@ void send_pid(const pid_t pid, bool proxy, int &status) {
 
 int main(int argc, char *argv[]) {
   int shift = -1;
-  if (!processArgs(argc, argv, shift)){
+  if (!processArgs(argc, argv, shift)) {
     error("parameter error");
     exit(EXIT_FAILURE);
   }
@@ -68,10 +69,10 @@ int main(int argc, char *argv[]) {
   }
 
   int status = -1;
-  send_pid(attach_pid?stoi(arg_pid):getpid(), proxy, status);
+  send_pid(attach_pid ? stoi(arg_pid) : getpid(), proxy, status);
   if (status != 0) {
     error("attach process failed");
-    if (status==1) error("maybe cgproxy.service not running");
+    if (status == 1) error("maybe cgproxy.service not running");
     exit(EXIT_FAILURE);
   }
 

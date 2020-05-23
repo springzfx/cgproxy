@@ -89,7 +89,10 @@ def attach(pid, path, proxy=True):
 def processAlreadyRunning():
     from subprocess import check_output
     def get_pid(name):
-        return map(int,check_output(["pidof",name]).split())
+        try:
+            return map(int,check_output(["pidof",name]).split())
+        except:
+            return []
     global exec_path_proxy, exec_path_noproxy
     for path in exec_path_proxy:
         for pid in get_pid(path):

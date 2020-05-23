@@ -1,16 +1,19 @@
 
 
-# Transparent Proxy with cgroup v2
+# Transparent Proxy powered with cgroup v2
 
 
 
 ## Introduction
 
-cgproxy will transparent proxy anything running in specific cgroup. It resembles with *proxychains* and *tsock*s in default setting.
+cgproxy will transparent proxy anything running in specific cgroup. It resembles with *proxychains* and *tsock*s in default setting. 
 
-It aslo supports global transparent proxy and gateway proxy. See [Global transparent proxy](#global-transparent-proxy) and  [Gateway proxy](#gateway-proxy).
+cgproxy also supports cgroup/program level proxy control. 
+
+And aslo supports global transparent proxy and gateway proxy. 
 
 <!--ts-->
+
    * [Transparent Proxy with cgroup v2](#transparent-proxy-with-cgroup-v2)
       * [Introduction](#introduction)
       * [Prerequest](#prerequest)
@@ -103,7 +106,7 @@ Config file: **/etc/cgproxy/config.json**
 
 - **port** tproxy listenning port
 
-- program level proxy controll, need `python-bcc` installed to work
+- program level proxy control, need `python-bcc` installed to work
 
   - **program_proxy**  program need to be proxied
   - **program_noproxy** program that won't be proxied
@@ -152,8 +155,10 @@ sudo systemctl restart cgproxy.service
     
     example: `cgnoproxy qv2ray`
     
-  - passive way,  set it's cgroup in configuration,  very useful for service
+  - passive way,  persistent config
   
+      example:  `"program_noproxy":["v2ray" ,"qv2ray"]`
+      
       example:  `"cgroup_noproxy":["/system.slice/v2ray.service"]`
   
 - Finally, restart cgproxy service, that's all

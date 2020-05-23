@@ -3,20 +3,38 @@
 .SH NAME
 cgproxyd \- Start a daemon with unix socket to accept control from cgproxy/cgnoproxy
 .SH SYNOPSIS
-cgproxyd [--help] [--debug]
+cgproxyd [--help] [--debug] [--execsnoop]
 .SH ALIAS
 cgproxyd = cgproxy --daemon
+.SH OPTIONS
+.B  --execsnoop
+.br
+enable execsnoop to support program level proxy, need python-bcc installed to actually work
 .SH CONFIGURATION
 .I /etc/cgproxy/config.json
 .br
 .B port 
 tproxy listenning port
 .br
+program level proxy controll, need `python-bcc` installed to work:
+.br
+.RS
+.B program_proxy
+program need to be proxied
+.br
+.B program_noproxy
+program that won't be proxied
+.RE
+.br
+cgroup level proxy control:
+.br
+.RS
 .B cgroup_noproxy
 cgroup array that no need to proxy, /noproxy.slice is preserved.
 .br
 .B cgroup_proxy
 cgroup array that need to proxy, /proxy.slice is preserved.
+.RE
 .br
 .B enable_gateway
 enable gateway proxy for local devices.
@@ -24,7 +42,14 @@ enable gateway proxy for local devices.
 .B enable_dns
 enable dns to go to proxy.
 .br
-.B enable_tcp enable_udp enable_ipv4 enable_ipv6
+.B enable_tcp
+.br
+.B enable_udp
+.br
+.B enable_ipv4 
+.br
+.B enable_ipv6
+.br
 .SH SEE ALSO
 cgproxyd(1), cgproxy(1), cgnoproxy(1)
 

@@ -1,13 +1,13 @@
 {
     "port": 12345,
-    "program_noproxy": ["/usr/lib/v2ray/v2ray", "/usr/bin/qv2ray"],
+    "program_noproxy": ["v2ray", "qv2ray"],
     "program_proxy": [],
     "cgroup_noproxy": ["/system.slice/v2ray.service"],
     "cgroup_proxy": [],
     "enable_gateway": false,
     "enable_dns": true,
-    "enable_ipv4": true,
-    "enable_ipv6": true,
+    "enable_udp": true,
     "enable_tcp": true,
-    "enable_udp": true
+    "enable_ipv4": true,
+    "enable_ipv6": true
 }

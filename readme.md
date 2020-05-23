@@ -87,27 +87,50 @@ Config file: **/etc/cgproxy/config.json**
 
 ```json
 {
+    "port": 12345,
+    "program_noproxy": ["v2ray", "qv2ray"],
+    "program_proxy": [ ],
     "cgroup_noproxy": ["/system.slice/v2ray.service"],
-    "cgroup_proxy": [],
-    "enable_dns": true,
+    "cgroup_proxy": [ ],
     "enable_gateway": false,
-    "enable_ipv4": true,
-    "enable_ipv6": true,
-    "enable_tcp": true,
+    "enable_dns": true,
     "enable_udp": true,
-    "port": 12345
+    "enable_tcp": true,
+    "enable_ipv4": true,
+    "enable_ipv6": true
 }
 ```
 
 - **port** tproxy listenning port
-- **cgroup_noproxy** cgroup array that no need to proxy, `/noproxy.slice` is preserved
-- **cgroup_proxy** cgroup array that need to proxy, `/proxy.slice` is preserved
+
+- program level proxy controll, need `python-bcc` installed to work
+
+  - **program_proxy**  program need to be proxied
+  - **program_noproxy** program that won't be proxied
+
+- cgroup level proxy control:
+
+  - **cgroup_noproxy** cgroup array that no need to proxy, `/noproxy.slice` is preserved
+  - **cgroup_proxy** cgroup array that need to proxy, `/proxy.slice` is preserved
+
 - **enable_gateway** enable gateway proxy for local devices
+
 - **enable_dns** enable dns to go to proxy
+
 - **enable_tcp**
+
 - **enable_udp**
+
 - **enable_ipv4**
+
 - **enable_ipv6**
+
+- options priority
+
+  ```
+  program_noproxy > program_proxy > cgroup_noproxy > cgroup_proxy
+  enable_ipv6 > enable_ipv4 > enable_tcp > enable_udp > enable_dns
+  ```
 
 **Note**: cgroup in configuration need to be exist, otherwise ignored
 
@@ -146,7 +169,8 @@ sudo systemctl restart cgproxy.service
 - `cgnoproxy` run program wihout proxy, very useful in global transparent proxy
 
   ```bash
-  cgnoproxy [--debug] <CMD> 
+  cgnoproxy [--debug] <CMD>
+  cgnoproxy [--debug] --pid <PID>
   ```
   
 - `cgattach` attach specific process pid to specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail. 
@@ -158,6 +182,8 @@ sudo systemctl restart cgproxy.service
   # example
   cgattch 9999 /proxy.slice
   ```
+  
+- For more detail command usage, see `man cgproxyd`  `man cgproxy`  `man cgnoproxy` 
 
 ## NOTES
 

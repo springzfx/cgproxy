@@ -3,11 +3,13 @@
 .SH NAME
 cgnoproxy \- Run program without proxy
 .SH SYNOPSIS
-cgnoproxy [--help] [--debug] <CMD>
+cgnoproxy --help
+cgnoproxy [--debug] <CMD>
+cgnoproxy [--debug] --pid <PID>
 .SH ALIAS
 cgnoproxy = cgproxy --noproxy
 .SH DESCRIPTION
-cgnoproxy send current running process pid to cgproxyd through unix socket, then pid is attached to non-proxied cgroup 
+cgnoproxy send current running process pid or specified pid to cgproxyd through unix socket, then pid is attached to non-proxied cgroup 
 .SH EXAMPLES
 cgnoproxy sudo v2ray -config config_file
 .SH SEE ALSO

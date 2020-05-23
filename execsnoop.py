@@ -35,10 +35,7 @@ int syscall__execve(struct pt_regs *ctx,
     const char __user *const __user *__argv,
     const char __user *const __user *__envp)
 {
-    // create data here and pass to submit_arg to save stack space (#555)
     struct data_t data = {};
-    struct task_struct *task;
-
     data.pid = bpf_get_current_pid_tgid() >> 32;
     bpf_probe_read(data.path, sizeof(data.path), filename);
     events.perf_submit(ctx, &data, sizeof(struct data_t));
@@ -53,10 +50,8 @@ def getRealPath(exec_path):
         path=shutil.which(path)
     if path:
         path=os.path.realpath(path)
-    if path and os.path.isfile(path):
-            return path
-            
-    eprint("'{0}' can not be find".format(exec_path))
+        if os.path.isfile(path): return path
+    eprint("'{0}' not exist or broken link".format(exec_path))
 
 def getParam():
     global exec_path_proxy, exec_path_noproxy
@@ -120,7 +115,14 @@ b.attach_kprobe(event=execve_fnname, fn_name="syscall__execve")
 def print_event(cpu, data, size):
     event = b["events"].event(data)
     pid=event.pid
-    exec_path=event.path.decode('utf-8')
+    try:
+        exec_path=os.readlink("/proc/{0}/exe".format(pid))
+    except: # in case process exit too early
+        if (show_ignore):
+            print("process exit too early: {0}".format(pid))
+        return
+    # this is not reliable, may be relative path
+    # exec_path=event.path.decode('utf-8')
     if (exec_path in exec_path_noproxy):
         attach(pid, exec_path, False)
     elif (exec_path in exec_path_proxy):

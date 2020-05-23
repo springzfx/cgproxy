@@ -2,18 +2,17 @@
 # This won't catch all new processes: an application may fork() but not exec().
 
 from __future__ import print_function
-from bcc import BPF
-from bcc.utils import ArgString, printb
-import bcc.utils as utils
-import argparse
-import re
-import time
-from collections import defaultdict
-import os
-import sys
-import signal
-import time
-import shutil
+import os, sys, signal, shutil
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+try:
+    from bcc import BPF
+    from bcc.utils import ArgString, printb
+    import bcc.utils as utils
+except:
+    eprint("python-bcc not installed")
+    exit(0)
 
 # define BPF program
 bpf_text = """
@@ -57,7 +56,7 @@ def getRealPath(exec_path):
     if path and os.path.isfile(path):
             return path
             
-    print("'{0}' can not be find".format(exec_path))
+    eprint("'{0}' can not be find".format(exec_path))
 
 def getParam():
     global exec_path_proxy, exec_path_noproxy
@@ -76,7 +75,7 @@ def getParam():
     print(*exec_path_noproxy, flush=True)
 
 def exit_gracefully(signum, frame):
-    print("execsnoop receive signal: {0}".format(signum),flush=True)
+    eprint("execsnoop receive signal: {0}".format(signum),flush=True)
     sys.exit(0)
 
 def attach(pid, path, proxy=True):

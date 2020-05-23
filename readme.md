@@ -8,9 +8,12 @@
 
 cgproxy will transparent proxy anything running in specific cgroup. It resembles with *proxychains* and *tsock*s in default setting. 
 
-cgproxy also supports cgroup/program level proxy control. 
+Main feature:
 
-And aslo supports global transparent proxy and gateway proxy. 
+- supports cgroup/program level proxy control. 
+- supports global transparent proxy and gateway proxy. 
+
+## Contents
 
 <!--ts-->
 

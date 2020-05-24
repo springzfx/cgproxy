@@ -8,8 +8,6 @@ def eprint(*args, **kwargs):
 
 try:
     from bcc import BPF
-    from bcc.utils import ArgString, printb
-    import bcc.utils as utils
 except:
     eprint("python-bcc not installed")
     exit(0)
@@ -20,12 +18,8 @@ bpf_text = """
 #include <linux/sched.h>
 #include <linux/fs.h>
 
-#define ARGSIZE  256
-
 struct data_t {
-    u32 pid;  // PID as in the userspace term (i.e. task->tgid in kernel)
-    char path[ARGSIZE];
-    int retval;
+    u32 pid;
 };
 
 BPF_PERF_OUTPUT(events);
@@ -37,9 +31,7 @@ int syscall__execve(struct pt_regs *ctx,
 {
     struct data_t data = {};
     data.pid = bpf_get_current_pid_tgid() >> 32;
-    bpf_probe_read(data.path, sizeof(data.path), filename);
     events.perf_submit(ctx, &data, sizeof(struct data_t));
-
     return 0;
 }
 """
@@ -100,7 +92,10 @@ signal.signal(signal.SIGINT, exit_gracefully)
 signal.signal(signal.SIGHUP, exit_gracefully)
 signal.signal(signal.SIGTERM, exit_gracefully)
 
-show_ignore=False
+debug=False
+if (len(sys.argv)>1 and sys.argv[1]=="--debug"):
+    debug=True
+
 exec_path_proxy=[]
 exec_path_noproxy=[]
 getParam()
@@ -118,17 +113,15 @@ def print_event(cpu, data, size):
     try:
         exec_path=os.readlink("/proc/{0}/exe".format(pid))
     except: # in case process exit too early
-        if (show_ignore):
+        if (debug):
             print("process exit too early: {0}".format(pid))
         return
-    # this is not reliable, may be relative path
-    # exec_path=event.path.decode('utf-8')
     if (exec_path in exec_path_noproxy):
         attach(pid, exec_path, False)
     elif (exec_path in exec_path_proxy):
         attach(pid, exec_path, True)
-    elif (show_ignore):
-        print("ignore: %-6d %s" % (pid, exec_path),flush=True)
+    elif (debug):
+        print("debug: %d %s" % (pid, exec_path),flush=True)
 
 
 # loop with callback to print_event

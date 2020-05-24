@@ -75,6 +75,8 @@ int main(int argc, char *argv[]) {
     if (status == 1) error("maybe cgproxy.service not running");
     exit(EXIT_FAILURE);
   }
+  // if just attach pid, return here
+  if (attach_pid) return 0;
 
   string s = join2str(argc - shift, argv + shift, ' ');
   return system(s.c_str());

@@ -17,6 +17,7 @@ namespace CGPROXY::SOCKET {
 struct thread_arg {
   function<int(char *)> handle_msg;
 };
+void *startThread(void *arg);
 
 class SocketServer {
 public:
@@ -25,7 +26,6 @@ public:
 
   void socketListening(function<int(char *)> callback);
   ~SocketServer();
-  static void *startThread(void *arg);
 };
 
 } // namespace CGPROXY::SOCKET

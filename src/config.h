@@ -30,10 +30,12 @@ public:
   string toJsonStr();
   int loadFromFile(const string f);
   int loadFromJsonStr(const string js);
+  void print_summary();
 
 private:
   void mergeReserved();
   bool validateJsonStr(const string js);
+  void toRealProgramPath(vector<string> &v);
 };
 
 } // namespace CGPROXY::CONFIG

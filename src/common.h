@@ -9,7 +9,6 @@ using namespace std;
 
 #define TPROXY_IPTABLS_START "/usr/share/cgproxy/scripts/cgroup-tproxy.sh"
 #define TPROXY_IPTABLS_CLEAN "/usr/share/cgproxy/scripts/cgroup-tproxy.sh stop"
-#define BPF_EXEC_SNOOP_START "/usr/share/cgproxy/scripts/execsnoop.py"
 
 #define PID_LOCK_FILE "/var/run/cgproxyd.pid"
 #define SOCKET_PATH "/tmp/cgproxy_unix_socket"
@@ -36,6 +35,7 @@ using namespace std;
 #define FILE_ERROR 7
 
 extern bool enable_debug;
+extern bool enable_info;
 
 #define error(...)                                                                       \
   {                                                                                      \
@@ -46,13 +46,20 @@ extern bool enable_debug;
 
 #define debug(...)                                                                       \
   if (enable_debug) {                                                                    \
-    fprintf(stderr, "debug: ");                                                          \
+    fprintf(stdout, "debug: ");                                                          \
     fprintf(stdout, __VA_ARGS__);                                                        \
     fprintf(stdout, "\n");                                                               \
   }
 
-#define return_error return -1;
-#define return_success return 0;
+#define info(...)                                                                        \
+  if (enable_info) {                                                                     \
+    fprintf(stdout, "info: ");                                                           \
+    fprintf(stdout, __VA_ARGS__);                                                        \
+    fprintf(stdout, "\n");                                                               \
+  }
+
+#define return_error return -1
+#define return_success return 0
 
 template <typename... T> string to_str(T... args) {
   stringstream ss;
@@ -69,5 +76,12 @@ bool validCgroup(const string cgroup);
 bool validCgroup(const vector<string> cgroup);
 bool validPid(const string pid);
 bool validPort(const int port);
+
+bool fileExist(const string &path);
+bool dirExist(const string &path);
+vector<int> bash_pidof(const string &path);
+string bash_which(const string &name);
+string bash_readlink(const string &path);
+string getRealExistPath(const string &name);
 
 #endif

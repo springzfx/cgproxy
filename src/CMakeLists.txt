@@ -7,7 +7,7 @@ add_executable(main main.cpp
                     common.cpp config.cpp cgroup_attach.cpp 
                     socket_client.cpp socket_server.cpp)
  
-target_link_libraries(main nlohmann_json::nlohmann_json Threads::Threads)
+target_link_libraries(main nlohmann_json::nlohmann_json Threads::Threads bcc)
 set_target_properties(main PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(main PROPERTIES OUTPUT_NAME cgproxy)
 

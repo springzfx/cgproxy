@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <nlohmann/json.hpp>
 #include <set>
+#include <vector>
 using json = nlohmann::json;
 
 #define add2json(v) j[#v] = v;
@@ -89,6 +90,11 @@ int Config::loadFromJsonStr(const string js) {
   tryassign(enable_udp);
   tryassign(enable_ipv4);
   tryassign(enable_ipv6);
+
+  // e.g. v2ray -> /usr/bin/v2ray -> /usr/lib/v2ray/v2ray
+  toRealProgramPath(program_noproxy);
+  toRealProgramPath(program_proxy);
+
   return 0;
 }
 
@@ -125,6 +131,23 @@ bool Config::validateJsonStr(const string js) {
     }
   }
   return true;
+}
+
+void Config::print_summary() {
+  info("noproxy program: %s", join2str(program_noproxy).c_str());
+  info("proxied program: %s", join2str(program_proxy).c_str());
+  info("noproxy cgroup: %s", join2str(cgroup_noproxy).c_str());
+  info("proxied cgroup: %s", join2str(cgroup_proxy).c_str());
+}
+
+void Config::toRealProgramPath(vector<string> &v) {
+  vector<string> tmp;
+  for (auto &p : v) {
+    auto rpath = getRealExistPath(p);
+    if (!rpath.empty()) tmp.push_back(rpath);
+    else error("%s not exist or broken link", p.c_str());
+  }
+  v=tmp;
 }
 
 } // namespace CGPROXY::CONFIG

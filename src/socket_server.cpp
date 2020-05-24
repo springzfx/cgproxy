@@ -49,7 +49,7 @@ void SocketServer::socketListening(function<int(char *)> callback) {
   }
 }
 
-void *SocketServer::startThread(void *arg) {
+void *startThread(void *arg) {
   thread_arg *p = (thread_arg *)arg;
   SocketServer server;
   server.socketListening(p->handle_msg);

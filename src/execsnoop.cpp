@@ -1,7 +1,3 @@
-#ifndef EXECSNOOP_HPP
-#define EXECSNOOP_HPP 1
-
-#include <exception>
 #include "bcc/BPF.h"
 #include "common.h"
 #include <bcc/libbpf.h>
@@ -93,19 +89,4 @@ int execsnoop() {
   return 0;
 }
 
-struct thread_arg {
-  function<int(int)> handle_pid;
-};
-
-void *startThread(void *arg) {
-  thread_arg *p = (thread_arg *)arg;
-  callback = p->handle_pid;
-  try {
-    execsnoop();
-  } catch (exception &e) {
-    error("bcc may not be installed, %s",e.what());
-  }
-  return (void *)0;
-}
 } // namespace CGPROXY::EXESNOOP
-#endif

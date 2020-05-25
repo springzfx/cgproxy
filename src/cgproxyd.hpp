@@ -4,7 +4,6 @@
 #include "cgroup_attach.h"
 #include "common.h"
 #include "config.h"
-#include "execsnoop.hpp"
 #include "socket_server.h"
 #include <algorithm>
 #include <csignal>
@@ -15,6 +14,7 @@
 #include <sched.h>
 #include <sys/file.h>
 #include <unistd.h>
+#include "optional.h"
 
 using namespace std;
 using json = nlohmann::json;

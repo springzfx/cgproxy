@@ -3,16 +3,15 @@ find_package(nlohmann_json REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(optional SHARED optional.cpp execsnoop.cpp)
-target_link_libraries(optional bcc)
-install(TARGETS optional DESTINATION /usr/lib/cgproxy/ PERMISSIONS ${basic_permission})
+add_library(execsnoop MODULE execsnoop.cpp common.cpp)
+target_link_libraries(execsnoop bcc)
+install(TARGETS execsnoop DESTINATION /usr/lib/cgproxy/ PERMISSIONS ${basic_permission})
 
 add_executable(main main.cpp
                     common.cpp config.cpp cgroup_attach.cpp
                     socket_client.cpp socket_server.cpp)
 
-target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json Threads::Threads)
-target_link_libraries(main PRIVATE optional)
+target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json Threads::Threads dl)
 set_target_properties(main PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(main PROPERTIES OUTPUT_NAME cgproxy)
 

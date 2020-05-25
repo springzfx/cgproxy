@@ -6,9 +6,10 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include "execsnoop.h"
 using namespace std;
 
-namespace CGPROXY::EXESNOOP {
+namespace CGPROXY::EXECSNOOP {
 
 const string BPF_PROGRAM = R"(
 #include <linux/fs.h>
@@ -89,4 +90,16 @@ int execsnoop() {
   return 0;
 }
 
+void *startThread(void *arg) {
+  thread_arg *p = (thread_arg *)arg;
+  callback = p->handle_pid;
+  execsnoop();
+  return (void *)0;
+}
+
+
 } // namespace CGPROXY::EXESNOOP
+
+extern "C" void *_startThread(void *arg) {
+  return CGPROXY::EXECSNOOP::startThread(arg);
+}

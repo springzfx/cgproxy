@@ -1,7 +1,8 @@
-#include "execsnoop.hpp"
+#include "execsnoop.h"
 #include "common.h"
+#include <unistd.h>
 using namespace std;
-using namespace CGPROXY::EXESNOOP;
+using namespace CGPROXY::EXECSNOOP;
 
 #define PATH_MAX_LEN 128
 

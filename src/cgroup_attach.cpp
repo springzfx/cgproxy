@@ -15,12 +15,6 @@ namespace CGPROXY::CGROUP {
 
 string cgroup2_mount_point = get_cgroup2_mount_point();
 
-bool exist(string path) {
-  struct stat st;
-  if (stat(path.c_str(), &st) != -1) { return S_ISDIR(st.st_mode); }
-  return false;
-}
-
 string get_cgroup2_mount_point() {
   stringstream buffer;
   FILE *fp = popen("findmnt -t cgroup2 -n -o TARGET", "r");
@@ -31,6 +25,24 @@ string get_cgroup2_mount_point() {
   string s = buffer.str();
   s.pop_back(); // remove newline character
   return s;
+}
+
+string getCgroup(const pid_t &pid) { return getCgroup(to_str(pid)); }
+
+string getCgroup(const string &pid) {
+  string cgroup_f = to_str("/proc/", pid, "/cgroup");
+  if (!fileExist(cgroup_f)) return "";
+  char buf[128];
+  FILE *f = fopen(cgroup_f.c_str(), "r");
+  int id;
+  char cgroup[256];
+  while (fgets(buf, 128, f) != NULL) {
+    if (buf[0] == '0') {
+      if (sscanf(buf, "%*i::%s", cgroup) == 1) return cgroup;
+      error("sscanf %s failed", buf);
+    }
+  }
+  return "";
 }
 
 bool validate(string pid, string cgroup) {
@@ -50,14 +62,13 @@ int attach(const string pid, const string cgroup_target) {
 
   debug("attaching %s to %s", pid.c_str(), cgroup_target.c_str());
 
-  int status;
   if (!validate(pid, cgroup_target)) return_error;
   if (cgroup2_mount_point.empty()) return_error;
   string cgroup_target_path = cgroup2_mount_point + cgroup_target;
   string cgroup_target_procs = cgroup_target_path + "/cgroup.procs";
 
   // check if exist, we will create it if not exist
-  if (!exist(cgroup_target_path)) {
+  if (!dirExist(cgroup_target_path)) {
     if (mkdir(cgroup_target_path.c_str(),
               S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0) {
       debug("created cgroup %s success", cgroup_target.c_str());
@@ -67,6 +78,11 @@ int attach(const string pid, const string cgroup_target) {
     }
     // error("cgroup %s not exist",cgroup_target.c_str());
     // return_error
+  }
+
+  if (getCgroup(pid) == cgroup_target) {
+    debug("%s already in %s", pid.c_str(), cgroup_target.c_str());
+    return_success;
   }
 
   // put pid to target cgroup

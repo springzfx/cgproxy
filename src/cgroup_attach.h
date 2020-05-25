@@ -7,9 +7,10 @@ using namespace std;
 
 namespace CGPROXY::CGROUP {
 extern string cgroup2_mount_point;
-bool exist(string path);
 bool validate(string pid, string cgroup);
 string get_cgroup2_mount_point();
+string getCgroup(const pid_t &pid);
+string getCgroup(const string &pid);
 int attach(const string pid, const string cgroup_target);
 int attach(const int pid, const string cgroup_target);
 

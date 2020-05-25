@@ -1,3 +1,4 @@
+#include "execsnoop.h"
 #include "bcc/BPF.h"
 #include "common.h"
 #include <bcc/libbpf.h>
@@ -6,7 +7,6 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include "execsnoop.h"
 using namespace std;
 
 namespace CGPROXY::EXECSNOOP {
@@ -97,9 +97,6 @@ void *startThread(void *arg) {
   return (void *)0;
 }
 
+} // namespace CGPROXY::EXECSNOOP
 
-} // namespace CGPROXY::EXESNOOP
-
-extern "C" void *_startThread(void *arg) {
-  return CGPROXY::EXECSNOOP::startThread(arg);
-}
+extern "C" void *_startThread(void *arg) { return CGPROXY::EXECSNOOP::startThread(arg); }

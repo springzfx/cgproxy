@@ -25,9 +25,10 @@ string get_cgroup2_mount_point() {
   stringstream buffer;
   FILE *fp = popen("findmnt -t cgroup2 -n -o TARGET", "r");
   if (!fp) return "";
-  char buf[64]; while (fgets(buf,64,fp)!=NULL) { buffer<<buf; }
+  char buf[64];
+  while (fgets(buf, 64, fp) != NULL) { buffer << buf; }
   pclose(fp);
-  string s=buffer.str();
+  string s = buffer.str();
   s.pop_back(); // remove newline character
   return s;
 }

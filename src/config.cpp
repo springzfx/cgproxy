@@ -145,9 +145,10 @@ void Config::toRealProgramPath(vector<string> &v) {
   for (auto &p : v) {
     auto rpath = getRealExistPath(p);
     if (!rpath.empty()) tmp.push_back(rpath);
-    else error("%s not exist or broken link", p.c_str());
+    else
+      error("%s not exist or broken link", p.c_str());
   }
-  v=tmp;
+  v = tmp;
 }
 
 } // namespace CGPROXY::CONFIG

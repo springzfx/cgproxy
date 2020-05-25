@@ -4,10 +4,12 @@
 #include "cgroup_attach.h"
 #include "common.h"
 #include "config.h"
+#include "execsnoop.h"
 #include "socket_server.h"
 #include <algorithm>
 #include <csignal>
 #include <cstdlib>
+#include <dlfcn.h>
 #include <exception>
 #include <fstream>
 #include <functional>
@@ -16,33 +18,35 @@
 #include <sched.h>
 #include <sys/file.h>
 #include <unistd.h>
-#include <dlfcn.h>
-#include "execsnoop.h"
 
 using namespace std;
 using json = nlohmann::json;
 using namespace ::CGPROXY::SOCKET;
 using namespace ::CGPROXY::CONFIG;
 using namespace ::CGPROXY::CGROUP;
-// using namespace ::CGPROXY::EXESNOOP;
+// using namespace ::CGPROXY::EXECSNOOP;
 
-namespace CGPROXY::EXECSNOOP{
-  typedef void* (*startThread_t)(void *arg);
-  startThread_t _startThread;
-  bool loadExecsnoopLib(){
-    try {
-      info("loading %s",LIBEXECSNOOP_SO);
-      void* handle_dl=dlopen(LIBEXECSNOOP_SO,RTLD_NOW);
-      if (handle_dl==NULL) {error("dlopen %s failed: %s",LIBEXECSNOOP_SO, dlerror());return false;}
-      _startThread= reinterpret_cast<startThread_t> (dlsym(handle_dl, "_startThread"));
-      if (_startThread==NULL){error("dlsym startThread failed: %s",dlerror());return false;}
-      info("dlsym startThread success");
-      return true;
-    } catch (exception &e) {
+namespace CGPROXY::EXECSNOOP {
+typedef void *(*startThread_t)(void *arg);
+startThread_t _startThread;
+bool loadExecsnoopLib() {
+  try {
+    info("loading %s", LIBEXECSNOOP_SO);
+    void *handle_dl = dlopen(LIBEXECSNOOP_SO, RTLD_NOW);
+    if (handle_dl == NULL) {
+      error("dlopen %s failed: %s", LIBEXECSNOOP_SO, dlerror());
       return false;
     }
-  }
+    _startThread = reinterpret_cast<startThread_t>(dlsym(handle_dl, "_startThread"));
+    if (_startThread == NULL) {
+      error("dlsym startThread failed: %s", dlerror());
+      return false;
+    }
+    info("dlsym startThread success");
+    return true;
+  } catch (exception &e) { return false; }
 }
+} // namespace CGPROXY::EXECSNOOP
 
 namespace CGPROXY::CGPROXYD {
 
@@ -52,10 +56,10 @@ bool enable_execsnoop = false;
 
 class cgproxyd {
   SOCKET::thread_arg socketserver_thread_arg;
-  pthread_t socket_thread_id = -1;
+  pthread_t socket_thread_id = THREAD_UNDEF;
 
   EXECSNOOP::thread_arg execsnoop_thread_arg;
-  pthread_t execsnoop_thread_id = -1;
+  pthread_t execsnoop_thread_id = THREAD_UNDEF;
 
   Config config;
 
@@ -77,8 +81,8 @@ class cgproxyd {
   }
 
   int handle_pid(int pid) {
-    auto path=realpath(to_str("/proc/",pid,"/exe").c_str(), NULL);
-    if (path==NULL) {
+    auto path = realpath(to_str("/proc/", pid, "/exe").c_str(), NULL);
+    if (path == NULL) {
       debug("pid %d live life too short", pid);
       return 0;
     }
@@ -88,13 +92,13 @@ class cgproxyd {
 
     v = config.program_noproxy;
     if (find(v.begin(), v.end(), path) != v.end()) {
-      info("exesnoop noproxy: %d %s", pid, path);
+      info("execsnoop noproxy: %d %s", pid, path);
       free(path);
       return attach(pid, config.cgroup_noproxy_preserved);
     }
     v = config.program_proxy;
     if (find(v.begin(), v.end(), path) != v.end()) {
-      info("exesnoop proxied: %d %s", pid, path);
+      info("execsnoop proxied: %d %s", pid, path);
       free(path);
       return attach(pid, config.cgroup_proxy_preserved);
     }
@@ -179,32 +183,41 @@ class cgproxyd {
     pthread_t thread_id;
     int status =
         pthread_create(&thread_id, NULL, &SOCKET::startThread, &socketserver_thread_arg);
-    if (status != 0) error("socket thread create failed");
+    if (status != 0) {
+      error("socket thread create failed");
+      return THREAD_UNDEF;
+    }
     return thread_id;
   }
 
   pthread_t startExecsnoopThread() {
-    if (!EXECSNOOP::loadExecsnoopLib()||EXECSNOOP::_startThread==NULL) {error("execsnoop start failed");exit(EXIT_FAILURE);}
+    if (!EXECSNOOP::loadExecsnoopLib() || EXECSNOOP::_startThread == NULL) {
+      error("execsnoop start failed, maybe bcc not installed");
+      return THREAD_UNDEF;
+    }
 
     execsnoop_thread_arg.handle_pid = &handle_pid_static;
     pthread_t thread_id;
     int status =
         pthread_create(&thread_id, NULL, EXECSNOOP::_startThread, &execsnoop_thread_arg);
-    if (status != 0) error("execsnoop thread create failed");
+    if (status != 0) {
+      error("execsnoop thread create failed");
+      return THREAD_UNDEF;
+    }
     return thread_id;
   }
 
-  void processRunningProgram(){
-    debug("process running program")
-    for (auto &path:config.program_noproxy)
-      for (auto &pid:bash_pidof(path)){
-        int status=attach(pid, config.cgroup_noproxy_preserved);
-        if (status==0) info("noproxy running process %d %s",pid, path.c_str());
-      }
-    for (auto &path:config.program_proxy)
-      for (auto &pid:bash_pidof(path)){
-        int status=attach(pid, config.cgroup_proxy_preserved);
-        if (status==0) info("proxied running process %d %s",pid, path.c_str());
+  void processRunningProgram() {
+    debug("process running program") for (auto &path :
+                                          config.program_noproxy) for (auto &pid :
+                                                                       bash_pidof(path)) {
+      int status = attach(pid, config.cgroup_noproxy_preserved);
+      if (status == 0) info("noproxy running process %d %s", pid, path.c_str());
+    }
+    for (auto &path : config.program_proxy)
+      for (auto &pid : bash_pidof(path)) {
+        int status = attach(pid, config.cgroup_proxy_preserved);
+        if (status == 0) info("proxied running process %d %s", pid, path.c_str());
       }
   }
 
@@ -223,10 +236,16 @@ public:
     applyConfig();
     processRunningProgram();
 
-    if (enable_socketserver) { socket_thread_id = startSocketListeningThread(); }
-    if (enable_execsnoop) { execsnoop_thread_id = startExecsnoopThread(); }
-    cout<<flush;
-    
+    if (enable_socketserver) {
+      socket_thread_id = startSocketListeningThread();
+      if (socket_thread_id > 0) info("socket server listening thread started");
+    }
+    if (enable_execsnoop) {
+      execsnoop_thread_id = startExecsnoopThread();
+      if (execsnoop_thread_id > 0) info("execsnoop thread started");
+    }
+    cout << flush;
+
     pthread_join(socket_thread_id, NULL);
     pthread_join(execsnoop_thread_id, NULL);
     return 0;

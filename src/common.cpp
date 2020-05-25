@@ -1,10 +1,10 @@
 #include "common.h"
 #include <fstream>
+#include <limits.h>
 #include <linux/limits.h>
 #include <regex>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <limits.h>
 
 bool enable_debug = false;
 bool enable_info = true;
@@ -49,12 +49,13 @@ bool dirExist(const string &path) {
   return (stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode));
 }
 
-vector<int> bash_pidof(const string &path){
+vector<int> bash_pidof(const string &path) {
   vector<int> pids;
   FILE *fp = popen(to_str("pidof ", path).c_str(), "r");
   if (!fp) return pids;
   int pid;
-  char buf[64]; while (fscanf(fp,"%d",&pid)!=EOF) { pids.push_back(pid); }
+  char buf[64];
+  while (fscanf(fp, "%d", &pid) != EOF) { pids.push_back(pid); }
   pclose(fp);
   return pids;
 }
@@ -63,9 +64,10 @@ string bash_which(const string &name) {
   stringstream buffer;
   FILE *fp = popen(to_str("which ", name).c_str(), "r");
   if (!fp) return "";
-  char buf[64]; while (fgets(buf,64,fp)!=NULL) { buffer<<buf; }
+  char buf[64];
+  while (fgets(buf, 64, fp) != NULL) { buffer << buf; }
   pclose(fp);
-  string s=buffer.str();
+  string s = buffer.str();
   s.pop_back(); // remove newline character
   return s;
 }
@@ -74,9 +76,10 @@ string bash_readlink(const string &path) {
   stringstream buffer;
   FILE *fp = popen(to_str("readlink -e ", path).c_str(), "r");
   if (!fp) return "";
-  char buf[64]; while (fgets(buf,64,fp)!=NULL) { buffer<<buf; }
+  char buf[64];
+  while (fgets(buf, 64, fp) != NULL) { buffer << buf; }
   pclose(fp);
-  string s=buffer.str();
+  string s = buffer.str();
   s.pop_back(); // remove newline character
   return s;
 }

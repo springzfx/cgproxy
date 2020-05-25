@@ -11,12 +11,12 @@ extern const string BPF_PROGRAM;
 struct data_t;
 extern function<int(int)> callback;
 void handle_events(void *cb_cookie, void *data, int data_size);
-int execsnoop(); 
+int execsnoop();
 
 struct thread_arg {
   function<int(int)> handle_pid;
 };
 void *startThread(void *arg);
 
-} // namespace CGPROXY::EXESNOOP
+} // namespace CGPROXY::EXECSNOOP
 #endif

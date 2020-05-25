@@ -73,7 +73,7 @@ cgroup_procs_file="cgroup.procs"
 
 stop(){
     iptables -t mangle -L TPROXY_PRE &> /dev/null || return
-    echo "cleaning tproxy iptables"
+    echo "iptables: cleaning tproxy iptables"
     iptables -t mangle -D PREROUTING -j TPROXY_PRE
     iptables -t mangle -D OUTPUT -j TPROXY_OUT
     iptables -t mangle -F TPROXY_PRE
@@ -124,7 +124,7 @@ test -d $cgroup_mount_point$cgroup_proxy    || mkdir $cgroup_mount_point$cgroup_
 test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_noproxy || exit -1; 
 
 
-echo "applying tproxy iptables"
+echo "iptables: applying tproxy iptables"
 ## use TPROXY
 #ipv4#
 ip rule add fwmark $fwmark table $table
@@ -220,8 +220,8 @@ ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --
 
 ## message for user
 cat << DOC
-noproxy cgroup: ${cgroup_noproxy[@]}
-proxied cgroup: ${cgroup_proxy[@]}
+iptables: noproxy cgroup: ${cgroup_noproxy[@]}
+iptables: proxied cgroup: ${cgroup_proxy[@]}
 DOC
 
 
@@ -230,5 +230,5 @@ if $enable_gateway; then
     ip6tables -t nat -A POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE # only masquerade ipv6 private address
     sysctl -w net.ipv4.ip_forward=1
     sysctl -w net.ipv6.conf.all.forwarding=1
-    echo "gateway enabled"
+    echo "ipatbles: gateway enabled"
 fi

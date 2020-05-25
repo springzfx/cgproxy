@@ -5,8 +5,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(cgproxy VERSION 0.13)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-unused-result")
 
-set(build_tools OFF)
-set(build_test  OFF)
+option(with_execsnoop "enable program level proxy control feature, need bcc installed" ON)
+option(build_tools OFF)
+option(build_test  OFF)
 
 set(basic_permission OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 

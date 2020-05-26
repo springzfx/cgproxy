@@ -19,8 +19,8 @@ string get_cgroup2_mount_point() {
   stringstream buffer;
   FILE *fp = popen("findmnt -t cgroup2 -n -o TARGET", "r");
   if (!fp) return "";
-  char buf[64];
-  while (fgets(buf, 64, fp) != NULL) { buffer << buf; }
+  char buf[READ_SIZE_MAX];
+  while (fgets(buf, READ_SIZE_MAX, fp) != NULL) { buffer << buf; }
   pclose(fp);
   string s = buffer.str();
   s.pop_back(); // remove newline character
@@ -32,17 +32,27 @@ string getCgroup(const pid_t &pid) { return getCgroup(to_str(pid)); }
 string getCgroup(const string &pid) {
   string cgroup_f = to_str("/proc/", pid, "/cgroup");
   if (!fileExist(cgroup_f)) return "";
-  char buf[128];
+
+  stringstream buffer;
+  string cgroup;
   FILE *f = fopen(cgroup_f.c_str(), "r");
-  int id;
-  char cgroup[256];
-  while (fgets(buf, 128, f) != NULL) {
-    if (buf[0] == '0') {
-      if (sscanf(buf, "%*i::%s", cgroup) == 1) return cgroup;
-      error("sscanf %s failed", buf);
+  char buf[READ_SIZE_MAX] = "";
+  char *flag = buf;
+  while (flag != NULL) {
+    buffer.clear();
+    while (!flag || buf[strlen(buf) - 1] != '\n') {
+      flag = fgets(buf, READ_SIZE_MAX, f);
+      if (flag) buffer << buf;
+    }
+    string line = buffer.str();
+    if (line[0] == '0') { // 0::/user.slice/user-1000.slice
+      cgroup = (*(line.end() - 1) == '\n') ? line.substr(3, line.length() - 4)
+                                           : line.substr(3);
+      break;
     }
   }
-  return "";
+  fclose(f);
+  return cgroup;
 }
 
 bool validate(string pid, string cgroup) {

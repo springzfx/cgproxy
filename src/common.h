@@ -15,6 +15,7 @@ using namespace std;
 #define SOCKET_PATH "/tmp/cgproxy_unix_socket"
 #define LISTEN_BACKLOG 64
 #define DEFAULT_CONFIG_FILE "/etc/cgproxy/config.json"
+#define READ_SIZE_MAX 128
 
 #define CGROUP_PROXY_PRESVERED "/proxy.slice"
 #define CGROUP_NOPROXY_PRESVERED "/noproxy.slice"

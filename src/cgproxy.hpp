@@ -5,8 +5,8 @@
 #include <nlohmann/json.hpp>
 #include <unistd.h>
 using json = nlohmann::json;
-using namespace CGPROXY;
-using namespace CGPROXY::CONFIG;
+using namespace ::CGPROXY;
+using namespace ::CGPROXY::CONFIG;
 
 namespace CGPROXY::CGPROXY {
 

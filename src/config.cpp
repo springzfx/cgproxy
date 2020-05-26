@@ -21,7 +21,6 @@ using json = nlohmann::json;
 namespace CGPROXY::CONFIG {
 
 void Config::toEnv() {
-  mergeReserved();
   setenv("program_proxy", join2str(program_proxy, ':').c_str(), 1);
   setenv("program_noproxy", join2str(program_noproxy, ':').c_str(), 1);
   setenv("cgroup_proxy", join2str(cgroup_proxy, ':').c_str(), 1);
@@ -95,6 +94,8 @@ int Config::loadFromJsonStr(const string js) {
   toRealProgramPath(program_noproxy);
   toRealProgramPath(program_proxy);
 
+  mergeReserved();
+
   return 0;
 }
 
@@ -150,5 +151,9 @@ void Config::toRealProgramPath(vector<string> &v) {
   }
   v = tmp;
 }
+
+#undef tryassign
+#undef add2json
+#undef merge
 
 } // namespace CGPROXY::CONFIG

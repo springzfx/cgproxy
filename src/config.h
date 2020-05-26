@@ -13,8 +13,8 @@ public:
   const string cgroup_proxy_preserved = CGROUP_PROXY_PRESVERED;
   const string cgroup_noproxy_preserved = CGROUP_NOPROXY_PRESVERED;
 
-  vector<string> program_proxy;
-  vector<string> program_noproxy;
+  vector<string> program_proxy = {cgroup_proxy_preserved};
+  vector<string> program_noproxy = {cgroup_noproxy_preserved};
   vector<string> cgroup_proxy;
   vector<string> cgroup_noproxy;
   bool enable_gateway = false;

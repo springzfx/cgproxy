@@ -22,6 +22,8 @@ string join2str(const int argc, char **argv, const char delm) {
   return s;
 }
 
+bool startWith(string s, string prefix) { return s.rfind(prefix, 0) == 0; }
+
 bool validCgroup(const string cgroup) {
   return regex_match(cgroup, regex("^/[a-zA-Z0-9\\-_./@]*$"));
 }
@@ -89,4 +91,41 @@ string getRealExistPath(const string &name) {
   path = bash_readlink(path);
   if (!fileExist(path)) return "";
   return path;
+}
+
+bool belongToCgroup(string cg1, string cg2) { return startWith(cg1 + '/', cg2 + '/'); }
+
+bool belongToCgroup(string cg1, vector<string> cg2) {
+  for (const auto &s : cg2) {
+    if (startWith(cg1 + '/', s + '/')) return true;
+  }
+  return false;
+}
+
+string getCgroup(const pid_t &pid) { return getCgroup(to_str(pid)); }
+
+string getCgroup(const string &pid) {
+  string cgroup_f = to_str("/proc/", pid, "/cgroup");
+  if (!fileExist(cgroup_f)) return "";
+
+  stringstream buffer;
+  string cgroup;
+  FILE *f = fopen(cgroup_f.c_str(), "r");
+  char buf[READ_SIZE_MAX] = "";
+  char *flag = buf;
+  while (flag != NULL) {
+    buffer.clear();
+    while (!flag || buf[strlen(buf) - 1] != '\n') {
+      flag = fgets(buf, READ_SIZE_MAX, f);
+      if (flag) buffer << buf;
+    }
+    string line = buffer.str();
+    if (line[0] == '0') { // 0::/user.slice/user-1000.slice
+      cgroup = (*(line.end() - 1) == '\n') ? line.substr(3, line.length() - 4)
+                                           : line.substr(3);
+      break;
+    }
+  }
+  fclose(f);
+  return cgroup;
 }

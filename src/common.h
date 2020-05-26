@@ -75,6 +75,7 @@ template <typename... T> string to_str(T... args) {
 
 string join2str(const vector<string> t, const char delm = ' ');
 string join2str(const int argc, char **argv, const char delm = ' ');
+bool startWith(string prefix);
 
 bool validCgroup(const string cgroup);
 bool validCgroup(const vector<string> cgroup);
@@ -87,5 +88,13 @@ vector<int> bash_pidof(const string &path);
 string bash_which(const string &name);
 string bash_readlink(const string &path);
 string getRealExistPath(const string &name);
+
+/**
+ * whether cg1 belongs to cg2
+ */
+bool belongToCgroup(string cg1, string cg2);
+bool belongToCgroup(string cg1, vector<string> cg2);
+string getCgroup(const pid_t &pid);
+string getCgroup(const string &pid);
 
 #endif

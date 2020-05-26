@@ -31,7 +31,7 @@ DOC
 }
 
 ## check root
-[ ! $(id -u) -eq 0 ] && { >&2 echo "need root to modify iptables";exit -1; }
+[ ! $(id -u) -eq 0 ] && { >&2 echo "iptables: need root to modify iptables";exit -1; }
 
 ## any process in this cgroup will be proxied
 if [ -z ${cgroup_proxy+x} ]; then  
@@ -150,10 +150,10 @@ iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
 iptables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
 iptables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
-iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
+iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN || { >&2 echo "iptables: $cg not exist, won't apply"; }
 done
 for cg in ${cgroup_proxy[@]}; do
-iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark
+iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark || { >&2 echo "iptables: $cg not exist, won't apply"; }
 done
 iptables -t mangle -A OUTPUT -j TPROXY_OUT
 
@@ -181,10 +181,10 @@ ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN || { >&2 echo "iptables: $cg not exist, won't apply"; }
 done
 for cg in ${cgroup_proxy[@]}; do
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark
+ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark || { >&2 echo "iptables: $cg not exist, won't apply"; }
 done
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 

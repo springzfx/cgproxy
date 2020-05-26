@@ -92,15 +92,16 @@ class cgproxyd {
 
     v = config.program_noproxy;
     if (find(v.begin(), v.end(), path) != v.end()) {
-      if (CGROUP::getCgroup(pid) != config.cgroup_noproxy_preserved) {
+      if (!belongToCgroup(getCgroup(pid), config.cgroup_noproxy)) {
         info("execsnoop noproxy: %d %s", pid, path);
         free(path);
         return attach(pid, config.cgroup_noproxy_preserved);
       }
     }
+
     v = config.program_proxy;
     if (find(v.begin(), v.end(), path) != v.end()) {
-      if (CGROUP::getCgroup(pid) != config.cgroup_proxy_preserved) {
+      if (!belongToCgroup(getCgroup(pid), config.cgroup_proxy)) {
         info("execsnoop proxied: %d %s", pid, path);
         free(path);
         return attach(pid, config.cgroup_proxy_preserved);
@@ -215,14 +216,14 @@ class cgproxyd {
     debug("process running program");
     for (auto &path : config.program_noproxy)
       for (auto &pid : bash_pidof(path)) {
-        if (CGROUP::getCgroup(pid) != config.cgroup_noproxy_preserved) {
+        if (!belongToCgroup(getCgroup(pid), config.cgroup_noproxy)) {
           int status = attach(pid, config.cgroup_noproxy_preserved);
           if (status == 0) info("noproxy running process %d %s", pid, path.c_str());
         }
       }
     for (auto &path : config.program_proxy)
       for (auto &pid : bash_pidof(path)) {
-        if (CGROUP::getCgroup(pid) != config.cgroup_proxy_preserved) {
+        if (!belongToCgroup(getCgroup(pid), config.cgroup_proxy)) {
           int status = attach(pid, config.cgroup_proxy_preserved);
           if (status == 0) info("proxied running process %d %s", pid, path.c_str());
         }

@@ -27,34 +27,6 @@ string get_cgroup2_mount_point() {
   return s;
 }
 
-string getCgroup(const pid_t &pid) { return getCgroup(to_str(pid)); }
-
-string getCgroup(const string &pid) {
-  string cgroup_f = to_str("/proc/", pid, "/cgroup");
-  if (!fileExist(cgroup_f)) return "";
-
-  stringstream buffer;
-  string cgroup;
-  FILE *f = fopen(cgroup_f.c_str(), "r");
-  char buf[READ_SIZE_MAX] = "";
-  char *flag = buf;
-  while (flag != NULL) {
-    buffer.clear();
-    while (!flag || buf[strlen(buf) - 1] != '\n') {
-      flag = fgets(buf, READ_SIZE_MAX, f);
-      if (flag) buffer << buf;
-    }
-    string line = buffer.str();
-    if (line[0] == '0') { // 0::/user.slice/user-1000.slice
-      cgroup = (*(line.end() - 1) == '\n') ? line.substr(3, line.length() - 4)
-                                           : line.substr(3);
-      break;
-    }
-  }
-  fclose(f);
-  return cgroup;
-}
-
 bool validate(string pid, string cgroup) {
   bool pid_v = validPid(pid);
   bool cg_v = validCgroup(cgroup);

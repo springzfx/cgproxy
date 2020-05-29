@@ -13,6 +13,7 @@
 #include <exception>
 #include <fstream>
 #include <functional>
+#include <future>
 #include <nlohmann/json.hpp>
 #include <pthread.h>
 #include <sched.h>
@@ -35,13 +36,12 @@ bool loadExecsnoopLib() {
       error("dlopen %s failed: %s", LIBEXECSNOOP_SO, dlerror());
       return false;
     }
-    _startThread =
-        reinterpret_cast<decltype(&startThread)>(dlsym(handle_dl, "startThread"));
+    _startThread = reinterpret_cast<startThread_t *>(dlsym(handle_dl, "startThread"));
     if (_startThread == NULL) {
-      error("dlsym startThread failed: %s", dlerror());
+      error("dlsym startThread func failed: %s", dlerror());
       return false;
     }
-    info("dlsym startThread success");
+    info("dlsym startThread func success");
     return true;
   } catch (exception &e) {
     debug("exception: %s", e.what());
@@ -57,11 +57,8 @@ bool enable_socketserver = true;
 bool enable_execsnoop = false;
 
 class cgproxyd {
-  SOCKET::thread_arg socketserver_thread_arg;
-  pthread_t socket_thread_id = THREAD_UNDEF;
-
-  EXECSNOOP::thread_arg execsnoop_thread_arg;
-  pthread_t execsnoop_thread_id = THREAD_UNDEF;
+  thread socketserver_thread;
+  thread execsnoop_thread;
 
   Config config;
 
@@ -185,33 +182,29 @@ class cgproxyd {
     }
   }
 
-  pthread_t startSocketListeningThread() {
-    socketserver_thread_arg.handle_msg = &handle_msg_static;
-    pthread_t thread_id;
-    int status =
-        pthread_create(&thread_id, NULL, &SOCKET::startThread, &socketserver_thread_arg);
-    if (status != 0) {
-      error("socket thread create failed");
-      return THREAD_UNDEF;
-    }
-    return thread_id;
+  void startSocketListeningThread() {
+    promise<void> status;
+    future<void> status_f = status.get_future();
+    thread th(SOCKET::startThread, handle_msg_static, move(status));
+    socketserver_thread = move(th);
+
+    status_f.wait();
+    info("socketserver thread started");
   }
 
-  pthread_t startExecsnoopThread() {
+  void startExecsnoopThread() {
     if (!EXECSNOOP::loadExecsnoopLib() || EXECSNOOP::_startThread == NULL) {
-      error("execsnoop start failed, maybe bcc not installed");
-      return THREAD_UNDEF;
+      error("execsnoop not ready to start, maybe bcc not installed");
+      return;
     }
 
-    execsnoop_thread_arg.handle_pid = &handle_pid_static;
-    pthread_t thread_id;
-    int status =
-        pthread_create(&thread_id, NULL, EXECSNOOP::_startThread, &execsnoop_thread_arg);
-    if (status != 0) {
-      error("execsnoop thread create failed");
-      return THREAD_UNDEF;
-    }
-    return thread_id;
+    promise<void> status;
+    future<void> status_f = status.get_future();
+    thread th(EXECSNOOP::_startThread, handle_pid_static, move(status));
+    execsnoop_thread = move(th);
+
+    status_f.wait();
+    info("execsnoop thread started");
   }
 
   void processRunningProgram() {
@@ -247,17 +240,12 @@ public:
     applyConfig();
     processRunningProgram();
 
-    if (enable_socketserver) {
-      socket_thread_id = startSocketListeningThread();
-      if (socket_thread_id > 0) info("socket server listening thread started");
-    }
-    if (enable_execsnoop) {
-      execsnoop_thread_id = startExecsnoopThread();
-      if (execsnoop_thread_id > 0) info("execsnoop thread started");
-    }
+    if (enable_socketserver) startSocketListeningThread();
+    if (enable_execsnoop) startExecsnoopThread();
 
-    pthread_join(socket_thread_id, NULL);
-    pthread_join(execsnoop_thread_id, NULL);
+    if (socketserver_thread.joinable()) socketserver_thread.join();
+    if (execsnoop_thread.joinable()) execsnoop_thread.join();
+
     return 0;
   }
   int applyConfig() {

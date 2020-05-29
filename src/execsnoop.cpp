@@ -90,11 +90,10 @@ int execsnoop() {
   return 0;
 }
 
-void *startThread(void *arg) {
-  thread_arg *p = (thread_arg *)arg;
-  callback = p->handle_pid;
+void startThread(function<int(int)> c, promise<void> status) {
+  status.set_value();
+  callback = c;
   execsnoop();
-  return (void *)0;
 }
 
 } // namespace CGPROXY::EXECSNOOP

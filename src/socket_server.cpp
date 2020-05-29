@@ -49,17 +49,16 @@ void SocketServer::socketListening(function<int(char *)> callback) {
   }
 }
 
-void *startThread(void *arg) {
-  thread_arg *p = (thread_arg *)arg;
-  SocketServer server;
-  server.socketListening(p->handle_msg);
-  return (void *)0;
-}
-
 SocketServer::~SocketServer() {
   close(sfd);
   close(cfd);
   unlink(SOCKET_PATH);
+}
+
+void startThread(function<int(char *)> callback, promise<void> status) {
+  status.set_value();
+  SocketServer server;
+  server.socketListening(callback);
 }
 
 } // namespace CGPROXY::SOCKET

@@ -2,6 +2,7 @@
 #define SOCKET_SERVER_H
 
 #include <functional>
+#include <future>
 #include <stdlib.h>
 #include <sys/un.h>
 using namespace std;
@@ -14,11 +15,6 @@ namespace CGPROXY::SOCKET {
     continue;                                                                            \
   }
 
-struct thread_arg {
-  function<int(char *)> handle_msg;
-};
-void *startThread(void *arg);
-
 class SocketServer {
 public:
   int sfd = -1, cfd = -1, flag = -1;
@@ -27,6 +23,8 @@ public:
   void socketListening(function<int(char *)> callback);
   ~SocketServer();
 };
+
+void startThread(function<int(char *)> callback, promise<void> status);
 
 } // namespace CGPROXY::SOCKET
 

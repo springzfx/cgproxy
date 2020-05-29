@@ -2,6 +2,7 @@
 #define EXECSNOOP_HPP 1
 
 #include <functional>
+#include <future>
 #include <string>
 using namespace std;
 
@@ -13,11 +14,9 @@ extern function<int(int)> callback;
 void handle_events(void *cb_cookie, void *data, int data_size);
 int execsnoop();
 
-struct thread_arg {
-  function<int(int)> handle_pid;
-};
-extern "C" void *startThread(void *arg);
-decltype(&startThread) _startThread; // only for dlsym()
+extern "C" void startThread(function<int(int)> c, promise<void> status);
+typedef void startThread_t(function<int(int)>, promise<void>);
+startThread_t *_startThread; // only for dlsym()
 
 } // namespace CGPROXY::EXECSNOOP
 #endif

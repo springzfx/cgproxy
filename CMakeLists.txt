@@ -3,7 +3,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(cgproxy VERSION 0.14)
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-unused-result")
+add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-result -Wno-unused-parameter)
+
+# for clangd
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(with_execsnoop "enable program level proxy control feature, need bcc installed" ON)
 option(build_tools OFF)

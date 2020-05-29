@@ -149,8 +149,7 @@ class cgproxyd {
       return MSG_ERROR;
     }
 
-    int type, status;
-    int pid, cgroup_target;
+    int type, status, pid;
     try {
       type = j.at("type").get<int>();
       switch (type) {

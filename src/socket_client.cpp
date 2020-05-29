@@ -42,11 +42,7 @@ void send(const char *msg, int &status) {
 }
 
 void send(const string msg, int &status) {
-  int msg_len = msg.length();
-  char buff[msg_len];
-  msg.copy(buff, msg_len, 0);
-  buff[msg_len] = '\0';
-  send(buff, status);
+  send(msg.c_str(), status);
   debug("return status: %d", status);
 }
 

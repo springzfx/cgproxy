@@ -108,24 +108,17 @@ string getCgroup(const string &pid) {
   string cgroup_f = to_str("/proc/", pid, "/cgroup");
   if (!fileExist(cgroup_f)) return "";
 
-  stringstream buffer;
-  string cgroup;
-  FILE *f = fopen(cgroup_f.c_str(), "r");
-  char buf[READ_SIZE_MAX] = "";
-  char *flag = buf;
-  while (flag != NULL) {
-    buffer.clear();
-    while (!flag || buf[strlen(buf) - 1] != '\n') {
-      flag = fgets(buf, READ_SIZE_MAX, f);
-      if (flag) buffer << buf;
-    }
-    string line = buffer.str();
-    if (line[0] == '0') { // 0::/user.slice/user-1000.slice
-      cgroup = (*(line.end() - 1) == '\n') ? line.substr(3, line.length() - 4)
-                                           : line.substr(3);
+  string cgroup, line;
+  ifstream ifs(cgroup_f);
+  debug("prcessing file %s", cgroup_f.c_str());
+  while (ifs.good() && getline(ifs, line)) {
+    debug("process line: %s",  line.c_str());
+    if (line[0] == '0') {
+      cgroup = line.substr(3);
+      debug("get cgroup of %s: %s", pid.c_str(), cgroup.c_str());
       break;
     }
   }
-  fclose(f);
+  ifs.close();
   return cgroup;
 }

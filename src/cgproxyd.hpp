@@ -45,7 +45,7 @@ bool loadExecsnoopLib() {
     info("dlsym startThread success");
     return true;
   } catch (exception &e) {
-    debug("exception: %s",e.what());
+    debug("exception: %s", e.what());
     return false;
   }
 }

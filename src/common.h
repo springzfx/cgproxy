@@ -46,6 +46,7 @@ extern bool enable_info;
     fprintf(stderr, "error: ");                                                          \
     fprintf(stderr, __VA_ARGS__);                                                        \
     fprintf(stderr, "\n");                                                               \
+    fflush(stderr);                                                                      \
   }
 
 #define debug(...)                                                                       \
@@ -53,6 +54,7 @@ extern bool enable_info;
     fprintf(stdout, "debug: ");                                                          \
     fprintf(stdout, __VA_ARGS__);                                                        \
     fprintf(stdout, "\n");                                                               \
+    fflush(stdout);                                                                      \
   }
 
 #define info(...)                                                                        \
@@ -60,6 +62,7 @@ extern bool enable_info;
     fprintf(stdout, "info: ");                                                           \
     fprintf(stdout, __VA_ARGS__);                                                        \
     fprintf(stdout, "\n");                                                               \
+    fflush(stdout);                                                                      \
   }
 
 #define return_error return -1

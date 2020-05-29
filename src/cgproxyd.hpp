@@ -44,7 +44,10 @@ bool loadExecsnoopLib() {
     }
     info("dlsym startThread success");
     return true;
-  } catch (exception &e) { return false; }
+  } catch (exception &e) {
+    debug("exception: %s",e.what());
+    return false;
+  }
 }
 } // namespace CGPROXY::EXECSNOOP
 
@@ -253,7 +256,6 @@ public:
       execsnoop_thread_id = startExecsnoopThread();
       if (execsnoop_thread_id > 0) info("execsnoop thread started");
     }
-    cout << flush;
 
     pthread_join(socket_thread_id, NULL);
     pthread_join(execsnoop_thread_id, NULL);
@@ -295,7 +297,6 @@ void processArgs(const int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-  setbuf(stdout, NULL);
   processArgs(argc, argv);
   if (print_help) {
     print_usage();

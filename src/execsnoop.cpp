@@ -60,15 +60,11 @@ void handle_events(void *cb_cookie, void *data, int data_size) {
 int execsnoop() {
   debug("starting execsnoop");
   ebpf::BPF bpf;
-
-  try {
-    auto init_res = bpf.init(BPF_PROGRAM);
-    if (init_res.code() != 0) {
-      std::cerr << init_res.msg() << std::endl;
-      return 1;
-    }
-  } catch (exception &e) {
-    error("bpf init failed, maybe linux-headers not installed: %s", e.what());
+  
+  auto init_res = bpf.init(BPF_PROGRAM);
+  if (init_res.code() != 0) {
+    error("bpf init failed, maybe linux-headers not installed");
+    std::cerr << init_res.msg() << std::endl;
     return 1;
   }
 

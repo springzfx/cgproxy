@@ -109,7 +109,7 @@ Config file: **/etc/cgproxy/config.json**
 
 - **port** tproxy listenning port
 
-- program level proxy control, need `bcc` installed to work
+- program level proxy control, need `bcc` and `linux-headers` installed to work
 
   - **program_proxy**  program need to be proxied
   - **program_noproxy** program that won't be proxied

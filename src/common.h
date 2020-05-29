@@ -20,7 +20,7 @@ using namespace std;
 #define CGROUP_PROXY_PRESVERED "/proxy.slice"
 #define CGROUP_NOPROXY_PRESVERED "/noproxy.slice"
 
-#define THREAD_UNDEF 0
+#define THREAD_TIMEOUT 5
 
 #define MSG_TYPE_CONFIG_JSON 1
 #define MSG_TYPE_CONFIG_PATH 2

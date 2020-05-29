@@ -188,8 +188,12 @@ class cgproxyd {
     thread th(SOCKET::startThread, handle_msg_static, move(status));
     socketserver_thread = move(th);
 
-    status_f.wait();
-    info("socketserver thread started");
+    future_status fstatus=status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));
+    if (fstatus == std::future_status::ready) {
+      info("socketserver thread started");
+    }else{
+      error("socketserver thread timeout, maybe failed");
+    }
   }
 
   void startExecsnoopThread() {
@@ -203,8 +207,12 @@ class cgproxyd {
     thread th(EXECSNOOP::_startThread, handle_pid_static, move(status));
     execsnoop_thread = move(th);
 
-    status_f.wait();
-    info("execsnoop thread started");
+    future_status fstatus=status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));
+    if (fstatus == std::future_status::ready) {
+      info("execsnoop thread started");
+    }else{
+      error("execsnoop thread timeout, maybe failed");
+    }
   }
 
   void processRunningProgram() {

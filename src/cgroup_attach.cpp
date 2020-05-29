@@ -17,11 +17,11 @@ string cgroup2_mount_point = get_cgroup2_mount_point();
 
 string get_cgroup2_mount_point() {
   stringstream buffer;
-  FILE *fp = popen("findmnt -t cgroup2 -n -o TARGET", "r");
+  unique_ptr<FILE, decltype(&pclose)> fp(popen("findmnt -t cgroup2 -n -o TARGET", "r"),
+                                         &pclose);
   if (!fp) return "";
   char buf[READ_SIZE_MAX];
-  while (fgets(buf, READ_SIZE_MAX, fp) != NULL) { buffer << buf; }
-  pclose(fp);
+  while (fgets(buf, READ_SIZE_MAX, fp.get()) != NULL) { buffer << buf; }
   string s = buffer.str();
   s.pop_back(); // remove newline character
   return s;

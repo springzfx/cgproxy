@@ -98,5 +98,3 @@ void *startThread(void *arg) {
 }
 
 } // namespace CGPROXY::EXECSNOOP
-
-extern "C" void *_startThread(void *arg) { return CGPROXY::EXECSNOOP::startThread(arg); }

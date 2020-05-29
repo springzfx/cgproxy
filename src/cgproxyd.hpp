@@ -27,8 +27,6 @@ using namespace ::CGPROXY::CGROUP;
 // using namespace ::CGPROXY::EXECSNOOP;
 
 namespace CGPROXY::EXECSNOOP {
-typedef void *(*startThread_t)(void *arg);
-startThread_t _startThread;
 bool loadExecsnoopLib() {
   try {
     info("loading %s", LIBEXECSNOOP_SO);
@@ -37,7 +35,8 @@ bool loadExecsnoopLib() {
       error("dlopen %s failed: %s", LIBEXECSNOOP_SO, dlerror());
       return false;
     }
-    _startThread = reinterpret_cast<startThread_t>(dlsym(handle_dl, "_startThread"));
+    _startThread =
+        reinterpret_cast<decltype(&startThread)>(dlsym(handle_dl, "startThread"));
     if (_startThread == NULL) {
       error("dlsym startThread failed: %s", dlerror());
       return false;

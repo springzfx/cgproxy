@@ -16,7 +16,8 @@ int execsnoop();
 struct thread_arg {
   function<int(int)> handle_pid;
 };
-void *startThread(void *arg);
+extern "C" void *startThread(void *arg);
+decltype(&startThread) _startThread; // only for dlsym()
 
 } // namespace CGPROXY::EXECSNOOP
 #endif

@@ -51,21 +51,21 @@ bool dirExist(const string &path) {
 
 vector<int> bash_pidof(const string &path) {
   vector<int> pids;
-  FILE *fp = popen(to_str("pidof ", path).c_str(), "r");
+  unique_ptr<FILE, decltype(&pclose)> fp(popen(to_str("pidof ", path).c_str(), "r"),
+                                         &pclose);
   if (!fp) return pids;
   int pid;
-  while (fscanf(fp, "%d", &pid) != EOF) { pids.push_back(pid); }
-  pclose(fp);
+  while (fscanf(fp.get(), "%d", &pid) != EOF) { pids.push_back(pid); }
   return pids;
 }
 
 string bash_which(const string &name) {
   stringstream buffer;
-  FILE *fp = popen(to_str("which ", name).c_str(), "r");
+  unique_ptr<FILE, decltype(&pclose)> fp(popen(to_str("which ", name).c_str(), "r"),
+                                         &pclose);
   if (!fp) return "";
   char buf[READ_SIZE_MAX];
-  while (fgets(buf, READ_SIZE_MAX, fp) != NULL) { buffer << buf; }
-  pclose(fp);
+  while (fgets(buf, READ_SIZE_MAX, fp.get()) != NULL) { buffer << buf; }
   string s = buffer.str();
   s.pop_back(); // remove newline character
   return s;
@@ -73,11 +73,11 @@ string bash_which(const string &name) {
 
 string bash_readlink(const string &path) {
   stringstream buffer;
-  FILE *fp = popen(to_str("readlink -e ", path).c_str(), "r");
+  unique_ptr<FILE, decltype(&pclose)> fp(popen(to_str("readlink -e ", path).c_str(), "r"),
+                                         &pclose);
   if (!fp) return "";
   char buf[READ_SIZE_MAX];
-  while (fgets(buf, READ_SIZE_MAX, fp) != NULL) { buffer << buf; }
-  pclose(fp);
+  while (fgets(buf, READ_SIZE_MAX, fp.get()) != NULL) { buffer << buf; }
   string s = buffer.str();
   s.pop_back(); // remove newline character
   return s;
@@ -112,7 +112,7 @@ string getCgroup(const string &pid) {
   ifstream ifs(cgroup_f);
   debug("prcessing file %s", cgroup_f.c_str());
   while (ifs.good() && getline(ifs, line)) {
-    debug("process line: %s",  line.c_str());
+    debug("process line: %s", line.c_str());
     if (line[0] == '0') {
       cgroup = line.substr(3);
       debug("get cgroup of %s: %s", pid.c_str(), cgroup.c_str());

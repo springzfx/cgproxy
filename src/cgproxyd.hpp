@@ -15,7 +15,6 @@
 #include <functional>
 #include <future>
 #include <nlohmann/json.hpp>
-#include <pthread.h>
 #include <sched.h>
 #include <sys/file.h>
 #include <unistd.h>

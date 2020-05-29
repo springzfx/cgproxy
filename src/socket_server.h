@@ -20,7 +20,7 @@ public:
   int sfd = -1, cfd = -1, flag = -1;
   struct sockaddr_un unix_socket;
 
-  void socketListening(function<int(char *)> callback);
+  void socketListening(function<int(char *)> callback, promise<void> status);
   ~SocketServer();
 };
 

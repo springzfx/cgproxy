@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 
 namespace CGPROXY::SOCKET {
 
-void SocketServer::socketListening(function<int(char *)> callback) {
+void SocketServer::socketListening(function<int(char *)> callback, promise<void> status) {
   debug("starting socket listening");
   sfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
@@ -25,6 +25,8 @@ void SocketServer::socketListening(function<int(char *)> callback) {
 
   listen(sfd, LISTEN_BACKLOG);
   chmod(SOCKET_PATH, S_IRWXU | S_IRWXG | S_IRWXO);
+
+  status.set_value();
 
   while (true) {
     close(cfd);
@@ -56,9 +58,8 @@ SocketServer::~SocketServer() {
 }
 
 void startThread(function<int(char *)> callback, promise<void> status) {
-  status.set_value();
   SocketServer server;
-  server.socketListening(callback);
+  server.socketListening(callback, move(status));
 }
 
 } // namespace CGPROXY::SOCKET

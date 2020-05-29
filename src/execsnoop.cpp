@@ -48,6 +48,7 @@ struct data_t {
 };
 
 function<int(int)> callback = NULL;
+promise<void> status;
 
 void handle_events(void *cb_cookie, void *data, int data_size) {
   auto event = static_cast<data_t *>(data);
@@ -91,13 +92,15 @@ int execsnoop() {
     return 1;
   }
 
+  status.set_value();
+
   while (true) bpf.poll_perf_buffer("events");
 
   return 0;
 }
 
-void startThread(function<int(int)> c, promise<void> status) {
-  status.set_value();
+void startThread(function<int(int)> c, promise<void> _status) {
+  status = move(_status);
   callback = c;
   execsnoop();
 }

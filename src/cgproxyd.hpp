@@ -235,6 +235,7 @@ class cgproxyd {
     future_status fstatus = status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));
     if (fstatus == std::future_status::ready) {
       info("execsnoop thread started");
+      processRunningProgram();
     } else {
       error("execsnoop thread timeout, maybe failed");
     }
@@ -291,7 +292,6 @@ public:
 
     config.loadFromFile(DEFAULT_CONFIG_FILE);
     applyConfig();
-    processRunningProgram();
 
     if (enable_socketserver) startSocketListeningThread();
     if (enable_execsnoop) startExecsnoopThread();

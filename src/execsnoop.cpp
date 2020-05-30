@@ -60,7 +60,7 @@ void handle_events(void *cb_cookie, void *data, int data_size) {
 int execsnoop() {
   debug("starting execsnoop");
   ebpf::BPF bpf;
-  
+
   auto init_res = bpf.init(BPF_PROGRAM);
   if (init_res.code() != 0) {
     error("bpf init failed, maybe linux-headers not installed");

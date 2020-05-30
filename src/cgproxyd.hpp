@@ -79,33 +79,53 @@ class cgproxyd {
   }
 
   int handle_pid(int pid) {
-    auto path = realpath(to_str("/proc/", pid, "/exe").c_str(), NULL);
+    unique_ptr<char[], decltype(&free)> path(
+        realpath(to_str("/proc/", pid, "/exe").c_str(), NULL), &free);
     if (path == NULL) {
-      debug("pid %d live life too short", pid);
+      debug("execsnoop: pid %d live life too short", pid);
       return 0;
     }
-    debug("execsnoop: %d %s", pid, path);
+    debug("execsnoop: %d %s", pid, path.get());
 
     vector<string> v;
 
     v = config.program_noproxy;
-    if (find(v.begin(), v.end(), path) != v.end()) {
-      if (!belongToCgroup(getCgroup(pid), config.cgroup_noproxy)) {
-        info("execsnoop noproxy: %d %s", pid, path);
-        free(path);
+    if (find(v.begin(), v.end(), path.get()) != v.end()) {
+      string cg = getCgroup(pid);
+      if (cg.empty()) {
+        debug("execsnoop: cgroup get failed, ignore: %d %s", pid, path.get());
+        return 0;
+      }
+      if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
+          belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
+        info("execsnoop: already in preserverd cgroup, leave alone: %d %s", pid,
+             path.get());
+        return 0;
+      }
+      if (!belongToCgroup(cg, config.cgroup_noproxy)) {
+        info("execsnoop; noproxy: %d %s", pid, path.get());
         return attach(pid, config.cgroup_noproxy_preserved);
       }
     }
 
     v = config.program_proxy;
-    if (find(v.begin(), v.end(), path) != v.end()) {
-      if (!belongToCgroup(getCgroup(pid), config.cgroup_proxy)) {
-        info("execsnoop proxied: %d %s", pid, path);
-        free(path);
+    if (find(v.begin(), v.end(), path.get()) != v.end()) {
+      string cg = getCgroup(pid);
+      if (cg.empty()) {
+        debug("execsnoop: cgroup get failed, ignore: %d %s", pid, path.get());
+        return 0;
+      }
+      if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
+          belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
+        info("execsnoop: already in preserverd cgroup, leave alone: %d %s", pid,
+             path.get());
+        return 0;
+      }
+      if (!belongToCgroup(cg, config.cgroup_proxy)) {
+        info("execsnoop: proxied: %d %s", pid, path.get());
         return attach(pid, config.cgroup_proxy_preserved);
       }
     }
-    free(path);
     return 0;
   }
 
@@ -155,25 +175,32 @@ class cgproxyd {
       switch (type) {
       case MSG_TYPE_CONFIG_JSON:
         status = config.loadFromJsonStr(j.at("data").dump());
+        info("process received config json msg");
         if (status == SUCCESS) status = applyConfig();
         return status;
         break;
       case MSG_TYPE_CONFIG_PATH:
         status = config.loadFromFile(j.at("data").get<string>());
+        info("process received config path msg");
         if (status == SUCCESS) status = applyConfig();
         return status;
         break;
       case MSG_TYPE_PROXY_PID:
         pid = j.at("data").get<int>();
+        info("process proxy pid msg: %d", pid);
         status = attach(pid, config.cgroup_proxy_preserved);
         return status;
         break;
       case MSG_TYPE_NOPROXY_PID:
         pid = j.at("data").get<int>();
+        info("process noproxy pid msg: %d", pid);
         status = attach(pid, config.cgroup_noproxy_preserved);
         return status;
         break;
-      default: return MSG_ERROR; break;
+      default:
+        error("unknown msg: %d", pid);
+        return MSG_ERROR;
+        break;
       };
     } catch (out_of_range &e) { return MSG_ERROR; } catch (exception &e) {
       return ERROR;
@@ -186,10 +213,10 @@ class cgproxyd {
     thread th(SOCKET::startThread, handle_msg_static, move(status));
     socketserver_thread = move(th);
 
-    future_status fstatus=status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));
+    future_status fstatus = status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));
     if (fstatus == std::future_status::ready) {
       info("socketserver thread started");
-    }else{
+    } else {
       error("socketserver thread timeout, maybe failed");
     }
   }
@@ -205,10 +232,10 @@ class cgproxyd {
     thread th(EXECSNOOP::_startThread, handle_pid_static, move(status));
     execsnoop_thread = move(th);
 
-    future_status fstatus=status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));
+    future_status fstatus = status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));
     if (fstatus == std::future_status::ready) {
       info("execsnoop thread started");
-    }else{
+    } else {
       error("execsnoop thread timeout, maybe failed");
     }
   }
@@ -217,14 +244,34 @@ class cgproxyd {
     debug("process running program");
     for (auto &path : config.program_noproxy)
       for (auto &pid : bash_pidof(path)) {
-        if (!belongToCgroup(getCgroup(pid), config.cgroup_noproxy)) {
+        string cg = getCgroup(pid);
+        if (cg.empty()) {
+          debug("cgroup get failed, ignore: %d %s", pid, path.c_str());
+          continue;
+        }
+        if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
+            belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
+          debug("already in preserverd cgroup, leave alone: %d %s", pid, path.c_str());
+          continue;
+        }
+        if (!belongToCgroup(cg, config.cgroup_noproxy)) {
           int status = attach(pid, config.cgroup_noproxy_preserved);
           if (status == 0) info("noproxy running process %d %s", pid, path.c_str());
         }
       }
     for (auto &path : config.program_proxy)
       for (auto &pid : bash_pidof(path)) {
-        if (!belongToCgroup(getCgroup(pid), config.cgroup_proxy)) {
+        string cg = getCgroup(pid);
+        if (cg.empty()) {
+          debug("cgroup get failed, ignore: %d %s", pid, path.c_str());
+          continue;
+        }
+        if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
+            belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
+          debug("already in preserverd cgroup, leave alone: %d %s", pid, path.c_str());
+          continue;
+        }
+        if (!belongToCgroup(cg, config.cgroup_proxy)) {
           int status = attach(pid, config.cgroup_proxy_preserved);
           if (status == 0) info("proxied running process %d %s", pid, path.c_str());
         }

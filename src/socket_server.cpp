@@ -1,10 +1,10 @@
 #include "socket_server.h"
 #include "common.h"
 #include <filesystem>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <stdlib.h>  
 
 namespace fs = std::filesystem;
 
@@ -40,7 +40,7 @@ void SocketServer::socketListening(function<int(char *)> callback, promise<void>
     flag = read(cfd, &msg_len, sizeof(int));
     continue_if_error(flag, "read length");
     // read msg
-    auto msg=(char*)malloc(msg_len+1);
+    auto msg = (char *)malloc(msg_len + 1);
     flag = read(cfd, msg, msg_len * sizeof(char));
     continue_if_error(flag, "read msg");
     msg[msg_len] = '\0';

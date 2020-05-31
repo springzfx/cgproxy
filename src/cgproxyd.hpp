@@ -198,7 +198,7 @@ class cgproxyd {
         return status;
         break;
       default:
-        error("unknown msg: %d", pid);
+        error("unknown msg");
         return MSG_ERROR;
         break;
       };

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(cgproxy VERSION 0.14)
+project(cgproxy VERSION 0.15)
 add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-result -Wno-unused-parameter)
 
 # for clangd

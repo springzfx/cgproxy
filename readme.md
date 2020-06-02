@@ -216,3 +216,7 @@ sudo systemctl restart cgproxy.service
 ## Licences
 
 cgproxy is licenced under [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0) 
+
+## Known Issus
+
+- docker breaks cgroup path match, add kernel parameter `cgroup_no_v1=net_cls,net_prio` to resolve, see [issue #3](https://github.com/springzfx/cgproxy/issues/3) for detail

@@ -112,7 +112,7 @@ string getCgroup(const string &pid) {
   ifstream ifs(cgroup_f);
   debug("prcessing file %s", cgroup_f.c_str());
   while (ifs.good() && getline(ifs, line)) {
-    debug("process line: %s", line.c_str());
+    // debug("process line: %s", line.c_str());
     if (line[0] == '0') {
       cgroup = line.substr(3);
       debug("get cgroup of %s: %s", pid.c_str(), cgroup.c_str());

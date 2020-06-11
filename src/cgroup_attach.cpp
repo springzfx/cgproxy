@@ -9,6 +9,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <thread>
 #include <unistd.h>
 
 namespace CGPROXY::CGROUP {
@@ -68,9 +69,19 @@ int attach(const string pid, const string cgroup_target) {
   }
 
   // put pid to target cgroup
-  ofstream procs(cgroup_target_procs, ofstream::app);
+  if (write2procs(pid, cgroup_target_procs) != 0) return_error;
+
+  // wait for small period and check again
+  this_thread::sleep_for(std::chrono::milliseconds(100));
+  if (getCgroup(pid) != cgroup_target && write2procs(pid, cgroup_target_procs) != 0)
+    return_error;
+  return_success;
+}
+
+int write2procs(string pid, string procspath) {
+  ofstream procs(procspath, ofstream::app);
   if (!procs.is_open()) {
-    error("open file %s failed", cgroup_target_procs.c_str());
+    error("open file %s failed", procspath.c_str());
     return_error;
   }
   procs << pid.c_str() << endl;
@@ -79,7 +90,7 @@ int attach(const string pid, const string cgroup_target) {
   // maybe there some write error, for example process pid may not exist
   if (!procs) {
     error("write %s to %s failed, maybe process %s not exist", pid.c_str(),
-          cgroup_target_procs.c_str(), pid.c_str());
+          procspath.c_str(), pid.c_str());
     return_error;
   }
   return_success;

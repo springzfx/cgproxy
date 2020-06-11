@@ -103,8 +103,13 @@ class cgproxyd {
         return 0;
       }
       if (!belongToCgroup(cg, config.cgroup_noproxy)) {
-        info("execsnoop; noproxy: %d %s", pid, path.get());
-        return attach(pid, config.cgroup_noproxy_preserved);
+        int res = attach(pid, config.cgroup_noproxy_preserved);
+        if (res == 0) {
+          info("execsnoop; noproxy: %d %s", pid, path.get());
+        } else {
+          info("execsnoop; noproxy failed: %d %s", pid, path.get());
+        }
+        return res;
       }
     }
 
@@ -122,8 +127,13 @@ class cgproxyd {
         return 0;
       }
       if (!belongToCgroup(cg, config.cgroup_proxy)) {
-        info("execsnoop: proxied: %d %s", pid, path.get());
-        return attach(pid, config.cgroup_proxy_preserved);
+        int res = attach(pid, config.cgroup_proxy_preserved);
+        if (res == 0) {
+          info("execsnoop: proxied: %d %s", pid, path.get());
+        } else {
+          info("execsnoop: proxied failed: %d %s", pid, path.get());
+        }
+        return res;
       }
     }
     return 0;

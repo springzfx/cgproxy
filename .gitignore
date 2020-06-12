@@ -5,3 +5,6 @@ build
 v2ray_config/proxy
 v2ray_config/06_outbounds_proxy.json
 aur-*
+gh-md-toc
+add_toc.sh
+compile_commands.json

@@ -109,7 +109,7 @@ Config file: **/etc/cgproxy/config.json**
 
 - **port** tproxy listenning port
 
-- program level proxy control, need `bcc` and `linux-headers` installed to work
+- program level proxy control, need `bcc/libbpfcc` and `linux-headers` installed to work
 
   - **program_proxy**  program need to be proxied
   - **program_noproxy** program that won't be proxied
@@ -211,7 +211,7 @@ sudo systemctl restart cgproxy.service
 - Offer you qv2ray config example
   
 
-![Qv2ray config example](https://i.loli.net/2020/04/28/bdQBzUD37FOgfvt.png)
+![Qv2ray config example](https://i.loli.net/2020/06/12/6ltax93bv7NCTHU.png)
 
 ## Licences
 

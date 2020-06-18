@@ -55,8 +55,8 @@ Main feature:
 ## How to install
 
 ```bash
-cd execsnoop-libbpf && make libexecsnoop.so
-mkdir build && cd build && cmake .. && make install
+cd execsnoop-libbpf && make CFLAGS="-O2 -Wall -s" libexecsnoop.so
+mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make install
 ```
 
 - It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy). 

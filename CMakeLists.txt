@@ -8,7 +8,7 @@ add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-result -Wno-unused-para
 # for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(with_execsnoop "enable program level proxy control feature, need bcc installed" ON)
+# option(with_execsnoop "enable program level proxy control feature, need bcc installed" ON)
 option(build_tools OFF)
 option(build_test  OFF)
 

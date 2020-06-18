@@ -55,7 +55,8 @@ Main feature:
 ## How to install
 
 ```bash
-mkdir build && cd build && cmake .. && make && make install
+cd execsnoop-libbpf && make install
+mkdir build && cd build && cmake .. && make install
 ```
 
 - It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy). 
@@ -109,7 +110,7 @@ Config file: **/etc/cgproxy/config.json**
 
 - **port** tproxy listenning port
 
-- program level proxy control, need `bcc/libbpfcc` and `linux-headers` installed to work
+- program level proxy control:
 
   - **program_proxy**  program need to be proxied
   - **program_noproxy** program that won't be proxied
@@ -179,16 +180,6 @@ sudo systemctl restart cgproxy.service
   ```bash
   cgnoproxy [--debug] <CMD>
   cgnoproxy [--debug] --pid <PID>
-  ```
-  
-- `cgattach` attach specific process pid to specific cgroup which will create if not exist , cgroup can be only one level down exist cgroup, otherwise created fail. 
-
-  You need to set `set(build_tools ON)` in *CmakeLists.txt* to build this.
-  
-  ```bash
-  cgattch <pid> <cgroup>
-  # example
-  cgattch 9999 /proxy.slice
   ```
   
 - For more detail command usage, see `man cgproxyd`  `man cgproxy`  `man cgnoproxy` 

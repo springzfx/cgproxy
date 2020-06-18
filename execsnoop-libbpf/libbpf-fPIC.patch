@@ -1,0 +1,21 @@
+diff --git src/Makefile src/Makefile
+index d0308c3..fcc3b6f 100644
+--- src/Makefile
++++ src/Makefile
+@@ -15,6 +15,7 @@ ifneq ($(FEATURE_REALLOCARRAY),)
+ 	ALL_CFLAGS += -DCOMPAT_NEED_REALLOCARRAY
+ endif
+ 
++STATIC_CFLAGS += -fPIC
+ SHARED_CFLAGS += -fPIC -fvisibility=hidden -DSHARED
+ 
+ CFLAGS ?= -g -O2 -Werror -Wall
+@@ -99,7 +100,7 @@ $(SHARED_OBJDIR):
+ 	mkdir -p $(SHARED_OBJDIR)
+ 
+ $(STATIC_OBJDIR)/%.o: %.c | $(STATIC_OBJDIR)
+-	$(CC) $(ALL_CFLAGS) $(CPPFLAGS) -c $< -o $@
++	$(CC) $(ALL_CFLAGS) $(STATIC_CFLAGS) $(CPPFLAGS) -c $< -o $@
+ 
+ $(SHARED_OBJDIR)/%.o: %.c | $(SHARED_OBJDIR)
+ 	$(CC) $(ALL_CFLAGS) $(SHARED_CFLAGS) $(CPPFLAGS) -c $< -o $@

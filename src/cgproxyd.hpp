@@ -4,7 +4,7 @@
 #include "cgroup_attach.h"
 #include "common.h"
 #include "config.h"
-#include "execsnoop.h"
+#include "execsnoop_share.h"
 #include "socket_server.h"
 #include <algorithm>
 #include <csignal>

@@ -1,13 +1,8 @@
 find_package(Threads REQUIRED)
 find_package(nlohmann_json REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/execsnoop-libbpf/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-if (with_execsnoop)
-add_library(execsnoop MODULE execsnoop.cpp common.cpp)
-target_link_libraries(execsnoop bcc)
-install(TARGETS execsnoop DESTINATION /usr/lib/cgproxy/ PERMISSIONS ${basic_permission})
-endif()
 
 add_executable(main main.cpp
                     common.cpp config.cpp cgroup_attach.cpp

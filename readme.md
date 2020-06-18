@@ -55,7 +55,7 @@ Main feature:
 ## How to install
 
 ```bash
-cd execsnoop-libbpf && make install
+cd execsnoop-libbpf && make libexecsnoop.so
 mkdir build && cd build && cmake .. && make install
 ```
 

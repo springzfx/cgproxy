@@ -12,3 +12,4 @@ set_target_properties(main PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(main PROPERTIES OUTPUT_NAME cgproxy)
 
 install(TARGETS main DESTINATION /usr/bin PERMISSIONS ${basic_permission})
+install(FILES ../execsnoop-libbpf/libexecsnoop.so DESTINATION /usr/lib/cgproxy/ PERMISSIONS ${basic_permission})

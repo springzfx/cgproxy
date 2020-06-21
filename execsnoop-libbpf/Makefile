@@ -67,12 +67,12 @@ $(OUTPUT)/%.bpf.o: %.bpf.c $(LIBBPF_OBJ) $(wildcard %.h) vmlinux.h | $(OUTPUT)
 vmlinux.h:
 	$(Q)$(BPFTOOL) btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 
-$(LIBBPF_OBJ): patch
-	$(Q)cd $(LIBBPF_DIR) && make DESTDIR=${OUTPUT} prefix=$(OUTPUT) install install_headers
+$(LIBBPF_OBJ):
+	$(Q)cd $(LIBBPF_DIR) && make DESTDIR=${OUTPUT} prefix=$(OUTPUT) CPPFLAGS="-fPIC" install install_headers
 
-patch: | $(LIBBPF_DIR)/Makefile
-	@echo "patching libbpf-fPIC.patch"
-	$(Q)cd libbpf/src && patch -p1 --forward -i ../../libbpf-fPIC.patch || true
+# patch: | $(LIBBPF_DIR)/Makefile
+# 	@echo "patching libbpf-fPIC.patch"
+# 	$(Q)cd libbpf/src && patch -p1 --forward -i ../../libbpf-fPIC.patch || true
 
 # build libexecsnoop.so
 $(LIBSO): execsnoop_share.cpp $(OUTPUT)/execsnoop.skel.h $(LIBBPF_OBJ) $(COMMON_OBJ) | $(OUTPUT) 

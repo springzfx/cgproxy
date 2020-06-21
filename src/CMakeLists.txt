@@ -10,6 +10,14 @@ add_executable(main main.cpp
 target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json Threads::Threads ${CMAKE_DL_LIBS})
 set_target_properties(main PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(main PROPERTIES OUTPUT_NAME cgproxy)
+install(TARGETS main RUNTIME)
 
-install(TARGETS main DESTINATION /usr/bin PERMISSIONS ${basic_permission})
-install(FILES ../execsnoop-libbpf/libexecsnoop.so DESTINATION /usr/lib/cgproxy/ PERMISSIONS ${basic_permission})
+# execsnoop related
+set(execsnoop ${PROJECT_SOURCE_DIR}/execsnoop-libbpf/libexecsnoop.so)
+add_custom_command(OUTPUT ${execsnoop}
+COMMAND make CFLAGS=\"-O2 -Wall -s -DNDEBUG\" libexecsnoop.so
+WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/execsnoop-libbpf
+BYPRODUCTS ${PROJECT_SOURCE_DIR}/execsnoop-libbpf/build
+)
+add_custom_target(execsnoop ALL DEPENDS ${execsnoop})
+install(PROGRAMS ${execsnoop} DESTINATION ${CMAKE_INSTALL_LIBDIR}/cgproxy/)

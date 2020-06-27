@@ -1,0 +1,2 @@
+#!/bin/sh
+exec sudo -E /usr/bin/gdb "$@"

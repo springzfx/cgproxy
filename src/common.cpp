@@ -67,7 +67,7 @@ string bash_which(const string &name) {
   char buf[READ_SIZE_MAX];
   while (fgets(buf, READ_SIZE_MAX, fp.get()) != NULL) { buffer << buf; }
   string s = buffer.str();
-  s.pop_back(); // remove newline character
+  if (!s.empty()) s.pop_back(); // remove newline character
   return s;
 }
 
@@ -79,7 +79,7 @@ string bash_readlink(const string &path) {
   char buf[READ_SIZE_MAX];
   while (fgets(buf, READ_SIZE_MAX, fp.get()) != NULL) { buffer << buf; }
   string s = buffer.str();
-  s.pop_back(); // remove newline character
+  if (!s.empty()) s.pop_back(); // remove newline character
   return s;
 }
 

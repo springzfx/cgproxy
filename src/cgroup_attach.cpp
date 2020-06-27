@@ -24,7 +24,7 @@ string get_cgroup2_mount_point() {
   char buf[READ_SIZE_MAX];
   while (fgets(buf, READ_SIZE_MAX, fp.get()) != NULL) { buffer << buf; }
   string s = buffer.str();
-  s.pop_back(); // remove newline character
+  if (!s.empty()) s.pop_back(); // remove newline character
   return s;
 }
 

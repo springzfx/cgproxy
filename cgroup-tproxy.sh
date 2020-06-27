@@ -60,10 +60,18 @@ fi
 [ -z ${enable_ipv4+x} ] && enable_ipv4=true
 [ -z ${enable_ipv6+x} ] && enable_ipv6=true
 
-## do not modify this if you don't known what you are doing
-table=100
-fwmark=0x01
-make_newin=0x02
+##
+get_available_route_table(){
+    table=10007 
+    while true; do 
+        ip route show table $table &> /dev/null && ((table++)) || { echo $table && break; }
+    done
+}
+
+## mark/route things
+table=10007 # just a prime number
+fwmark=0x9973
+make_newin=0x9967
 
 ## cgroup things
 cgroup_mount_point=$(findmnt -t cgroup2 -n -o TARGET)
@@ -219,10 +227,10 @@ iptables  -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --
 ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
 
 ## message for user
-cat << DOC
-iptables: noproxy cgroup: ${cgroup_noproxy[@]}
-iptables: proxied cgroup: ${cgroup_proxy[@]}
-DOC
+# cat << DOC
+# iptables: noproxy cgroup: ${cgroup_noproxy[@]}
+# iptables: proxied cgroup: ${cgroup_proxy[@]}
+# DOC
 
 
 if $enable_gateway; then

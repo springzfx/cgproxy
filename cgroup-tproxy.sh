@@ -69,9 +69,12 @@ get_available_route_table(){
 }
 
 ## mark/route things
-table=10007 # just a prime number
-fwmark=0x9973
-make_newin=0x9967
+[ -z ${table+x} ]       && table=10007 # just a prime number
+[ -z ${fwmark+x} ]      && fwmark=0x9973
+[ -z ${mark_newin+x} ]  && mark_newin=0x9967
+
+
+# echo "table: $table fwmark: $fwmark, mark_newin: $mark_newin"
 
 ## cgroup things
 cgroup_mount_point=$(findmnt -t cgroup2 -n -o TARGET)
@@ -154,7 +157,7 @@ iptables -t mangle -A PREROUTING -j TPROXY_PRE
 
 iptables -t mangle -N TPROXY_OUT
 iptables -t mangle -A TPROXY_OUT -p icmp -j RETURN
-iptables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
+iptables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN
 iptables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
 iptables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
@@ -185,7 +188,7 @@ ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
 
 ip6tables -t mangle -N TPROXY_OUT
 ip6tables -t mangle -A TPROXY_OUT -p icmpv6 -j RETURN
-ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $make_newin -j RETURN
+ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
@@ -223,8 +226,8 @@ $enable_gateway || ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LO
 
 ## make sure following rules are the first in chain TPROXY_PRE to mark new incoming connection or gateway proxy connection
 ## so must put at last to insert first
-iptables  -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
-ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $make_newin
+iptables  -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $mark_newin
+ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $mark_newin
 
 ## message for user
 # cat << DOC

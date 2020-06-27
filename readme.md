@@ -1,6 +1,6 @@
 
 
-# Transparent Proxy powered with cgroup v2
+# Transparent Proxy powered by cgroup v2
 
 
 
@@ -95,16 +95,20 @@ Config file: **/etc/cgproxy/config.json**
 {
     "port": 12345,
     "program_noproxy": ["v2ray", "qv2ray"],
-    "program_proxy": [ ],
+    "program_proxy": [],
     "cgroup_noproxy": ["/system.slice/v2ray.service"],
-    "cgroup_proxy": [ ],
+    "cgroup_proxy": [],
     "enable_gateway": false,
     "enable_dns": true,
     "enable_udp": true,
     "enable_tcp": true,
     "enable_ipv4": true,
-    "enable_ipv6": true
+    "enable_ipv6": true,
+    "table": 10007,
+    "fwmark": 39283,
+    "mark_newin": 39271
 }
+
 ```
 
 - **port** tproxy listenning port
@@ -131,11 +135,14 @@ Config file: **/etc/cgproxy/config.json**
 
 - **enable_ipv6**
 
+- **table**, **fwmark**, **mark_newin**  you can specify iptables and route table related parameter in case conflict.
+
 - options priority
 
   ```
   program_noproxy > program_proxy > cgroup_noproxy > cgroup_proxy
   enable_ipv6 > enable_ipv4 > enable_tcp > enable_udp > enable_dns
+  ommand cgproxy and cgnoproxy always have highest priority
   ```
 
 **Note**: cgroup in configuration need to be exist, otherwise ignored

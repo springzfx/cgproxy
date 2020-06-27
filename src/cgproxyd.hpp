@@ -300,7 +300,10 @@ public:
 
     assignStaticInstance();
 
-    config.loadFromFile(DEFAULT_CONFIG_FILE);
+    if (config.loadFromFile(DEFAULT_CONFIG_FILE)!=SUCCESS) {
+      error("load config file failed");
+      return -1;
+    }
     applyConfig();
 
     if (enable_socketserver) startSocketListeningThread();
@@ -311,6 +314,7 @@ public:
 
     return 0;
   }
+
   int applyConfig() {
     system(TPROXY_IPTABLS_CLEAN);
     config.print_summary();

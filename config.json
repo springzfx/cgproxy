@@ -1,4 +1,6 @@
 {
+    "comment":"For usgae, see https://github.com/springzfx/cgproxy",
+
     "port": 12345,
     "program_noproxy": ["v2ray", "qv2ray"],
     "program_proxy": [],
@@ -9,5 +11,8 @@
     "enable_udp": true,
     "enable_tcp": true,
     "enable_ipv4": true,
-    "enable_ipv6": true
+    "enable_ipv6": true,
+    "table": 10007,
+    "fwmark": 39283,
+    "mark_newin": 39271
 }

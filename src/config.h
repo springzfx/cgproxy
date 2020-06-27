@@ -25,6 +25,11 @@ public:
   bool enable_ipv4 = true;
   bool enable_ipv6 = true;
 
+  // for iptables
+  int table=10007;
+  int fwmark=0x9973;
+  int mark_newin=0x9967;
+
   void toEnv();
   int saveToFile(const string f);
   string toJsonStr();

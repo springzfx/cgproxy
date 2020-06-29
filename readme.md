@@ -55,12 +55,14 @@ Main feature:
 ## How to install
 
 ```bash
-mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/ .. && make install
+# 
+mkdir build && cd build
+# cmake
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make install
 ```
 
 - It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy). 
 
-- DEB and RPM are packaged in [release page](https://github.com/springzfx/cgproxy/releases).
 
 ## Default usage
 

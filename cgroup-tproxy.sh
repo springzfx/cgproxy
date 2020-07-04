@@ -134,6 +134,20 @@ done
 test -d $cgroup_mount_point$cgroup_proxy    || mkdir $cgroup_mount_point$cgroup_proxy   || exit -1; 
 test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_noproxy || exit -1; 
 
+## filter cgroup that not exist
+_cgroup_noproxy=()
+for cg in ${cgroup_noproxy[@]}; do
+    test -d $cgroup_mount_point$cg && _cgroup_noproxy+=($cg) || { >&2 echo "iptables: $cg not exist, ignore";}
+done
+unset cgroup_noproxy && cgroup_noproxy=${_cgroup_noproxy[@]}
+
+## filter cgroup that not exist
+_cgroup_proxy=()
+for cg in ${cgroup_proxy[@]}; do
+    test -d $cgroup_mount_point$cg && _cgroup_proxy+=($cg) || { >&2 echo "iptables: $cg not exist, ignore";}
+done
+unset cgroup_proxy && cgroup_proxy=${_cgroup_proxy[@]}
+
 
 echo "iptables: applying tproxy iptables"
 ## use TPROXY
@@ -161,10 +175,10 @@ iptables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN
 iptables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
 iptables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
-iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN || { >&2 echo "iptables: $cg not exist, won't apply"; }
+iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
 done
 for cg in ${cgroup_proxy[@]}; do
-iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark || { >&2 echo "iptables: $cg not exist, won't apply"; }
+iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark
 done
 iptables -t mangle -A OUTPUT -j TPROXY_OUT
 
@@ -192,10 +206,10 @@ ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN || { >&2 echo "ip6tables: $cg not exist, won't apply"; }
+ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
 done
 for cg in ${cgroup_proxy[@]}; do
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark || { >&2 echo "ip6tables: $cg not exist, won't apply"; }
+ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark
 done
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 
@@ -229,11 +243,11 @@ $enable_gateway || ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LO
 iptables  -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $mark_newin
 ip6tables -t mangle -I TPROXY_PRE -m addrtype ! --src-type LOCAL -m conntrack --ctstate NEW -j CONNMARK --set-mark $mark_newin
 
-## message for user
-# cat << DOC
-# iptables: noproxy cgroup: ${cgroup_noproxy[@]}
-# iptables: proxied cgroup: ${cgroup_proxy[@]}
-# DOC
+# message for user
+cat << DOC
+iptables: noproxy cgroup: ${cgroup_noproxy[@]}
+iptables: proxied cgroup: ${cgroup_proxy[@]}
+DOC
 
 
 if $enable_gateway; then

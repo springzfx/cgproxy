@@ -16,6 +16,7 @@ option(build_tools OFF)
 option(build_test  OFF)
 
 add_subdirectory(src)
+add_subdirectory(execsnoop-kernel)
 add_subdirectory(pack)
 if (build_tools)
     add_subdirectory(tools)

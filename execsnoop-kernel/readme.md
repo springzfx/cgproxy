@@ -41,6 +41,8 @@ using `make V=1 M=samples/bpf | tee -a log.txt` to get and filter following comm
 
 - build `execsnoop_kern.o`
 
+  note `-g` is needed if with BPF CO-RE
+
 ```bash
 clang -nostdinc \
 	-isystem /usr/lib/gcc/x86_64-pc-linux-gnu/10.1.0/include \
@@ -108,7 +110,7 @@ bpftool gen skeleton execsnoop_kern.o > execsnoop_kern_skel.h
 - build
 
 ```
-gcc -Wall -O2 execsnoop_user_1.c -o execsnoop -Wl,-lbpf
+gcc -Wall -O2 execsnoop_user_1.c -o execsnoop -lbpf
 ```
 
 ## Some resources

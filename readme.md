@@ -16,9 +16,9 @@ Main feature:
 ## Contents
 
 <!--ts-->
-
-   * [Transparent Proxy with cgroup v2](#transparent-proxy-with-cgroup-v2)
+   * [Transparent Proxy powered by cgroup v2](#transparent-proxy-powered-by-cgroup-v2)
       * [Introduction](#introduction)
+      * [Contents](#contents)
       * [Prerequest](#prerequest)
       * [How to install](#how-to-install)
       * [Default usage](#default-usage)
@@ -29,8 +29,9 @@ Main feature:
       * [NOTES](#notes)
       * [TIPS](#tips)
       * [Licences](#licences)
+      * [Known Issus](#known-issus)
 
-<!-- Added by: fancy, at: Sat 16 May 2020 03:12:07 PM HKT -->
+<!-- Added by: fancy, at: Sat 04 Jul 2020 03:52:07 PM CST -->
 
 <!--te-->
 
@@ -54,15 +55,24 @@ Main feature:
 
 ## How to install
 
+### main depency
+
+| os        | build depency                                                | runtime depency                                       | download                                                     |
+| --------- | ------------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------ |
+| Archlinux | clang, nlohmann-json, libbpf                                 | libbpf                                                | [archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy) |
+| Ubuntu    | clang, nlohmann-json, [libbpf-dev](https://packages.ubuntu.com/groovy/libbpf-dev) | [libbpf0](https://packages.ubuntu.com/groovy/libbpf0) | [Release page](https://github.com/springzfx/cgproxy/releases) |
+| Fedora    | clang, nlohmann-json,[libbpf](https://src.fedoraproject.org/rpms/libbpf) | [libbpf](https://src.fedoraproject.org/rpms/libbpf)   | [Release page](https://github.com/springzfx/cgproxy/releases) |
+
+tested in arch and ubuntu 20.04.
+
+### build
+
 ```bash
 # 
 mkdir build && cd build
 # cmake
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make install
 ```
-
-- It is alreay in [archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy). 
-
 
 ## Default usage
 

@@ -49,6 +49,14 @@ extern bool enable_info;
     fflush(stderr);                                                                      \
   }
 
+#define warning(...)                                                                       \
+  {                                                                                      \
+    fprintf(stderr, "warning: ");                                                          \
+    fprintf(stderr, __VA_ARGS__);                                                        \
+    fprintf(stderr, "\n");                                                               \
+    fflush(stderr);                                                                      \
+  }
+
 #define debug(...)                                                                       \
   if (enable_debug) {                                                                    \
     fprintf(stdout, "debug: ");                                                          \

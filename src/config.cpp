@@ -157,7 +157,7 @@ void Config::toRealProgramPath(vector<string> &v) {
     auto rpath = getRealExistPath(p);
     if (!rpath.empty()) tmp.push_back(rpath);
     else
-      error("%s not exist or broken link", p.c_str());
+      warning("%s not exist or broken link", p.c_str());
   }
   v = tmp;
 }

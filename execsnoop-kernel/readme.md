@@ -61,7 +61,7 @@ clang -nostdinc \
 	-Wno-gnu-variable-sized-type-not-at-end \
 	-Wno-address-of-packed-member -Wno-tautological-compare \
 	-Wno-unknown-warning-option  \
-	-fno-stack-protector -g \
+	-fno-stack-protector \
 	-O2 -emit-llvm -c samples/bpf/execsnoop_kern.c \
 	-o - | llc -march=bpf  -filetype=obj -o samples/bpf/execsnoop_kern.o
 ```
@@ -93,6 +93,22 @@ clang -nostdinc \
 	  samples/bpf/bpf_load.o samples/bpf/execsnoop_user.o \
 	  tools/testing/selftests/bpf/trace_helpers.o tools/lib/bpf/libbpf.a \
 	  -lelf -lz
+```
+
+
+
+## With bpftool
+
+- gen
+
+```
+bpftool gen skeleton execsnoop_kern.o > execsnoop_kern_skel.h
+```
+
+- build
+
+```
+gcc -Wall -O2 execsnoop_user_1.c -o execsnoop -Wl,-lbpf
 ```
 
 ## Some resources

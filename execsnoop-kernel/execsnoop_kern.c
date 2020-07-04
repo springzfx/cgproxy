@@ -52,7 +52,7 @@ int syscall_enter_execve(struct syscalls_enter_execve_args *ctx){
     u64 id = bpf_get_current_pid_tgid();
 	pid = (pid_t)id;
 	tgid = id >> 32;
-	uid = (__u32)bpf_get_current_uid_gid();
+	uid = (u32)bpf_get_current_uid_gid();
 
 	struct event empty_event={};
 	if (bpf_map_update_elem(&records, &pid, &empty_event, BPF_NOEXIST)!=0) return 0;

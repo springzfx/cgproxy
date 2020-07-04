@@ -233,7 +233,7 @@ class cgproxyd {
 
   void startExecsnoopThread() {
     if (!EXECSNOOP::loadExecsnoopLib() || EXECSNOOP::_startThread == NULL) {
-      error("execsnoop not ready to start, maybe bcc not installed");
+      error("execsnoop not ready to start, maybe missing libbpf");
       return;
     }
 

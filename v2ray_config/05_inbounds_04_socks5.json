@@ -5,6 +5,7 @@
       "port": 1080,
       "protocol": "socks",
       "settings": {
+        "udp": true,
         "auth": "noauth",
         "userLevel": 0
       },

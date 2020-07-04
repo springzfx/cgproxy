@@ -141,8 +141,8 @@ echo "iptables: applying tproxy iptables"
 ip rule add fwmark $fwmark table $table
 ip route add local default dev lo table $table
 iptables -t mangle -N TPROXY_ENT
-iptables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip localhost --on-port $port --tproxy-mark $fwmark
-iptables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip localhost --on-port $port --tproxy-mark $fwmark
+iptables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark
+iptables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark
 
 iptables -t mangle -N TPROXY_PRE
 iptables -t mangle -A TPROXY_PRE -m socket --transparent -j MARK --set-mark $fwmark
@@ -172,8 +172,8 @@ iptables -t mangle -A OUTPUT -j TPROXY_OUT
 ip -6 rule add fwmark $fwmark table $table
 ip -6 route add local default dev lo table $table
 ip6tables -t mangle -N TPROXY_ENT
-ip6tables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip localhost --on-port $port --tproxy-mark $fwmark
-ip6tables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip localhost --on-port $port --tproxy-mark $fwmark
+ip6tables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark
+ip6tables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark
 
 ip6tables -t mangle -N TPROXY_PRE
 ip6tables -t mangle -A TPROXY_PRE -m socket --transparent -j MARK --set-mark $fwmark
@@ -192,10 +192,10 @@ ip6tables -t mangle -A TPROXY_OUT -m connmark --mark  $mark_newin -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype --dst-type LOCAL -j RETURN
 ip6tables -t mangle -A TPROXY_OUT -m addrtype ! --dst-type UNICAST -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN || { >&2 echo "iptables: $cg not exist, won't apply"; }
+ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN || { >&2 echo "ip6tables: $cg not exist, won't apply"; }
 done
 for cg in ${cgroup_proxy[@]}; do
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark || { >&2 echo "iptables: $cg not exist, won't apply"; }
+ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j MARK --set-mark $fwmark || { >&2 echo "ip6tables: $cg not exist, won't apply"; }
 done
 ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
 

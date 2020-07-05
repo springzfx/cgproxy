@@ -61,7 +61,7 @@ Main feature:
 
 - For archlinux series, see[archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy)
 
-- Already tested on Archlinux, fedora 32, ubuntu 18.04, ubuntu 20.04, deepin v20 beta
+- **Tested on  archlinux, fedora 32, ubuntu 18.04, ubuntu 20.04,  deepin 15.11, deepin v20 beta**
 
 ### build
 

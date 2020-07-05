@@ -12,8 +12,10 @@ add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-result -Wno-unused-para
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # option(with_execsnoop "enable program level proxy control feature, need bcc installed" ON)
+option(build_execsnoop_dl "build libexecsnoop.so which will be dynamic loaded, otherwise built directly into cgproxy" ON)
+option(build_static "build with static link prefered" OFF)
 option(build_tools OFF)
-option(build_test  OFF)
+option(build_test "for develop" OFF)
 
 add_subdirectory(src)
 add_subdirectory(execsnoop-kernel)

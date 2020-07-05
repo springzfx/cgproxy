@@ -26,6 +26,7 @@ using namespace ::CGPROXY::CONFIG;
 using namespace ::CGPROXY::CGROUP;
 // using namespace ::CGPROXY::EXECSNOOP;
 
+#ifdef BUIlD_EXECSNOOP_DL
 namespace CGPROXY::EXECSNOOP {
 bool loadExecsnoopLib() {
   try {
@@ -48,6 +49,7 @@ bool loadExecsnoopLib() {
   }
 }
 } // namespace CGPROXY::EXECSNOOP
+#endif
 
 namespace CGPROXY::CGPROXYD {
 
@@ -232,14 +234,21 @@ class cgproxyd {
   }
 
   void startExecsnoopThread() {
+    #ifdef BUIlD_EXECSNOOP_DL
     if (!EXECSNOOP::loadExecsnoopLib() || EXECSNOOP::_startThread == NULL) {
       error("execsnoop not ready to start, maybe missing libbpf");
       return;
     }
+    #endif
 
     promise<void> status;
     future<void> status_f = status.get_future();
+    #ifdef BUIlD_EXECSNOOP_DL
     thread th(EXECSNOOP::_startThread, handle_pid_static, move(status));
+    #else
+    thread th(EXECSNOOP::startThread, handle_pid_static, move(status));
+    #endif
+
     execsnoop_thread = move(th);
 
     future_status fstatus = status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));

@@ -11,6 +11,7 @@ using namespace std;
 #define TPROXY_IPTABLS_CLEAN "/usr/share/cgproxy/scripts/cgroup-tproxy.sh stop"
 
 #define LIBEXECSNOOP_SO "/usr/lib/cgproxy/libexecsnoop.so"
+#define CGROUP2_MOUNT_POINT "/var/run/cgproxy/cgroup2"
 #define PID_LOCK_FILE "/var/run/cgproxyd.pid"
 #define SOCKET_PATH "/tmp/cgproxy_unix_socket"
 #define LISTEN_BACKLOG 64

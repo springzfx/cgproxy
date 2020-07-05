@@ -77,10 +77,11 @@ get_available_route_table(){
 # echo "table: $table fwmark: $fwmark, mark_newin: $mark_newin"
 
 ## cgroup things
-cgroup_mount_point=$(findmnt -t cgroup2 -n -o TARGET)
-cgroup_type="cgroup2"
-cgroup_procs_file="cgroup.procs"
-
+[ -z ${cgroup_mount_point+x} ] && cgroup_mount_point=$(findmnt -t cgroup2 -n -o TARGET | head -n 1)
+[ -z $cgroup_mount_point ] && { >&2 echo "iptables: no cgroup2 mount point available"; exit -1; }
+[ ! -d $cgroup_mount_point ] && mkdir -p $cgroup_mount_point
+[ "$(findmnt -M $cgroup_mount_point -n -o FSTYPE)" != "cgroup2" ] && mount -t cgroup2 none $cgroup_mount_point
+[ "$(findmnt -M $cgroup_mount_point -n -o FSTYPE)" != "cgroup2" ] && { >&2 echo "iptables: mount $cgroup_mount_point failed"; exit -1; }
 
 stop(){
     iptables -t mangle -L TPROXY_PRE &> /dev/null || return
@@ -108,6 +109,8 @@ stop(){
     ## may not exist, just ignore, and tracking their existence is not reliable
     iptables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
     ip6tables -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
+    ## unmount cgroup2
+    [ "$(findmnt -M $cgroup_mount_point -n -o FSTYPE)" = "cgroup2" ] && umount $cgroup_mount_point
 }
 
 ## parse parameter

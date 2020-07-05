@@ -14,19 +14,8 @@
 
 namespace CGPROXY::CGROUP {
 
-string cgroup2_mount_point = get_cgroup2_mount_point();
+string cgroup2_mount_point = CGROUP2_MOUNT_POINT;
 
-string get_cgroup2_mount_point() {
-  stringstream buffer;
-  unique_ptr<FILE, decltype(&pclose)> fp(popen("findmnt -t cgroup2 -n -o TARGET", "r"),
-                                         &pclose);
-  if (!fp) return "";
-  char buf[READ_SIZE_MAX];
-  while (fgets(buf, READ_SIZE_MAX, fp.get()) != NULL) { buffer << buf; }
-  string s = buffer.str();
-  if (!s.empty()) s.pop_back(); // remove newline character
-  return s;
-}
 
 bool validate(string pid, string cgroup) {
   bool pid_v = validPid(pid);

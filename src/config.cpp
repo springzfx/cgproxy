@@ -21,6 +21,7 @@ using json = nlohmann::json;
 namespace CGPROXY::CONFIG {
 
 void Config::toEnv() {
+  setenv("cgroup_mount_point", CGROUP2_MOUNT_POINT, 1);
   setenv("program_proxy", join2str(program_proxy, ':').c_str(), 1);
   setenv("program_noproxy", join2str(program_noproxy, ':').c_str(), 1);
   setenv("cgroup_proxy", join2str(cgroup_proxy, ':').c_str(), 1);

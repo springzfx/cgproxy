@@ -53,25 +53,33 @@ Main feature:
 
   ubuntu 16.04, debian 9, fedora 27 and later are desired
 
-## How to install
+## How to build and install
 
-### main depency
+### distro install
 
-| os        | build depency                                                | runtime depency                                       | download                                                     |
-| --------- | ------------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------ |
-| Archlinux | clang, nlohmann-json, libbpf                                 | libbpf                                                | [archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy) |
-| Ubuntu    | clang, nlohmann-json, [libbpf-dev](https://packages.ubuntu.com/groovy/libbpf-dev) | [libbpf0](https://packages.ubuntu.com/groovy/libbpf0) | [Release page](https://github.com/springzfx/cgproxy/releases) |
-| Fedora    | clang, nlohmann-json,[libbpf](https://src.fedoraproject.org/rpms/libbpf) | [libbpf](https://src.fedoraproject.org/rpms/libbpf)   | [Release page](https://github.com/springzfx/cgproxy/releases) |
+- For debian and redhat series, download from [Release page](https://github.com/springzfx/cgproxy/releases)
 
-tested in arch and ubuntu 20.04.
+- For archlinux series, see[archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy)
+
+- Already tested on Archlinux, fedora 32, ubuntu 20.04, deepin v20 beta
 
 ### build
 
+- before build, install depencies: clang, nlohmann-json, libbpf
+- then cmake standard build
+
 ```bash
-# 
-mkdir build && cd build
-# cmake
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make install
+# ready build dir
+mkdir build
+cd build
+# generate
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      -Dbuild_execsnoop_dl=ON \
+      -Dbuild_static=OFF \
+      ..
+# compile
+make
 ```
 
 ## Default usage

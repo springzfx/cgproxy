@@ -133,7 +133,7 @@ Config file: **/etc/cgproxy/config.json**
 
 - **port** tproxy listenning port
 
-- program level proxy control:
+- program level proxy control, need execsnoop enabled:
 
   - **program_proxy**  program need to be proxied
   - **program_noproxy** program that won't be proxied

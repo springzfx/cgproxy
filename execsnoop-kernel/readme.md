@@ -28,12 +28,40 @@ execsnoop-objs := bpf_load.o execsnoop_user.o $(TRACE_HELPERS)
 always-y += execsnoop_kern.o
 ```
 
-## Run
+- compile again
+
+```
+make M=samples/bpf -j8
+```
+
+- run test
 
 ```bash
 cd samples/bpf
 sudo bash -c "ulimit -l unlimited && ./execsnoop"
 ```
+
+## With bpftool
+
+- move compiled `execsnoop_kern.o` to current `exexcnoop-kernel` directory
+
+- generate `execsnoop_kern_skel.h`
+
+```
+bpftool gen skeleton execsnoop_kern.o > execsnoop_kern_skel.h
+```
+
+- build execsnoop
+
+```
+gcc -Wall -O2 execsnoop_user_1.c -o execsnoop -lbpf
+```
+
+
+
+
+
+**Followings are just some notes. they are not really related.**
 
 ## Detail build command
 
@@ -98,20 +126,6 @@ clang -nostdinc \
 ```
 
 
-
-## With bpftool
-
-- gen
-
-```
-bpftool gen skeleton execsnoop_kern.o > execsnoop_kern_skel.h
-```
-
-- build
-
-```
-gcc -Wall -O2 execsnoop_user_1.c -o execsnoop -lbpf
-```
 
 ## Some resources
 

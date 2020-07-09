@@ -1,4 +1,4 @@
-
+#include <errno.h>
 #include <signal.h>
 #include <bpf/libbpf.h>
 #include <sys/resource.h>
@@ -38,6 +38,7 @@ int execsnoop() {
 	struct perf_buffer_opts pb_opts = {};
 	struct perf_buffer *pb;
 	int err;
+	bool notified=false;
 	
 	err = bump_memlock_rlimit();
 	if (err) {
@@ -57,6 +58,7 @@ int execsnoop() {
 		return err;
 	}
 
+main_loop:
 	pb_opts.sample_cb = handle_event;
 	pb_opts.lost_cb = handle_lost_events;
 	pb = perf_buffer__new(bpf_map__fd(obj->maps.perf_events), PERF_BUFFER_PAGES, &pb_opts);
@@ -67,9 +69,14 @@ int execsnoop() {
 	}
 
 	// notify
-  	status.set_value();
+  	if (!notified) {status.set_value(); notified=true;}
 
 	while ((err = perf_buffer__poll(pb, -1)) >= 0) {}
+	perf_buffer__free(pb);
+	/* handle Interrupted system call when sleep*/
+	if (err == -EINTR) goto main_loop;
+
+	perror("perf_buffer__poll");
 	kill(0, SIGINT);
 	return err;
 }

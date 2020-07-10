@@ -34,7 +34,7 @@ struct bpf_map_def SEC("maps") records = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(pid_t),
     .value_size = sizeof(struct event),
-    .max_entries = 1024,
+    .max_entries = 10240,
 };
 struct bpf_map_def SEC("maps") perf_events = {
     .type = BPF_MAP_TYPE_PERF_EVENT_ARRAY,

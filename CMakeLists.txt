@@ -6,7 +6,7 @@ project(cgproxy VERSION 0.18)
 
 include(GNUInstallDirs)
 
-add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-result -Wno-unused-parameter)
+add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-result -Wno-unused-parameter -Wl,--no-undefined)
 
 # for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -1,9 +1,15 @@
+#include "execsnoop_share.h"
+
 #include <errno.h>
 #include <signal.h>
 #include <bpf/libbpf.h>
 #include <sys/resource.h>
-#include "execsnoop_kern_skel.h"
-#include "execsnoop_share.h"
+
+#if defined(__x86_64__)
+	#include "x86_64/execsnoop_kern_skel.h"
+#elif defined(__aarch64__)
+	#include "aarch64/execsnoop_kern_skel.h"
+#endif
 
 namespace CGPROXY::EXECSNOOP {
 
@@ -73,7 +79,7 @@ main_loop:
 
 	while ((err = perf_buffer__poll(pb, -1)) >= 0) {}
 	perf_buffer__free(pb);
-	/* handle Interrupted system call when sleep*/
+	/* handle Interrupted system call when sleep */
 	if (err == -EINTR) goto main_loop;
 
 	perror("perf_buffer__poll");

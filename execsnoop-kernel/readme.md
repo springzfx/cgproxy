@@ -6,16 +6,20 @@
 
 ## Build in kernel tree
 
+- download kernel source code
 - ready and config kernel tree
 
 ```bash
 # kernel config
-gunzip -c /proc/config.gz > .config
-make oldconfig && make prepare
+#gunzip -c /proc/config.gz > .config
+#make oldconfig && make prepare
+make defconfig && make prepare
 # install headers to ./usr/include
 make headers_install -j8
-# build bpf
-make M=samples/bpf -j8
+# build samples/bpf
+make samples/bpf -j8
+# build bpftool
+make tools/bpf -j8
 ```
 
 - put or link `execsnoop_kern.c` and `execsnoop_user.c` to *samples/bpf/*
@@ -43,8 +47,6 @@ sudo bash -c "ulimit -l unlimited && ./execsnoop"
 
 ## With bpftool
 
-- move compiled `execsnoop_kern.o` to current `exexcnoop-kernel` directory
-
 - generate `execsnoop_kern_skel.h`
 
 ```
@@ -56,12 +58,6 @@ bpftool gen skeleton execsnoop_kern.o > execsnoop_kern_skel.h
 ```
 gcc -Wall -O2 execsnoop_user_1.c -o execsnoop -lbpf
 ```
-
-
-
-
-
-**Followings are just some notes. they are not really related.**
 
 ## Detail build command
 
@@ -123,6 +119,75 @@ clang -nostdinc \
 	  samples/bpf/bpf_load.o samples/bpf/execsnoop_user.o \
 	  tools/testing/selftests/bpf/trace_helpers.o tools/lib/bpf/libbpf.a \
 	  -lelf -lz
+```
+
+## ARM64
+
+```bash
+# if cross compile
+export ARCH=arm64
+export CROSS_COMPILE=aarch64-linux-gnu-
+```
+
+The recommend way is to build in [ARM Docker Containers](https://www.stereolabs.com/docs/docker/building-arm-container-on-x86/). see `arm_docker.md`
+
+- make
+
+```bash
+# clean
+make mrproper
+make -C tools clean
+make -C samples/bpf clean
+# make
+make defconfig && make prepare
+make headers_install -j8
+# build samples/bpf
+make samples/bpf -j8
+# build bpftool
+make tools/bpf -j8
+```
+
+- detail build `execsnoop_kern.o`
+
+  note `-g` may not needed
+
+```bash
+clang  -nostdinc \
+	-isystem /usr/lib/gcc/aarch64-linux-gnu/9/include \
+	-I./arch/arm64/include -I./arch/arm64/include/generated  \
+	-I./include -I./arch/arm64/include/uapi \
+	-I./arch/arm64/include/generated/uapi \
+	-I./include/uapi \
+	-I./include/generated/uapi \
+	-include ./include/linux/kconfig.h \
+    -I./samples/bpf \
+    -I./tools/testing/selftests/bpf/ \
+    -I./tools/lib/ \
+    -include asm_goto_workaround.h \
+    -D__KERNEL__ -D__BPF_TRACING__ -Wno-unused-value -Wno-pointer-sign \
+    -D__TARGET_ARCH_arm64 -Wno-compare-distinct-pointer-types \
+    -Wno-gnu-variable-sized-type-not-at-end \
+    -Wno-address-of-packed-member -Wno-tautological-compare \
+    -Wno-unknown-warning-option  \
+    -fno-stack-protector \
+    -O2 -emit-llvm -c samples/bpf/execsnoop_kern.c \
+    -o -| llc -march=bpf  -filetype=obj -o samples/bpf/execsnoop_kern.o
+```
+
+- generate
+
+```
+bpftool gen skeleton execsnoop_kern.o > aarch64/execsnoop_kern_skel.h
+```
+
+
+
+http://www.redfelineninja.org.uk/daniel/2018/02/running-an-iso-installer-image-for-arm64-aarch64-using-qemu-and-kvm/
+
+```
+qemu-system-aarch64 -cpu cortex-a53 -M virt -m 2048 -nographic \
+-drive if=pflash,format=raw,file=QEMU_EFI.img \
+-drive if=virtio,format=raw,file=ubuntu-20.04-live-server-arm64.iso
 ```
 
 

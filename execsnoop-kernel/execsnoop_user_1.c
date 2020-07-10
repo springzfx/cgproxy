@@ -1,9 +1,12 @@
-
 #include <signal.h>
 #include <bpf/libbpf.h>
 #include <sys/resource.h>
-#include "execsnoop_kern_skel.h"
-// #include "bpf_load.h"
+
+#if defined(__x86_64__)
+	#include "x86_64/execsnoop_kern_skel.h"
+#elif defined(__aarch64__)
+	#include "aarch64/execsnoop_kern_skel.h"
+#endif
 
 #define TASK_COMM_LEN 16
 struct event {

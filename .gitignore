@@ -1,4 +1,4 @@
-build
+build*
 .directory
 .clangd
 v2ray_config/proxy

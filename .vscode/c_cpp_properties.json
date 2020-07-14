@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [],
+            "defines": ["USE_VMLINUX"],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c18",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "gcc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

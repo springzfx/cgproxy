@@ -1,12 +1,8 @@
 # find libbpf
 if (build_static)
-    find_library(LIBBPF libbpf.a)
+    find_library(LIBBPF libbpf.a REQUIRED)
 else()
-    find_library(LIBBPF bpf)
-endif()
-
-if (LIBBPF-NOTFOUND)
-    message(FATAL_ERROR "libbpf not found")
+    find_library(LIBBPF bpf REQUIRED)
 endif()
 
 if (build_execsnoop_dl)

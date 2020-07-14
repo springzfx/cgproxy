@@ -2,9 +2,13 @@
 ## Prons and cons
 
 - use stable execve tracepoint, so build once and should work everywhere
-- need to build in kernel tree
+- build in kernel tree or build with VMLINUX
 
-## Build in kernel tree
+
+
+## Build `execsnoop_kern.o`
+
+### M1: Build in kernel tree
 
 - download kernel source code
 - ready and config kernel tree
@@ -17,7 +21,7 @@ make defconfig && make prepare
 # install headers to ./usr/include
 make headers_install -j8
 # build samples/bpf
-make samples/bpf -j8
+make M=samples/bpf -j8
 # build bpftool
 make tools/bpf -j8
 ```
@@ -45,27 +49,13 @@ cd samples/bpf
 sudo bash -c "ulimit -l unlimited && ./execsnoop"
 ```
 
-## With bpftool
 
-- generate `execsnoop_kern_skel.h`
-
-```
-bpftool gen skeleton execsnoop_kern.o > execsnoop_kern_skel.h
-```
-
-- build execsnoop
-
-```
-gcc -Wall -O2 execsnoop_user_1.c -o execsnoop -lbpf
-```
-
-## Detail build command
+**Detail build command**
 
 using `make V=1 M=samples/bpf | tee -a log.txt` to get and filter following command
 
 - build `execsnoop_kern.o`
 
-  note `-g` is needed if with BPF CO-RE
 
 ```bash
 clang -nostdinc \
@@ -89,67 +79,87 @@ clang -nostdinc \
 	-Wno-unknown-warning-option  \
 	-fno-stack-protector \
 	-O2 -emit-llvm -c samples/bpf/execsnoop_kern.c \
-	-o - | llc -march=bpf  -filetype=obj -o samples/bpf/execsnoop_kern.o
+	-o - | llc -march=bpf -filetype=obj -o samples/bpf/execsnoop_kern.o
 ```
 
-- build `execsnoop_user.o`
 
-```bash
-  gcc -Wall -O2 -Wmissing-prototypes -Wstrict-prototypes \
-  	-I./usr/include \
-  	-I./tools/testing/selftests/bpf/ \
-  	-I./tools/lib/ \
-  	-I./tools/include \
-  	-I./tools/perf \
-  	-DHAVE_ATTR_TEST=0  \
-  	-c -o samples/bpf/execsnoop_user.o samples/bpf/execsnoop_user.c
+
+### M2: Build with VMLINUX
+
+- get `vmlinux.h`
+
+```
+bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 ```
 
-- build `execsnoop`
+- compile
 
-```bash
-  gcc -Wall -O2 -Wmissing-prototypes -Wstrict-prototypes \
-	  -I./usr/include \
-	  -I./tools/testing/selftests/bpf/ \
-	  -I./tools/lib/ \
-	  -I./tools/include \
-	  -I./tools/perf \
-	  -DHAVE_ATTR_TEST=0 \
-	  -o samples/bpf/execsnoop \
-	  samples/bpf/bpf_load.o samples/bpf/execsnoop_user.o \
-	  tools/testing/selftests/bpf/trace_helpers.o tools/lib/bpf/libbpf.a \
-	  -lelf -lz
+  note `-g` is needed if with BPF CO-RE
+
+```
+clang -O2 -target bpf -DUSE_VMLINUX -c execsnoop_kern.c -o execsnoop_kern.o
 ```
 
-## ARM64
+## Generate `execsnoop_kern_skel.h`
+
+- generate `execsnoop_kern_skel.h`
+
+```
+bpftool gen skeleton execsnoop_kern.o > execsnoop_kern_skel.h
+```
+
+- build execsnoop
+
+```
+gcc -Wall -O2 execsnoop_user_1.c -o execsnoop -lbpf
+```
+
+
+
+## Multiarch build
+
+- Cross compile, fast, but library link can be mess
+  - aarch64-linux-gnu-gcc
+- Emulation, the easist, but with perfomance cost
+  - qemu-user-static + binfmt-qemu-static + docker/chroot
+- see `arm64.md` to see how to setup
+
+
 
 ```bash
 # if cross compile
 export ARCH=arm64
 export CROSS_COMPILE=aarch64-linux-gnu-
+export SYSROOT=/home/fancy/workspace-xps/linux/ArchLinuxARM-aarch64-latest
+export C_INCLUDE_PATH=$SYSROOT/usr/include
 ```
 
-The recommend way is to build in [ARM Docker Containers](https://www.stereolabs.com/docs/docker/building-arm-container-on-x86/). see `arm_docker.md`
+-  edit `tools/lib/bpf/makefile` #192 to:
+
+```makefile
+$(OUTPUT)libbpf.so.$(LIBBPF_VERSION): $(BPF_IN_SHARED)
+     $(QUIET_LINK)$(CC) $(CFLAGS) $(LDFLAGS)
+```
 
 - make
 
 ```bash
 # clean
 make mrproper
+make clean
 make -C tools clean
 make -C samples/bpf clean
 # make
 make defconfig && make prepare
 make headers_install -j8
 # build samples/bpf
-make samples/bpf -j8
+make M=samples/bpf -j8
 # build bpftool
 make tools/bpf -j8
 ```
 
 - detail build `execsnoop_kern.o`
 
-  note `-g` may not needed
 
 ```bash
 clang  -nostdinc \
@@ -182,17 +192,7 @@ bpftool gen skeleton execsnoop_kern.o > aarch64/execsnoop_kern_skel.h
 
 
 
-http://www.redfelineninja.org.uk/daniel/2018/02/running-an-iso-installer-image-for-arm64-aarch64-using-qemu-and-kvm/
-
-```
-qemu-system-aarch64 -cpu cortex-a53 -M virt -m 2048 -nographic \
--drive if=pflash,format=raw,file=QEMU_EFI.img \
--drive if=virtio,format=raw,file=ubuntu-20.04-live-server-arm64.iso
-```
-
-
-
-## Some resources
+## Refer
 
 - [A thorough introduction to eBPF](https://lwn.net/Articles/740157/)
-- [Write eBPF program in pure C](http://terenceli.github.io/%E6%8A%80%E6%9C%AF/2020/01/18/ebpf-in-c)
+

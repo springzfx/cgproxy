@@ -1,7 +1,11 @@
+#ifdef USE_VMLINUX
+#include "vmlinux.h"
+#else
 #include "linux/sched.h"
-#include <linux/version.h>
 #include <linux/ptrace.h>
 #include <uapi/linux/bpf.h>
+#endif
+#include <linux/version.h>
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 

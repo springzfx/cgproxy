@@ -13,6 +13,5 @@
     "enable_ipv4": true,
     "enable_ipv6": true,
     "table": 10007,
-    "fwmark": 39283,
-    "mark_newin": 39271
+    "fwmark": 39283
 }

@@ -125,8 +125,7 @@ Config file: **/etc/cgproxy/config.json**
     "enable_ipv4": true,
     "enable_ipv6": true,
     "table": 10007,
-    "fwmark": 39283,
-    "mark_newin": 39271
+    "fwmark": 39283
 }
 
 ```
@@ -161,7 +160,7 @@ Config file: **/etc/cgproxy/config.json**
 
   ```
   program_noproxy > program_proxy > cgroup_noproxy > cgroup_proxy
-  enable_ipv6 > enable_ipv4 > enable_tcp > enable_udp > enable_dns
+  enable_ipv6 = enable_ipv4 > enable_dns > enable_tcp = enable_udp
   ommand cgproxy and cgnoproxy always have highest priority
   ```
 

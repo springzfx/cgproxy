@@ -79,6 +79,7 @@ int main(int argc, char *argv[]) {
   if (attach_pid) return 0;
 
   string s = join2str(argc - shift, argv + shift, ' ');
+  debug("executing: %s", s.c_str());
   return system(s.c_str());
 }
 } // namespace CGPROXY::CGPROXY

@@ -271,7 +271,7 @@ class cgproxyd {
         }
         if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
             belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
-          debug("already in preserverd cgroup, leave alone: %d %s", pid, path.c_str());
+          info("already in preserverd cgroup, leave alone: %d %s", pid, path.c_str());
           continue;
         }
         if (!belongToCgroup(cg, config.cgroup_noproxy)) {
@@ -288,7 +288,7 @@ class cgproxyd {
         }
         if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
             belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
-          debug("already in preserverd cgroup, leave alone: %d %s", pid, path.c_str());
+          info("already in preserverd cgroup, leave alone: %d %s", pid, path.c_str());
           continue;
         }
         if (!belongToCgroup(cg, config.cgroup_proxy)) {

@@ -182,6 +182,7 @@ iptables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $p
 iptables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark_tproxy
 # filter
 iptables -t mangle -N TPROXY_PRE
+iptables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
 iptables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
 $enable_gateway  || iptables -t mangle -A TPROXY_PRE -m addrtype ! --src-type LOCAL -j RETURN
 $enable_dns && iptables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
@@ -225,6 +226,7 @@ ip6tables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip ::1 --on-port $port -
 ip6tables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark_tproxy
 # filter
 ip6tables -t mangle -N TPROXY_PRE
+ip6tables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
 ip6tables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
 $enable_gateway  || ip6tables -t mangle -A TPROXY_PRE -m addrtype ! --src-type LOCAL -j RETURN
 $enable_dns && ip6tables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT

@@ -27,13 +27,17 @@ if (build_test)
     add_subdirectory(test)
 endif()
 
+configure_file(cgnoproxy.cmake cgnoproxy)
+configure_file(cgproxyd.cmake cgproxyd)
+configure_file(cgproxy.service.cmake cgproxy.service)
+
 # instal scripts and other things
-install(PROGRAMS cgproxyd TYPE BIN)
-install(PROGRAMS cgnoproxy TYPE BIN)
-install(PROGRAMS cgroup-tproxy.sh DESTINATION ${CMAKE_INSTALL_DATADIR}/cgproxy/scripts)
-install(FILES cgproxy.service DESTINATION ${CMAKE_INSTALL_LIBDIR}/systemd/system)
+install(PROGRAMS ${CMAKE_BINARY_DIR}/cgproxyd TYPE BIN)
+install(PROGRAMS ${CMAKE_BINARY_DIR}/cgnoproxy TYPE BIN)
+install(PROGRAMS cgroup-tproxy.sh DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/cgproxy/scripts)
+install(FILES ${CMAKE_BINARY_DIR}/cgproxy.service DESTINATION /usr/lib/systemd/system)
 install(FILES config.json DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/cgproxy)
-install(FILES readme.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
+install(FILES readme.md DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR})
 
 # man pages
 set(man_gz ${PROJECT_SOURCE_DIR}/man/cgproxyd.1.gz ${PROJECT_SOURCE_DIR}/man/cgproxy.1.gz ${PROJECT_SOURCE_DIR}/man/cgnoproxy.1.gz)

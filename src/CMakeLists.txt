@@ -2,7 +2,9 @@ find_package(nlohmann_json REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/execsnoop-kernel/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+configure_file(common.h.cmake common.h)
 
 if (build_execsnoop_dl)
     add_definitions(-DBUIlD_EXECSNOOP_DL)

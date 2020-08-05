@@ -7,15 +7,15 @@
 #include <vector>
 using namespace std;
 
-#define TPROXY_IPTABLS_START "/usr/share/cgproxy/scripts/cgroup-tproxy.sh"
-#define TPROXY_IPTABLS_CLEAN "/usr/share/cgproxy/scripts/cgroup-tproxy.sh stop"
+#define TPROXY_IPTABLS_START "@CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/cgroup-tproxy.sh"
+#define TPROXY_IPTABLS_CLEAN "@CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/cgroup-tproxy.sh stop"
 
-#define LIBEXECSNOOP_SO "/usr/lib/cgproxy/libexecsnoop.so"
+#define LIBEXECSNOOP_SO "@CMAKE_INSTALL_FULL_LIBDIR@/cgproxy/libexecsnoop.so"
 #define CGROUP2_MOUNT_POINT "/var/run/cgproxy/cgroup2"
 #define PID_LOCK_FILE "/var/run/cgproxyd.pid"
 #define SOCKET_PATH "/tmp/cgproxy_unix_socket"
 #define LISTEN_BACKLOG 64
-#define DEFAULT_CONFIG_FILE "/etc/cgproxy/config.json"
+#define DEFAULT_CONFIG_FILE "@CMAKE_INSTALL_FULL_SYSCONFDIR@/cgproxy/config.json"
 #define READ_SIZE_MAX 128
 
 #define CGROUP_PROXY_PRESVERED "/proxy.slice"

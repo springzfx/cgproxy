@@ -154,7 +154,7 @@ Config file: **/etc/cgproxy/config.json**
 
 - **enable_ipv6**
 
-- **table**, **fwmark**, **mark_newin**  you can specify iptables and route table related parameter in case conflict.
+- **table**, **fwmark** you can specify iptables and route table related parameter in case conflict.
 
 - options priority
 
@@ -236,3 +236,16 @@ cgproxy is licenced under [![License: GPL v3](https://img.shields.io/badge/Licen
 ## Known Issus
 
 - docker breaks cgroup path match, add kernel parameter `cgroup_no_v1=net_cls,net_prio` to resolve, see [issue #3](https://github.com/springzfx/cgproxy/issues/3) for detail
+
+- Bridge mode works different way,  this may affect programs which using bridge network, for example podman, docker, virtualbox. To get is work, set following parameter:
+
+  ```
+  sudo sysctl -w net.bridge.bridge-nf-call-iptables=0
+  sudo sysctl -w net.bridge.bridge-nf-call-ip6tables=0
+  ```
+  see [issue #10](https://github.com/springzfx/cgproxy/issues/10)
+
+  refer:  
+
+  - [ebtables/iptables interaction on a Linux-based bridge](http://ebtables.netfilter.org/br_fw_ia/br_fw_ia.html)
+  - https://serverfault.com/questions/162366/iptables-bridge-and-forward-chain

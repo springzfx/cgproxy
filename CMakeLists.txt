@@ -35,7 +35,7 @@ configure_file(cgproxy.service.cmake cgproxy.service)
 install(PROGRAMS ${CMAKE_BINARY_DIR}/cgproxyd TYPE BIN)
 install(PROGRAMS ${CMAKE_BINARY_DIR}/cgnoproxy TYPE BIN)
 install(PROGRAMS cgroup-tproxy.sh DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/cgproxy/scripts)
-install(FILES ${CMAKE_BINARY_DIR}/cgproxy.service DESTINATION /usr/lib/systemd/system)
+install(FILES ${CMAKE_BINARY_DIR}/cgproxy.service DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/systemd/system)
 install(FILES config.json DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/cgproxy)
 install(FILES readme.md DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR})
 

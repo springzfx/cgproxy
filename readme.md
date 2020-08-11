@@ -20,7 +20,7 @@ Main feature:
       * [Introduction](#introduction)
       * [Contents](#contents)
       * [Prerequest](#prerequest)
-      * [How to install](#how-to-install)
+      * [How to build and install](#how-to-build-and-install)
       * [Default usage](#default-usage)
       * [Configuration](#configuration)
       * [Global transparent proxy](#global-transparent-proxy)
@@ -29,7 +29,7 @@ Main feature:
       * [NOTES](#notes)
       * [TIPS](#tips)
       * [Licences](#licences)
-      * [Known Issus](#known-issus)
+      * [Known Issues](#known-issues)
 
 <!-- Added by: fancy, at: Sat 04 Jul 2020 03:52:07 PM CST -->
 
@@ -161,7 +161,7 @@ Config file: **/etc/cgproxy/config.json**
   ```
   program_noproxy > program_proxy > cgroup_noproxy > cgroup_proxy
   enable_ipv6 = enable_ipv4 > enable_dns > enable_tcp = enable_udp
-  ommand cgproxy and cgnoproxy always have highest priority
+  command cgproxy and cgnoproxy always have highest priority
   ```
 
 **Note**: cgroup in configuration need to be exist, otherwise ignored
@@ -233,7 +233,7 @@ sudo systemctl restart cgproxy.service
 
 cgproxy is licenced under [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0) 
 
-## Known Issus
+## Known Issues
 
 - docker breaks cgroup path match, add kernel parameter `cgroup_no_v1=net_cls,net_prio` to resolve, see [issue #3](https://github.com/springzfx/cgproxy/issues/3) for detail
 

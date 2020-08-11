@@ -52,7 +52,11 @@ int attach(const string pid, const string cgroup_target) {
     // return_error
   }
 
-  if (getCgroup(pid) == cgroup_target) {
+  string cg;
+
+  cg = getCgroup(pid);
+  if (cg.empty()) return_success;
+  if (cg == cgroup_target) {
     debug("%s already in %s", pid.c_str(), cgroup_target.c_str());
     return_success;
   }
@@ -62,7 +66,9 @@ int attach(const string pid, const string cgroup_target) {
 
   // wait for small period and check again
   this_thread::sleep_for(std::chrono::milliseconds(100));
-  if (getCgroup(pid) != cgroup_target && write2procs(pid, cgroup_target_procs) != 0)
+  cg = getCgroup(pid);
+  if (cg.empty()) return_success;
+  if (cg != cgroup_target && write2procs(pid, cgroup_target_procs) != 0)
     return_error;
   return_success;
 }
@@ -78,7 +84,7 @@ int write2procs(string pid, string procspath) {
 
   // maybe there some write error, for example process pid may not exist
   if (!procs) {
-    error("write %s to %s failed, maybe process %s not exist", pid.c_str(),
+    error("write %s to %s failed, maybe process %s live too short", pid.c_str(),
           procspath.c_str(), pid.c_str());
     return_error;
   }

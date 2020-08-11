@@ -59,13 +59,13 @@ Main feature:
 
 - For debian and redhat series, download from [Release page](https://github.com/springzfx/cgproxy/releases)
 
-- For archlinux series, see[archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy)
+- For archlinux series, already in archlinuxcn repo, or see [archlinux AUR](https://aur.archlinux.org/packages/?K=cgproxy)
 
 - **Tested on  archlinux, fedora 32, ubuntu 18.04, ubuntu 20.04,  deepin 15.11, deepin v20 beta**
 
 ### build
 
-- before build, install depencies: clang, nlohmann-json, libbpf
+- before build, install depencies: clang(if to build bpf obj from scratch), nlohmann-json, libbpf
 - then cmake standard build
 
 ```bash

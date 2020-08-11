@@ -211,7 +211,7 @@ sudo systemctl restart cgproxy.service
 
 ## NOTES
 
-- v2ray TPROXY need root or special permission, use [service](https://github.com/springzfx/cgproxy/blob/v3.x/v2ray_config/v2ray.service) or
+- v2ray TPROXY need root or special permission, use [service](/v2ray_config/v2ray.service) or
   
   ```bash
   sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/lib/v2ray/v2ray

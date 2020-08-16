@@ -73,39 +73,39 @@ fi
 
 
 stop(){
-    iptables -t mangle -L TPROXY_ENT &> /dev/null || return
+    iptables -w 60 -t mangle -L TPROXY_ENT &> /dev/null || return
     echo "iptables: cleaning tproxy iptables"
 
-    iptables -t mangle -D PREROUTING -j TPROXY_PRE
-    iptables -t mangle -D OUTPUT -j TPROXY_OUT
+    iptables -w 60 -t mangle -D PREROUTING -j TPROXY_PRE
+    iptables -w 60 -t mangle -D OUTPUT -j TPROXY_OUT
 
-    iptables -t mangle -F TPROXY_PRE
-    iptables -t mangle -F TPROXY_ENT
-    iptables -t mangle -F TPROXY_OUT
-    iptables -t mangle -F TPROXY_MARK
+    iptables -w 60 -t mangle -F TPROXY_PRE
+    iptables -w 60 -t mangle -F TPROXY_ENT
+    iptables -w 60 -t mangle -F TPROXY_OUT
+    iptables -w 60 -t mangle -F TPROXY_MARK
 
-    iptables -t mangle -X TPROXY_PRE
-    iptables -t mangle -X TPROXY_ENT
-    iptables -t mangle -X TPROXY_OUT
-    iptables -t mangle -X TPROXY_MARK
+    iptables -w 60 -t mangle -X TPROXY_PRE
+    iptables -w 60 -t mangle -X TPROXY_ENT
+    iptables -w 60 -t mangle -X TPROXY_OUT
+    iptables -w 60 -t mangle -X TPROXY_MARK
 
     ip rule delete fwmark $fwmark_tproxy lookup $table_tproxy
     ip rule delete fwmark $fwmark_reroute lookup $table_reroute &> /dev/null
     ip route flush table $table_tproxy
     ip route flush table $table_reroute &> /dev/null
 
-    ip6tables -t mangle -D PREROUTING -j TPROXY_PRE
-    ip6tables -t mangle -D OUTPUT -j TPROXY_OUT
+    ip6tables -w 60 -t mangle -D PREROUTING -j TPROXY_PRE
+    ip6tables -w 60 -t mangle -D OUTPUT -j TPROXY_OUT
 
-    ip6tables -t mangle -F TPROXY_PRE
-    ip6tables -t mangle -F TPROXY_OUT
-    ip6tables -t mangle -F TPROXY_ENT
-    ip6tables -t mangle -F TPROXY_MARK
+    ip6tables -w 60 -t mangle -F TPROXY_PRE
+    ip6tables -w 60 -t mangle -F TPROXY_OUT
+    ip6tables -w 60 -t mangle -F TPROXY_ENT
+    ip6tables -w 60 -t mangle -F TPROXY_MARK
 
-    ip6tables -t mangle -X TPROXY_PRE
-    ip6tables -t mangle -X TPROXY_OUT
-    ip6tables -t mangle -X TPROXY_ENT
-    ip6tables -t mangle -X TPROXY_MARK
+    ip6tables -w 60 -t mangle -X TPROXY_PRE
+    ip6tables -w 60 -t mangle -X TPROXY_OUT
+    ip6tables -w 60 -t mangle -X TPROXY_ENT
+    ip6tables -w 60 -t mangle -X TPROXY_MARK
 
     ip -6 rule delete fwmark $fwmark_tproxy lookup $table_tproxy
     ip -6 rule delete fwmark $fwmark_reroute lookup $table_reroute &> /dev/null
@@ -113,8 +113,8 @@ stop(){
     ip -6 route flush table $table_reroute &> /dev/null
 
     ## may not exist, just ignore, and tracking their existence is not reliable
-    iptables -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
-    ip6tables -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
+    iptables -w 60 -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
+    ip6tables -w 60 -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
 
     ## unmount cgroup2
     [ "$(findmnt -M $cgroup_mount_point -n -o FSTYPE)" = "cgroup2" ] && umount $cgroup_mount_point
@@ -175,21 +175,21 @@ echo "iptables: applying tproxy iptables"
 ip rule add fwmark $fwmark_tproxy table $table_tproxy
 ip route add local default dev lo table $table_tproxy
 # core
-iptables -t mangle -N TPROXY_ENT
-iptables -t mangle -A TPROXY_ENT -m socket -j MARK --set-mark $fwmark_tproxy
-iptables -t mangle -A TPROXY_ENT -m socket -j ACCEPT
-iptables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark_tproxy
-iptables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark_tproxy
+iptables -w 60 -t mangle -N TPROXY_ENT
+iptables -w 60 -t mangle -A TPROXY_ENT -m socket -j MARK --set-mark $fwmark_tproxy
+iptables -w 60 -t mangle -A TPROXY_ENT -m socket -j ACCEPT
+iptables -w 60 -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark_tproxy
+iptables -w 60 -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark_tproxy
 # filter
-iptables -t mangle -N TPROXY_PRE
-iptables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
-iptables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
-$enable_gateway  || iptables -t mangle -A TPROXY_PRE -m addrtype ! --src-type LOCAL -j RETURN
-$enable_dns && iptables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
-$enable_udp && iptables -t mangle -A TPROXY_PRE -p udp -j TPROXY_ENT
-$enable_tcp && iptables -t mangle -A TPROXY_PRE -p tcp -j TPROXY_ENT
+iptables -w 60 -t mangle -N TPROXY_PRE
+iptables -w 60 -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
+iptables -w 60 -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
+$enable_gateway  || iptables -w 60 -t mangle -A TPROXY_PRE -m addrtype ! --src-type LOCAL -j RETURN
+$enable_dns && iptables -w 60 -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
+$enable_udp && iptables -w 60 -t mangle -A TPROXY_PRE -p udp -j TPROXY_ENT
+$enable_tcp && iptables -w 60 -t mangle -A TPROXY_PRE -p tcp -j TPROXY_ENT
 # hook
-iptables -t mangle -A PREROUTING -j TPROXY_PRE
+iptables -w 60 -t mangle -A PREROUTING -j TPROXY_PRE
 
 ## mangle output
 if [ $fwmark_reroute != $fwmark_tproxy ]; then
@@ -197,43 +197,43 @@ ip rule add fwmark $fwmark_reroute table $table_reroute
 ip route add local default dev lo table $table_reroute
 fi
 # filter
-iptables -t mangle -N TPROXY_MARK
-iptables -t mangle -A TPROXY_MARK -m addrtype ! --dst-type UNICAST -j RETURN
-$enable_dns && iptables -t mangle -A TPROXY_MARK -p udp --dport 53 -j MARK --set-mark $fwmark_reroute
-$enable_udp && iptables -t mangle -A TPROXY_MARK -p udp -j MARK --set-mark $fwmark_reroute
-$enable_tcp && iptables -t mangle -A TPROXY_MARK -p tcp -j MARK --set-mark $fwmark_reroute
+iptables -w 60 -t mangle -N TPROXY_MARK
+iptables -w 60 -t mangle -A TPROXY_MARK -m addrtype ! --dst-type UNICAST -j RETURN
+$enable_dns && iptables -w 60 -t mangle -A TPROXY_MARK -p udp --dport 53 -j MARK --set-mark $fwmark_reroute
+$enable_udp && iptables -w 60 -t mangle -A TPROXY_MARK -p udp -j MARK --set-mark $fwmark_reroute
+$enable_tcp && iptables -w 60 -t mangle -A TPROXY_MARK -p tcp -j MARK --set-mark $fwmark_reroute
 # cgroup
-iptables -t mangle -N TPROXY_OUT
-iptables -t mangle -A TPROXY_OUT -m conntrack --ctdir REPLY -j RETURN
+iptables -w 60 -t mangle -N TPROXY_OUT
+iptables -w 60 -t mangle -A TPROXY_OUT -m conntrack --ctdir REPLY -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
-iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
+iptables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
 done
 for cg in ${cgroup_proxy[@]}; do
-iptables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
+iptables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
 done
 # hook
-$enable_ipv4 && iptables -t mangle -A OUTPUT -j TPROXY_OUT
+$enable_ipv4 && iptables -w 60 -t mangle -A OUTPUT -j TPROXY_OUT
 
 ## ipv6 #########################################################################
 ## mangle prerouting
 ip -6 rule add fwmark $fwmark_tproxy table $table_tproxy
 ip -6 route add local default dev lo table $table_tproxy
 # core
-ip6tables -t mangle -N TPROXY_ENT
-ip6tables -t mangle -A TPROXY_ENT -m socket -j MARK --set-mark $fwmark_tproxy
-ip6tables -t mangle -A TPROXY_ENT -m socket -j ACCEPT
-ip6tables -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark_tproxy
-ip6tables -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark_tproxy
+ip6tables -w 60 -t mangle -N TPROXY_ENT
+ip6tables -w 60 -t mangle -A TPROXY_ENT -m socket -j MARK --set-mark $fwmark_tproxy
+ip6tables -w 60 -t mangle -A TPROXY_ENT -m socket -j ACCEPT
+ip6tables -w 60 -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark_tproxy
+ip6tables -w 60 -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark_tproxy
 # filter
-ip6tables -t mangle -N TPROXY_PRE
-ip6tables -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
-ip6tables -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
-$enable_gateway  || ip6tables -t mangle -A TPROXY_PRE -m addrtype ! --src-type LOCAL -j RETURN
-$enable_dns && ip6tables -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
-$enable_udp && ip6tables -t mangle -A TPROXY_PRE -p udp -j TPROXY_ENT
-$enable_tcp && ip6tables -t mangle -A TPROXY_PRE -p tcp -j TPROXY_ENT
+ip6tables -w 60 -t mangle -N TPROXY_PRE
+ip6tables -w 60 -t mangle -A TPROXY_PRE -m addrtype --dst-type LOCAL -j RETURN
+ip6tables -w 60 -t mangle -A TPROXY_PRE -m addrtype ! --dst-type UNICAST -j RETURN
+$enable_gateway  || ip6tables -w 60 -t mangle -A TPROXY_PRE -m addrtype ! --src-type LOCAL -j RETURN
+$enable_dns && ip6tables -w 60 -t mangle -A TPROXY_PRE -p udp --dport 53 -j TPROXY_ENT
+$enable_udp && ip6tables -w 60 -t mangle -A TPROXY_PRE -p udp -j TPROXY_ENT
+$enable_tcp && ip6tables -w 60 -t mangle -A TPROXY_PRE -p tcp -j TPROXY_ENT
 # hook
-ip6tables -t mangle -A PREROUTING -j TPROXY_PRE
+ip6tables -w 60 -t mangle -A PREROUTING -j TPROXY_PRE
 
 ## mangle output
 if [ $fwmark_reroute != $fwmark_tproxy ]; then
@@ -241,27 +241,27 @@ ip -6 rule add fwmark $fwmark_reroute table $table_reroute
 ip -6 route add local default dev lo table $table_reroute
 fi
 # filter
-ip6tables -t mangle -N TPROXY_MARK
-ip6tables -t mangle -A TPROXY_MARK -m addrtype ! --dst-type UNICAST -j RETURN
-$enable_dns && ip6tables -t mangle -A TPROXY_MARK -p udp --dport 53 -j MARK --set-mark $fwmark_reroute
-$enable_udp && ip6tables -t mangle -A TPROXY_MARK -p udp -j MARK --set-mark $fwmark_reroute
-$enable_tcp && ip6tables -t mangle -A TPROXY_MARK -p tcp -j MARK --set-mark $fwmark_reroute
+ip6tables -w 60 -t mangle -N TPROXY_MARK
+ip6tables -w 60 -t mangle -A TPROXY_MARK -m addrtype ! --dst-type UNICAST -j RETURN
+$enable_dns && ip6tables -w 60 -t mangle -A TPROXY_MARK -p udp --dport 53 -j MARK --set-mark $fwmark_reroute
+$enable_udp && ip6tables -w 60 -t mangle -A TPROXY_MARK -p udp -j MARK --set-mark $fwmark_reroute
+$enable_tcp && ip6tables -w 60 -t mangle -A TPROXY_MARK -p tcp -j MARK --set-mark $fwmark_reroute
 # cgroup
-ip6tables -t mangle -N TPROXY_OUT
-ip6tables -t mangle -A TPROXY_OUT -m conntrack --ctdir REPLY -j RETURN
+ip6tables -w 60 -t mangle -N TPROXY_OUT
+ip6tables -w 60 -t mangle -A TPROXY_OUT -m conntrack --ctdir REPLY -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
+ip6tables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
 done
 for cg in ${cgroup_proxy[@]}; do
-ip6tables -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
+ip6tables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
 done
 # hook
-$enable_ipv6 && ip6tables -t mangle -A OUTPUT -j TPROXY_OUT
+$enable_ipv6 && ip6tables -w 60 -t mangle -A OUTPUT -j TPROXY_OUT
 
 ## forward #######################################################################
 if $enable_gateway; then
     iptables  -t nat -A POSTROUTING -m owner ! --socket-exists -j MASQUERADE
-    ip6tables -t nat -A POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE # only masquerade ipv6 private address
+    ip6tables -w 60 -t nat -A POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE # only masquerade ipv6 private address
     sysctl -w net.ipv4.ip_forward=1
     sysctl -w net.ipv6.conf.all.forwarding=1
     echo "iptables: gateway enabled"

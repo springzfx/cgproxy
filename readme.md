@@ -217,7 +217,7 @@ sudo systemctl restart cgproxy.service
   sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/lib/v2ray/v2ray
   ```
 
-- Why not outbound mark solution, because in v2ray [when `"localhost"` is used, out-going DNS traffic is not controlled by V2Ray](https://www.v2fly.org/en/configuration/dns.html), so no mark at all, that's pity.
+- Why not outbound mark solution, because in v2ray [when `"localhost"` is used, out-going DNS traffic is not controlled by V2Ray](https://www.v2fly.org/config/dns.html#dnsobject), so no mark at all, that's pity.
 
 ## TIPS
 
@@ -227,7 +227,7 @@ sudo systemctl restart cgproxy.service
 - Offer you qv2ray config example
   
 
-![Qv2ray config example](https://i.loli.net/2020/06/12/6ltax93bv7NCTHU.png)
+![Qv2ray config example](https://i.loli.net/2020/08/17/P6y5SfLoUwGjaxM.png)
 
 ## Licences
 

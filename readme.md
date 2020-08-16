@@ -235,17 +235,14 @@ cgproxy is licenced under [![License: GPL v3](https://img.shields.io/badge/Licen
 
 ## Known Issus
 
-- docker breaks cgroup path match, add kernel parameter `cgroup_no_v1=net_cls,net_prio` to resolve, see [issue #3](https://github.com/springzfx/cgproxy/issues/3) for detail
+- docker breaks cgroup v2 path match, add kernel parameter `cgroup_no_v1=net_cls,net_prio` to resolve, see [issue #3](https://github.com/springzfx/cgproxy/issues/3) for detail
 
-- Bridge mode works different way,  this may affect programs which using bridge network, for example podman, docker, virtualbox. To get is work, set following parameter:
+- docker load `br_netfilter` module due to [hairpin nat](https://wiki.mikrotik.com/wiki/Hairpin_NAT),  which is not a big deal,  see [commit](https://github.com/moby/moby/pull/13162). 
+
+  It enables data link layer packet to go through iptables and only once. However TPROXY do not accept this kind of packets. So to get it working, set following parameter to disable this behavior or unload br_netfilter module manualy. see [issue #10](https://github.com/springzfx/cgproxy/issues/10) for detail.
 
   ```
   sudo sysctl -w net.bridge.bridge-nf-call-iptables=0
   sudo sysctl -w net.bridge.bridge-nf-call-ip6tables=0
+  sudo sysctl -w net.bridge.bridge-nf-call-arptables = 0
   ```
-  see [issue #10](https://github.com/springzfx/cgproxy/issues/10)
-
-  refer:  
-
-  - [ebtables/iptables interaction on a Linux-based bridge](http://ebtables.netfilter.org/br_fw_ia/br_fw_ia.html)
-  - https://serverfault.com/questions/162366/iptables-bridge-and-forward-chain

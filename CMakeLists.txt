@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(cgproxy VERSION 0.18)
+project(cgproxy VERSION 0.19)
 
 include(GNUInstallDirs)
 
@@ -32,8 +32,8 @@ configure_file(cgproxyd.cmake cgproxyd)
 configure_file(cgproxy.service.cmake cgproxy.service)
 
 # instal scripts and other things
-install(PROGRAMS ${CMAKE_BINARY_DIR}/cgproxyd TYPE BIN)
-install(PROGRAMS ${CMAKE_BINARY_DIR}/cgnoproxy TYPE BIN)
+install(PROGRAMS ${CMAKE_BINARY_DIR}/cgproxyd DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+install(PROGRAMS ${CMAKE_BINARY_DIR}/cgnoproxy DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 install(PROGRAMS cgroup-tproxy.sh DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/cgproxy/scripts)
 install(FILES ${CMAKE_BINARY_DIR}/cgproxy.service DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/systemd/system)
 install(FILES config.json DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/cgproxy)
@@ -46,4 +46,4 @@ add_custom_command(OUTPUT ${man_gz}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/man
 )
 add_custom_target(man ALL DEPENDS ${man_gz})
-install(FILES ${man_gz} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1/)
+install(FILES ${man_gz} DESTINATION ${CMAKE_INSTALL_FULL_MANDIR}/man1/)

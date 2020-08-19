@@ -17,7 +17,7 @@ endif()
 add_executable(main main.cpp common.cpp config.cpp cgroup_attach.cpp socket_client.cpp socket_server.cpp)
 target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json ${DL_LIB} ${EXECSNOOP_LIB})
 set_target_properties(main PROPERTIES OUTPUT_NAME cgproxy)
-install(TARGETS main RUNTIME)
+install(TARGETS main DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
 if (build_static)
     target_link_libraries(main PRIVATE -static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive)

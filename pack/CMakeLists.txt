@@ -2,6 +2,7 @@
 set(CPACK_GENERATOR "DEB;RPM")
 set(CPACK_PACKAGE_NAME "cgproxy")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "cgproxy will transparent proxy anything running in specific cgroup.It aslo supports global transparent proxy and gateway proxy")
+set(CMAKE_INSTALL_PREFIX /usr)
 
 ## deb pack
 execute_process(COMMAND dpkg --print-architecture 

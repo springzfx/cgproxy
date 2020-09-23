@@ -1,5 +1,6 @@
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_BINARY_DIR}/src)
 
 find_package(nlohmann_json REQUIRED)
 add_executable(client_test socket_client_test.cpp

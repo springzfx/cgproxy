@@ -214,7 +214,7 @@ sudo systemctl restart cgproxy.service
 - v2ray TPROXY need root or special permission, use [service](/v2ray_config/v2ray.service) or
   
   ```bash
-  sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/lib/v2ray/v2ray
+  sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/bin/v2ray
   ```
 
 - Why not outbound mark solution, because in v2ray [when `"localhost"` is used, out-going DNS traffic is not controlled by V2Ray](https://www.v2fly.org/config/dns.html#dnsobject), so no mark at all, that's pity.

@@ -13,5 +13,7 @@
     "enable_ipv4": true,
     "enable_ipv6": true,
     "table": 10007,
-    "fwmark": 39283
+    "fwmark": 39283,
+    "hijack_dns": false,
+    "dns_port": 5450
 }

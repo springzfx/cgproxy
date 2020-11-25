@@ -24,6 +24,8 @@ public:
   bool enable_udp = true;
   bool enable_ipv4 = true;
   bool enable_ipv6 = true;
+  int dns_port = 5450;
+  bool hijack_dns = false;
 
   // for iptables
   int table=10007;

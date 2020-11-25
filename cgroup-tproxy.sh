@@ -22,6 +22,8 @@
 ###     enable_gateway=false
 ###     table=10007
 ###     fwmark=0x9973
+###     hijack_dns=false
+###     dns_port=5450
 ###     cgroup_mount_point=$(findmnt -t cgroup2 -n -o TARGET | head -n 1)
 ###
 ### semicolon to seperate multi cgroup:
@@ -51,6 +53,7 @@ fi
 
 ## tproxy listening port
 [ -z ${port+x} ] && port=12345
+[ -z ${dns_port+x} ] && dns_port=5450
 
 ## controll options
 [ -z ${enable_dns+x} ]  && enable_dns=true
@@ -59,6 +62,7 @@ fi
 [ -z ${enable_ipv4+x} ] && enable_ipv4=true
 [ -z ${enable_ipv6+x} ] && enable_ipv6=true
 [ -z ${enable_gateway+x} ] && enable_gateway=false
+[ -z ${hijack_dns+x} ] && hijack_dns=false
 
 ## mark/route things
 [ -z ${table+x} ]           && table=10007
@@ -113,6 +117,18 @@ stop(){
     ip -6 route flush table $table_reroute &> /dev/null
 
     ## may not exist, just ignore, and tracking their existence is not reliable
+    iptables -w 60 -t nat -D OUTPUT -j HIJACK_OUT &> /dev/null
+    iptables -w 60 -t nat -F HIJACK_OUT &> /dev/null
+    iptables -w 60 -t nat -X HIJACK_OUT &> /dev/null
+    ip6tables -w 60 -t nat -D OUTPUT -j HIJACK_OUT &> /dev/null
+    ip6tables -w 60 -t nat -F HIJACK_OUT &> /dev/null
+    ip6tables -w 60 -t nat -X HIJACK_OUT &> /dev/null
+    iptables -w 60 -t nat -D PREROUTING -j HIJACK_PRE &> /dev/null
+    iptables -w 60 -t nat -F HIJACK_PRE &> /dev/null
+    iptables -w 60 -t nat -X HIJACK_PRE &> /dev/null
+    ip6tables -w 60 -t nat -D PREROUTING -j HIJACK_PRE &> /dev/null
+    ip6tables -w 60 -t nat -F HIJACK_PRE &> /dev/null
+    ip6tables -w 60 -t nat -X HIJACK_PRE &> /dev/null
     iptables -w 60 -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
     ip6tables -w 60 -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
 
@@ -257,6 +273,31 @@ ip6tables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
 done
 # hook
 $enable_ipv6 && ip6tables -w 60 -t mangle -A OUTPUT -j TPROXY_OUT
+
+## hijack dns ####################################################################
+
+if $hijack_dns; then
+    iptables -w 60 -t nat -N HIJACK_OUT
+    ip6tables -w 60 -t nat -N HIJACK_OUT
+    for cg in ${cgroup_noproxy[@]}; do
+    iptables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j RETURN
+    ip6tables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j RETURN
+    done
+    for cg in ${cgroup_proxy[@]}; do
+    iptables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j REDIRECT --to-ports $dns_port
+    ip6tables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j REDIRECT --to-ports $dns_port
+    done
+    iptables -w 60 -t nat -A OUTPUT -j HIJACK_OUT
+    ip6tables -w 60 -t nat -A OUTPUT -j HIJACK_OUT
+    if $enable_gateway; then
+    iptables -w 60 -t nat -N HIJACK_PRE
+    ip6tables -w 60 -t nat -N HIJACK_PRE
+    iptables -w 60 -t nat -A HIJACK_PRE -p udp --dport 53 -j REDIRECT --to-ports $dns_port
+    ip6tables -w 60 -t nat -A HIJACK_PRE -p udp --dport 53 -j REDIRECT --to-ports $dns_port
+    iptables -w 60 -t nat -A PREROUTING -j HIJACK_PRE
+    ip6tables -w 60 -t nat -A PREROUTING -j HIJACK_PRE
+    fi
+fi
 
 ## forward #######################################################################
 if $enable_gateway; then

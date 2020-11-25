@@ -15,5 +15,7 @@
     "table": 10007,
     "fwmark": 39283,
     "hijack_dns": false,
-    "dns_port": 5450
+    "hijack_dns_port": 5450,
+    "hijack_dns_ignore_v4": [],
+    "hijack_dns_ignore_v6": []
 }

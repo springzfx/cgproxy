@@ -91,6 +91,10 @@ bool startWith(string prefix);
 
 bool validCgroup(const string cgroup);
 bool validCgroup(const vector<string> cgroup);
+bool validIpv4(const string ip);
+bool validIpv4(const vector<string> ip);
+bool validIpv6(const string ip);
+bool validIpv6(const vector<string> ip);
 bool validPid(const string pid);
 bool validPort(const int port);
 

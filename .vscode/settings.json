@@ -3,5 +3,9 @@
     "cmake.configureArgs": [
         "-Dbuild_static=OFF",
         "-Dbuild_execsnoop_dl=OFF"
-    ]
+    ],
+    "files.associations": {
+        "regex": "cpp",
+        "string": "cpp"
+    }
 }

@@ -24,8 +24,10 @@ public:
   bool enable_udp = true;
   bool enable_ipv4 = true;
   bool enable_ipv6 = true;
-  int dns_port = 5450;
+  int hijack_dns_port = 5450;
   bool hijack_dns = false;
+  vector<string> hijack_dns_ignore_v4 = {};
+  vector<string> hijack_dns_ignore_v6 = {};
 
   // for iptables
   int table=10007;

@@ -51,9 +51,21 @@ else
     IFS=':' read -r -a cgroup_noproxy   <<< "$cgroup_noproxy"
 fi
 
+if [ -z ${hijack_dns_ignore_v4+x} ]; then  
+    hijack_dns_ignore_v4=""
+else
+    IFS=':' read -r -a hijack_dns_ignore_v4   <<< "$hijack_dns_ignore_v4"
+fi
+
+if [ -z ${hijack_dns_ignore_v6+x} ]; then  
+    hijack_dns_ignore_v6=""
+else
+    IFS=':' read -r -a hijack_dns_ignore_v6   <<< "$hijack_dns_ignore_v6"
+fi
+
 ## tproxy listening port
 [ -z ${port+x} ] && port=12345
-[ -z ${dns_port+x} ] && dns_port=5450
+[ -z ${hijack_dns_port+x} ] && hijack_dns_port=5450
 
 ## controll options
 [ -z ${enable_dns+x} ]  && enable_dns=true
@@ -283,17 +295,23 @@ if $hijack_dns; then
     iptables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j RETURN
     ip6tables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j RETURN
     done
+    for ip in ${hijack_dns_ignore_v4[@]}; do
+    iptables -w 60 -t nat -A HIJACK_OUT -p udp --dport 53 --dst $ip -j RETURN
+    done
+    for ip in ${hijack_dns_ignore_v6[@]}; do
+    ip6tables -w 60 -t nat -A HIJACK_OUT -p udp --dport 53 --dst $ip -j RETURN
+    done
     for cg in ${cgroup_proxy[@]}; do
-    iptables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j REDIRECT --to-ports $dns_port
-    ip6tables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j REDIRECT --to-ports $dns_port
+    iptables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j REDIRECT --to-ports $hijack_dns_port
+    ip6tables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j REDIRECT --to-ports $hijack_dns_port
     done
     iptables -w 60 -t nat -A OUTPUT -j HIJACK_OUT
     ip6tables -w 60 -t nat -A OUTPUT -j HIJACK_OUT
     if $enable_gateway; then
     iptables -w 60 -t nat -N HIJACK_PRE
     ip6tables -w 60 -t nat -N HIJACK_PRE
-    iptables -w 60 -t nat -A HIJACK_PRE -p udp --dport 53 -j REDIRECT --to-ports $dns_port
-    ip6tables -w 60 -t nat -A HIJACK_PRE -p udp --dport 53 -j REDIRECT --to-ports $dns_port
+    iptables -w 60 -t nat -A HIJACK_PRE -p udp --dport 53 -j REDIRECT --to-ports $hijack_dns_port
+    ip6tables -w 60 -t nat -A HIJACK_PRE -p udp --dport 53 -j REDIRECT --to-ports $hijack_dns_port
     iptables -w 60 -t nat -A PREROUTING -j HIJACK_PRE
     ip6tables -w 60 -t nat -A PREROUTING -j HIJACK_PRE
     fi

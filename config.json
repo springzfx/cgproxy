@@ -17,5 +17,6 @@
     "hijack_dns": false,
     "hijack_dns_port": 5450,
     "hijack_dns_ignore_v4": [],
-    "hijack_dns_ignore_v6": []
+    "hijack_dns_ignore_v6": [],
+    "block_port": false
 }

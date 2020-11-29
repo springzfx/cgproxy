@@ -75,6 +75,7 @@ fi
 [ -z ${enable_ipv6+x} ] && enable_ipv6=true
 [ -z ${enable_gateway+x} ] && enable_gateway=false
 [ -z ${hijack_dns+x} ] && hijack_dns=false
+[ -z ${block_port+x} ] && block_port=false
 
 ## mark/route things
 [ -z ${table+x} ]           && table=10007
@@ -143,6 +144,10 @@ stop(){
     ip6tables -w 60 -t nat -X HIJACK_PRE &> /dev/null
     iptables -w 60 -t nat -D POSTROUTING -m owner ! --socket-exists -j MASQUERADE &> /dev/null
     ip6tables -w 60 -t nat -D POSTROUTING -m owner ! --socket-exists -s fc00::/7 -j MASQUERADE &> /dev/null
+    iptables -w 60 -D INPUT -p tcp --dport $port -j REJECT &> /dev/null
+    iptables -w 60 -D INPUT -p udp --dport $port -j REJECT &> /dev/null
+    ip6tables -w 60 -D INPUT -p tcp --dport $port -j REJECT &> /dev/null
+    ip6tables -w 60 -D INPUT -p udp --dport $port -j REJECT &> /dev/null
 
     ## unmount cgroup2
     [ "$(findmnt -M $cgroup_mount_point -n -o FSTYPE)" = "cgroup2" ] && umount $cgroup_mount_point
@@ -242,6 +247,10 @@ done
 # hook
 $enable_ipv4 && iptables -w 60 -t mangle -A OUTPUT -j TPROXY_OUT
 
+## filter input: block port
+$block_port && iptables -w 60 -A INPUT -p tcp --dport $port -j REJECT
+$block_port && iptables -w 60 -A INPUT -p udp --dport $port -j REJECT
+
 ## ipv6 #########################################################################
 ## mangle prerouting
 ip -6 rule add fwmark $fwmark_tproxy table $table_tproxy
@@ -285,6 +294,10 @@ ip6tables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
 done
 # hook
 $enable_ipv6 && ip6tables -w 60 -t mangle -A OUTPUT -j TPROXY_OUT
+
+## filter input: block port
+$block_port && ip6tables -w 60 -A INPUT -p tcp --dport $port -j REJECT
+$block_port && ip6tables -w 60 -A INPUT -p udp --dport $port -j REJECT
 
 ## hijack dns ####################################################################
 

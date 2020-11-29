@@ -28,6 +28,7 @@ public:
   bool hijack_dns = false;
   vector<string> hijack_dns_ignore_v4 = {};
   vector<string> hijack_dns_ignore_v6 = {};
+  bool block_port = false;
 
   // for iptables
   int table=10007;

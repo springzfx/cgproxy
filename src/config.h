@@ -12,6 +12,7 @@ class Config {
 public:
   const string cgroup_proxy_preserved = CGROUP_PROXY_PRESVERED;
   const string cgroup_noproxy_preserved = CGROUP_NOPROXY_PRESVERED;
+  const string cgroup_dnsproxy_preserved = CGROUP_DNSPROXY_PRESVERED;
 
   vector<string> program_proxy = {cgroup_proxy_preserved};
   vector<string> program_noproxy = {cgroup_noproxy_preserved};
@@ -26,8 +27,7 @@ public:
   bool enable_ipv6 = true;
   int hijack_dns_port = 5450;
   bool hijack_dns = false;
-  vector<string> hijack_dns_ignore_v4 = {};
-  vector<string> hijack_dns_ignore_v6 = {};
+  vector<string> cgroup_dnsproxy;
   bool block_port = false;
 
   // for iptables

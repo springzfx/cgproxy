@@ -209,6 +209,12 @@ class cgproxyd {
         status = attach(pid, config.cgroup_noproxy_preserved);
         return status;
         break;
+      case MSG_TYPE_DNSPROXY_PID:
+        pid = j.at("data").get<int>();
+        info("process dnsproxy pid msg: %d", pid);
+        status = attach(pid, config.cgroup_dnsproxy_preserved);
+        return status;
+        break;
       default:
         error("unknown msg");
         return MSG_ERROR;

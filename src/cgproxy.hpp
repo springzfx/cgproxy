@@ -10,13 +10,20 @@ using namespace ::CGPROXY::CONFIG;
 
 namespace CGPROXY::CGPROXY {
 
-bool print_help = false, proxy = true;
+bool print_help = false, proxy = true, dns = false;
 bool attach_pid = false;
 string arg_pid;
 inline void print_usage() {
   if (proxy) {
-    cout << "Run program with proxy" << endl;
-    cout << "Usage: cgproxy [--help] [--debug] <CMD>" << endl;
+    if (dns) {
+      cout << "Run program with proxy but without dns hijack" << endl;
+      cout << "Usage: cgdnsproxy [--help] [--debug] <CMD>" << endl;
+      cout << "Alias: cgdnsproxy = cgproxy --dns" << endl;
+    }
+    else {
+      cout << "Run program with proxy and with dns hijack (optional)" << endl;
+      cout << "Usage: cgproxy [--help] [--debug] <CMD>" << endl;
+    }
   } else {
     cout << "Run program without proxy" << endl;
     cout << "Usage: cgpnoroxy [--help] [--debug] <CMD>" << endl;
@@ -36,6 +43,7 @@ bool processArgs(const int argc, char *argv[], int &shift) {
       continue;
     }
     if (strcmp(argv[i], "--noproxy") == 0) { proxy = false; }
+    if (strcmp(argv[i], "--dns") == 0) { dns = true; }
     if (strcmp(argv[i], "--debug") == 0) { enable_debug = true; }
     if (strcmp(argv[i], "--help") == 0) { print_help = true; }
     if (argv[i][0] != '-') { break; }
@@ -44,9 +52,9 @@ bool processArgs(const int argc, char *argv[], int &shift) {
   return true;
 }
 
-void send_pid(const pid_t pid, bool proxy, int &status) {
+void send_pid(const pid_t pid, bool proxy, bool dns, int &status) {
   json j;
-  j["type"] = proxy ? MSG_TYPE_PROXY_PID : MSG_TYPE_NOPROXY_PID;
+  j["type"] = !proxy ? MSG_TYPE_NOPROXY_PID : (dns ? MSG_TYPE_DNSPROXY_PID : MSG_TYPE_PROXY_PID);
   j["data"] = pid;
   SOCKET::send(j.dump(), status);
 }
@@ -69,7 +77,7 @@ int main(int argc, char *argv[]) {
   }
 
   int status = -1;
-  send_pid(attach_pid ? stoi(arg_pid) : getpid(), proxy, status);
+  send_pid(attach_pid ? stoi(arg_pid) : getpid(), proxy, dns, status);
   if (status != 0) {
     error("attach process failed");
     if (status == 1) error("maybe cgproxy.service not running");

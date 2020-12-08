@@ -2,9 +2,9 @@
     "comment":"For usage, see https://github.com/springzfx/cgproxy",
 
     "port": 12345,
-    "program_noproxy": ["v2ray", "qv2ray"],
+    "program_noproxy": ["v2ray", "qv2ray", "clash"],
     "program_proxy": [],
-    "cgroup_noproxy": ["/system.slice/v2ray.service"],
+    "cgroup_noproxy": ["/system.slice/v2ray.service", "/system.slice/clash.service"],
     "cgroup_proxy": [],
     "enable_gateway": false,
     "enable_dns": true,
@@ -16,7 +16,6 @@
     "fwmark": 39283,
     "hijack_dns": false,
     "hijack_dns_port": 5450,
-    "hijack_dns_ignore_v4": [],
-    "hijack_dns_ignore_v6": [],
+    "cgroup_dnsproxy": ["/system.slice/smartdns.service"],
     "block_port": false
 }

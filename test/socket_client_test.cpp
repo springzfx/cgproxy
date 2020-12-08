@@ -22,9 +22,9 @@ void send_config_path(const string s, int &status) {
   SOCKET::send(j.dump(), status);
 }
 
-void send_pid(const pid_t pid, bool proxy, int &status) {
+void send_pid(const pid_t pid, bool proxy, bool dns, int &status) {
   json j;
-  j["type"] = proxy ? MSG_TYPE_PROXY_PID : MSG_TYPE_NOPROXY_PID;
+  j["type"] = !proxy ? MSG_TYPE_NOPROXY_PID : (dns ? MSG_TYPE_DNSPROXY_PID : MSG_TYPE_PROXY_PID);
   j["data"] = pid;
   SOCKET::send(j.dump(), status);
 }

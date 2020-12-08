@@ -28,12 +28,14 @@ if (build_test)
 endif()
 
 configure_file(cgnoproxy.cmake cgnoproxy)
+configure_file(cgdnsproxy.cmake cgdnsproxy)
 configure_file(cgproxyd.cmake cgproxyd)
 configure_file(cgproxy.service.cmake cgproxy.service)
 
 # instal scripts and other things
 install(PROGRAMS ${CMAKE_BINARY_DIR}/cgproxyd DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 install(PROGRAMS ${CMAKE_BINARY_DIR}/cgnoproxy DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+install(PROGRAMS ${CMAKE_BINARY_DIR}/cgdnsproxy DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 install(PROGRAMS cgroup-tproxy.sh DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/cgproxy/scripts)
 install(FILES ${CMAKE_BINARY_DIR}/cgproxy.service DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/systemd/system)
 install(FILES config.json DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/cgproxy)

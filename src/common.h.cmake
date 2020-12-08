@@ -20,6 +20,7 @@ using namespace std;
 
 #define CGROUP_PROXY_PRESVERED "/proxy.slice"
 #define CGROUP_NOPROXY_PRESVERED "/noproxy.slice"
+#define CGROUP_DNSPROXY_PRESVERED "/dnsproxy.slice"
 
 #define THREAD_TIMEOUT 5
 
@@ -27,6 +28,7 @@ using namespace std;
 #define MSG_TYPE_CONFIG_PATH 2
 #define MSG_TYPE_PROXY_PID 3
 #define MSG_TYPE_NOPROXY_PID 4
+#define MSG_TYPE_DNSPROXY_PID 5
 
 #define UNKNOWN_ERROR 99
 #define ERROR -1
@@ -91,10 +93,6 @@ bool startWith(string prefix);
 
 bool validCgroup(const string cgroup);
 bool validCgroup(const vector<string> cgroup);
-bool validIpv4(const string ip);
-bool validIpv4(const vector<string> ip);
-bool validIpv6(const string ip);
-bool validIpv6(const vector<string> ip);
 bool validPid(const string pid);
 bool validPort(const int port);
 

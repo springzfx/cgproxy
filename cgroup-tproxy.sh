@@ -51,16 +51,10 @@ else
     IFS=':' read -r -a cgroup_noproxy   <<< "$cgroup_noproxy"
 fi
 
-if [ -z ${hijack_dns_ignore_v4+x} ]; then  
-    hijack_dns_ignore_v4=""
+if [ -z ${cgroup_dnsproxy+x} ]; then  
+    cgroup_dnsproxy="/dnsproxy.slice"
 else
-    IFS=':' read -r -a hijack_dns_ignore_v4   <<< "$hijack_dns_ignore_v4"
-fi
-
-if [ -z ${hijack_dns_ignore_v6+x} ]; then  
-    hijack_dns_ignore_v6=""
-else
-    IFS=':' read -r -a hijack_dns_ignore_v6   <<< "$hijack_dns_ignore_v6"
+    IFS=':' read -r -a cgroup_dnsproxy   <<< "$cgroup_dnsproxy"
 fi
 
 ## tproxy listening port
@@ -308,11 +302,9 @@ if $hijack_dns; then
     iptables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j RETURN
     ip6tables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j RETURN
     done
-    for ip in ${hijack_dns_ignore_v4[@]}; do
-    iptables -w 60 -t nat -A HIJACK_OUT -p udp --dport 53 --dst $ip -j RETURN
-    done
-    for ip in ${hijack_dns_ignore_v6[@]}; do
-    ip6tables -w 60 -t nat -A HIJACK_OUT -p udp --dport 53 --dst $ip -j RETURN
+    for cg in ${cgroup_dnsproxy[@]}; do
+    iptables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j RETURN
+    ip6tables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j RETURN
     done
     for cg in ${cgroup_proxy[@]}; do
     iptables -w 60 -t nat -A HIJACK_OUT -m cgroup --path $cg -p udp --dport 53 -j REDIRECT --to-ports $hijack_dns_port

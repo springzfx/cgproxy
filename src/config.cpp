@@ -38,8 +38,7 @@ void Config::toEnv() {
   setenv("mark_newin", to_str(mark_newin).c_str(), 1);
   setenv("hijack_dns", to_str(hijack_dns).c_str(), 1);
   setenv("hijack_dns_port", to_str(hijack_dns_port).c_str(), 1);
-  setenv("hijack_dns_ignore_v4", join2str(hijack_dns_ignore_v4, ':').c_str(), 1);
-  setenv("hijack_dns_ignore_v6", join2str(hijack_dns_ignore_v6, ':').c_str(), 1);
+  setenv("cgroup_dnsproxy", join2str(cgroup_dnsproxy, ':').c_str(), 1);
   setenv("block_port", to_str(block_port).c_str(), 1);
 }
 
@@ -70,8 +69,7 @@ string Config::toJsonStr() {
   add2json(mark_newin);
   add2json(hijack_dns);
   add2json(hijack_dns_port);
-  add2json(hijack_dns_ignore_v4);
-  add2json(hijack_dns_ignore_v6);
+  add2json(cgroup_dnsproxy);
   add2json(block_port);
   return j.dump();
 }
@@ -111,8 +109,7 @@ int Config::loadFromJsonStr(const string js) {
   tryassign(mark_newin);
   tryassign(hijack_dns);
   tryassign(hijack_dns_port);
-  tryassign(hijack_dns_ignore_v4);
-  tryassign(hijack_dns_ignore_v6);
+  tryassign(cgroup_dnsproxy);
   tryassign(block_port);
 
   // e.g. v2ray -> /usr/bin/v2ray -> /usr/lib/v2ray/v2ray
@@ -127,6 +124,7 @@ int Config::loadFromJsonStr(const string js) {
 void Config::mergeReserved() {
   merge(cgroup_proxy);
   merge(cgroup_noproxy);
+  merge(cgroup_dnsproxy);
 }
 
 bool Config::validateJsonStr(const string js) {
@@ -136,20 +134,10 @@ bool Config::validateJsonStr(const string js) {
                                "enable_udp",     "enable_ipv4", "enable_ipv6", "hijack_dns", "block_port"};
   const set<string> allowset = {"program_proxy", "program_noproxy", "comment", "table", "fwmark", "mark_newin"};
   for (auto &[key, value] : j.items()) {
-    if (key == "cgroup_proxy" || key == "cgroup_noproxy") {
+    if (key == "cgroup_proxy" || key == "cgroup_noproxy" || key == "cgroup_dnsproxy") {
       if (value.is_string() && !validCgroup((string)value)) status = false;
       // TODO what if vector<int> etc.
       if (value.is_array() && !validCgroup((vector<string>)value)) status = false;
-      if (!value.is_string() && !value.is_array()) status = false;
-    } else if (key == "hijack_dns_ignore_v4") {
-      if (value.is_string() && !validIpv4((string)value)) status = false;
-      // TODO what if vector<int> etc.
-      if (value.is_array() && !validIpv4((vector<string>)value)) status = false;
-      if (!value.is_string() && !value.is_array()) status = false;
-    } else if (key == "hijack_dns_ignore_v6") {
-      if (value.is_string() && !validIpv6((string)value)) status = false;
-      // TODO what if vector<int> etc.
-      if (value.is_array() && !validIpv6((vector<string>)value)) status = false;
       if (!value.is_string() && !value.is_array()) status = false;
     } else if (key == "port" || key == "hijack_dns_port") {
       if (!validPort(value)) status = false;

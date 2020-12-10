@@ -162,6 +162,7 @@ void Config::print_summary() {
   info("proxied program: %s", join2str(program_proxy).c_str());
   info("noproxy cgroup: %s", join2str(cgroup_noproxy).c_str());
   info("proxied cgroup: %s", join2str(cgroup_proxy).c_str());
+  info("dns proxied cgroup: %s", join2str(cgroup_dnsproxy).c_str());
   info("table: %d, fwmark: %d, mark_newin: %d", table, fwmark, mark_newin);
 }
 

@@ -180,6 +180,7 @@ done
 ## only create the first one in arrary
 test -d $cgroup_mount_point$cgroup_proxy    || mkdir $cgroup_mount_point$cgroup_proxy   || exit -1; 
 test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_noproxy || exit -1; 
+test -d $cgroup_mount_point$cgroup_dnsproxy  || mkdir $cgroup_mount_point$cgroup_dnsproxy || exit -1; 
 
 ## filter cgroup that not exist
 _cgroup_noproxy=()

@@ -24,6 +24,7 @@ void Config::toEnv() {
   setenv("cgroup_mount_point", CGROUP2_MOUNT_POINT, 1);
   setenv("program_proxy", join2str(program_proxy, ':').c_str(), 1);
   setenv("program_noproxy", join2str(program_noproxy, ':').c_str(), 1);
+  setenv("program_dnsproxy", join2str(program_dnsproxy, ':').c_str(), 1);
   setenv("cgroup_proxy", join2str(cgroup_proxy, ':').c_str(), 1);
   setenv("cgroup_noproxy", join2str(cgroup_noproxy, ':').c_str(), 1);
   setenv("enable_gateway", to_str(enable_gateway).c_str(), 1);
@@ -55,6 +56,7 @@ string Config::toJsonStr() {
   json j;
   add2json(program_proxy);
   add2json(program_noproxy);
+  add2json(program_dnsproxy);
   add2json(cgroup_proxy);
   add2json(cgroup_noproxy);
   add2json(enable_gateway);
@@ -95,6 +97,7 @@ int Config::loadFromJsonStr(const string js) {
   json j = json::parse(js);
   tryassign(program_proxy);
   tryassign(program_noproxy);
+  tryassign(program_dnsproxy);
   tryassign(cgroup_proxy);
   tryassign(cgroup_noproxy);
   tryassign(enable_gateway);
@@ -114,6 +117,7 @@ int Config::loadFromJsonStr(const string js) {
 
   // e.g. v2ray -> /usr/bin/v2ray -> /usr/lib/v2ray/v2ray
   toRealProgramPath(program_noproxy);
+  toRealProgramPath(program_dnsproxy);
   toRealProgramPath(program_proxy);
 
   mergeReserved();
@@ -132,7 +136,7 @@ bool Config::validateJsonStr(const string js) {
   bool status = true;
   const set<string> boolset = {"enable_gateway", "enable_dns",  "enable_tcp",
                                "enable_udp",     "enable_ipv4", "enable_ipv6", "hijack_dns", "block_port"};
-  const set<string> allowset = {"program_proxy", "program_noproxy", "comment", "table", "fwmark", "mark_newin"};
+  const set<string> allowset = {"program_proxy", "program_noproxy", "program_dnsproxy", "comment", "table", "fwmark", "mark_newin"};
   for (auto &[key, value] : j.items()) {
     if (key == "cgroup_proxy" || key == "cgroup_noproxy" || key == "cgroup_dnsproxy") {
       if (value.is_string() && !validCgroup((string)value)) status = false;
@@ -160,6 +164,7 @@ bool Config::validateJsonStr(const string js) {
 void Config::print_summary() {
   info("noproxy program: %s", join2str(program_noproxy).c_str());
   info("proxied program: %s", join2str(program_proxy).c_str());
+  info("dns proxied program: %s", join2str(program_dnsproxy).c_str());
   info("noproxy cgroup: %s", join2str(cgroup_noproxy).c_str());
   info("proxied cgroup: %s", join2str(cgroup_proxy).c_str());
   info("dns proxied cgroup: %s", join2str(cgroup_dnsproxy).c_str());

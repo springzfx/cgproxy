@@ -4,6 +4,7 @@
     "port": 12345,
     "program_noproxy": ["v2ray", "qv2ray", "clash"],
     "program_proxy": [],
+    "program_dnsproxy": ["smartdns"],
     "cgroup_noproxy": ["/system.slice/v2ray.service", "/system.slice/clash.service"],
     "cgroup_proxy": [],
     "enable_gateway": false,

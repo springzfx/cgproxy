@@ -16,8 +16,10 @@ public:
 
   vector<string> program_proxy = {cgroup_proxy_preserved};
   vector<string> program_noproxy = {cgroup_noproxy_preserved};
+  vector<string> program_dnsproxy = {cgroup_dnsproxy_preserved};
   vector<string> cgroup_proxy;
   vector<string> cgroup_noproxy;
+  vector<string> cgroup_dnsproxy;
   bool enable_gateway = false;
   int port = 12345;
   bool enable_dns = true;
@@ -27,7 +29,6 @@ public:
   bool enable_ipv6 = true;
   int hijack_dns_port = 5450;
   bool hijack_dns = false;
-  vector<string> cgroup_dnsproxy;
   bool block_port = false;
 
   // for iptables

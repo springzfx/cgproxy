@@ -99,7 +99,8 @@ class cgproxyd {
         return 0;
       }
       if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
-          belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
+          belongToCgroup(cg, config.cgroup_noproxy_preserved) ||
+          belongToCgroup(cg, config.cgroup_dnsproxy_preserved)) {
         info("execsnoop: already in preserverd cgroup, leave alone: %d %s", pid,
              path.get());
         return 0;
@@ -123,7 +124,8 @@ class cgproxyd {
         return 0;
       }
       if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
-          belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
+          belongToCgroup(cg, config.cgroup_noproxy_preserved) ||
+          belongToCgroup(cg, config.cgroup_dnsproxy_preserved)) {
         info("execsnoop: already in preserverd cgroup, leave alone: %d %s", pid,
              path.get());
         return 0;
@@ -134,6 +136,31 @@ class cgproxyd {
           info("execsnoop: proxied: %d %s", pid, path.get());
         } else {
           info("execsnoop: proxied failed: %d %s", pid, path.get());
+        }
+        return res;
+      }
+    }
+
+    v = config.program_dnsproxy;
+    if (find(v.begin(), v.end(), path.get()) != v.end()) {
+      string cg = getCgroup(pid);
+      if (cg.empty()) {
+        debug("execsnoop: cgroup get failed, ignore: %d %s", pid, path.get());
+        return 0;
+      }
+      if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
+          belongToCgroup(cg, config.cgroup_noproxy_preserved) ||
+          belongToCgroup(cg, config.cgroup_dnsproxy_preserved)) {
+        info("execsnoop: already in preserverd cgroup, leave alone: %d %s", pid,
+             path.get());
+        return 0;
+      }
+      if (!belongToCgroup(cg, config.cgroup_dnsproxy)) {
+        int res = attach(pid, config.cgroup_dnsproxy_preserved);
+        if (res == 0) {
+          info("execsnoop: dns proxied: %d %s", pid, path.get());
+        } else {
+          info("execsnoop: dns proxied failed: %d %s", pid, path.get());
         }
         return res;
       }
@@ -276,7 +303,8 @@ class cgproxyd {
           continue;
         }
         if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
-            belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
+            belongToCgroup(cg, config.cgroup_noproxy_preserved) ||
+            belongToCgroup(cg, config.cgroup_dnsproxy_preserved)) {
           info("already in preserverd cgroup, leave alone: %d %s", pid, path.c_str());
           continue;
         }
@@ -293,13 +321,32 @@ class cgproxyd {
           continue;
         }
         if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
-            belongToCgroup(cg, config.cgroup_noproxy_preserved)) {
+            belongToCgroup(cg, config.cgroup_noproxy_preserved) ||
+            belongToCgroup(cg, config.cgroup_dnsproxy_preserved)) {
           info("already in preserverd cgroup, leave alone: %d %s", pid, path.c_str());
           continue;
         }
         if (!belongToCgroup(cg, config.cgroup_proxy)) {
           int status = attach(pid, config.cgroup_proxy_preserved);
           if (status == 0) info("proxied running process %d %s", pid, path.c_str());
+        }
+      }
+    for (auto &path : config.program_dnsproxy)
+      for (auto &pid : bash_pidof(path)) {
+        string cg = getCgroup(pid);
+        if (cg.empty()) {
+          debug("cgroup get failed, ignore: %d %s", pid, path.c_str());
+          continue;
+        }
+        if (belongToCgroup(cg, config.cgroup_proxy_preserved) ||
+            belongToCgroup(cg, config.cgroup_noproxy_preserved) ||
+            belongToCgroup(cg, config.cgroup_dnsproxy_preserved)) {
+          info("already in preserverd cgroup, leave alone: %d %s", pid, path.c_str());
+          continue;
+        }
+        if (!belongToCgroup(cg, config.cgroup_dnsproxy)) {
+          int status = attach(pid, config.cgroup_dnsproxy_preserved);
+          if (status == 0) info("dns proxied running process %d %s", pid, path.c_str());
         }
       }
   }

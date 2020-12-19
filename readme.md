@@ -141,13 +141,13 @@ Config file: **/etc/cgproxy/config.json**
 
   - **program_proxy**  program need to be proxied
   - **program_noproxy** program that won't be proxied
-  - **program_dnsproxy** program acted as a dns server and need to be proxied
+  - **program_dnsproxy** program act as a dns server and need to be proxied
 
 - cgroup level proxy control:
 
   - **cgroup_noproxy** cgroup array that no need to proxy, `/noproxy.slice` is preserved
   - **cgroup_proxy** cgroup array that need to proxy, `/proxy.slice` is preserved
-  - **cgroup_dnsproxy** cgroup array for program acted as a dns server and need to be proxied, `/dnsproxy.slice` is preserved
+  - **cgroup_dnsproxy** cgroup array for program act as a dns server and need to be proxied, `/dnsproxy.slice` is preserved
 
 - **program_dnsproxy** and **cgroup_dnsproxy** is only useful if both **enable_dns** and **hijack_dns** is set to `true`, see below for more explanation.
 
@@ -167,8 +167,8 @@ Config file: **/etc/cgproxy/config.json**
 
 - **hijack_dns**, **hijack_dns_port**:
   - These options allow you to hijack all system dns request into a specific local dns server. It's useful if the proxy client is `clash`, since `clash` can only recover hostname from transparent proxy's traffic if its dns request go through clash. It's useless if the proxy client is `v2ray`, because `v2ray` already has its own dns hijack method (dns outbound).
-  - If enabled, traffic sent to udp port 53 by programs in `program_proxy` and `cgroup_proxy` but not in `program_dnsproxy` or `cgroup_dnsproxy` will be redirected to `hijack_dns_port`. programs in `program_noproxy` and `cgroup_noproxy` won't be affected.
-  - However, since `clash` doesn't support query dns through proxy. If you want to use `clash` and also want to query dns through proxy, you need to set up a local dns server inside the transparent proxy environment. In this situation you need to put your dns server program in `program_dnsproxy` or `cgroup_dnsproxy`, to allow it query dns through proxy and not be hijacked.
+  - If enabled, traffic sent to udp port 53 by programs in `program_proxy` or `cgroup_proxy` but not in `program_dnsproxy` and `cgroup_dnsproxy` will be redirected to `hijack_dns_port`. programs in `program_noproxy` or `cgroup_noproxy` won't be affected.
+  - Since `clash` doesn't support query dns through proxy. If you want to use `clash` and also want to query dns through proxy, you need to set up a local dns server inside the transparent proxy environment. In this situation you need to put your dns server program in `program_dnsproxy` or `cgroup_dnsproxy`, to allow it query dns through proxy and not be hijacked.
 
 - **block_port** block non tproxy traffic from accessing tproxy port
 

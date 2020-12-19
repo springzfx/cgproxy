@@ -336,4 +336,5 @@ fi
 cat << DOC
 iptables: noproxy cgroup: ${cgroup_noproxy[@]}
 iptables: proxied cgroup: ${cgroup_proxy[@]}
+iptables: dns proxied cgroup: ${cgroup_dnsproxy[@]}
 DOC

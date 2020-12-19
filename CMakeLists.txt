@@ -42,9 +42,9 @@ install(FILES config.json DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/cgproxy)
 install(FILES readme.md DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR})
 
 # man pages
-set(man_gz ${PROJECT_SOURCE_DIR}/man/cgproxyd.1.gz ${PROJECT_SOURCE_DIR}/man/cgproxy.1.gz ${PROJECT_SOURCE_DIR}/man/cgnoproxy.1.gz)
+set(man_gz ${PROJECT_SOURCE_DIR}/man/cgproxyd.1.gz ${PROJECT_SOURCE_DIR}/man/cgproxy.1.gz ${PROJECT_SOURCE_DIR}/man/cgnoproxy.1.gz ${PROJECT_SOURCE_DIR}/man/cgdnsproxy.1.gz)
 add_custom_command(OUTPUT ${man_gz}
-    COMMAND gzip -fk cgproxyd.1 cgproxy.1 cgnoproxy.1
+    COMMAND gzip -fk cgproxyd.1 cgproxy.1 cgnoproxy.1 cgdnsproxy.1
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/man
 )
 add_custom_target(man ALL DEPENDS ${man_gz})

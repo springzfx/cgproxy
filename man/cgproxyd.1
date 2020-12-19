@@ -23,6 +23,9 @@ program need to be proxied
 .br
 .B program_noproxy
 program that won't be proxied
+.br
+.B program_dnsproxy
+program act as a dns server and need to be proxied
 .RE
 .br
 cgroup level proxy control:
@@ -33,6 +36,9 @@ cgroup array that no need to proxy, /noproxy.slice is preserved.
 .br
 .B cgroup_proxy
 cgroup array that need to proxy, /proxy.slice is preserved.
+.br
+.B cgroup_dnsproxy
+cgroup array for program act as a dns server and need to be proxied, `/dnsproxy.slice` is preserved
 .RE
 .br
 .B enable_gateway
@@ -48,6 +54,19 @@ enable dns to go to proxy.
 .B enable_ipv4 
 .br
 .B enable_ipv6
+.br
+dns hijack:
+.br
+.RS
+.B hijack_dns
+hijack system dns request
+.br
+.B hijack_dns_port
+dns server port to be hijacked to
+.RE
+.br
+.B block_port
+block non tproxy traffic from accessing tproxy port
 .br
 .SH SEE ALSO
 cgproxyd(1), cgproxy(1), cgnoproxy(1)

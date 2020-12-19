@@ -7,6 +7,7 @@
     "program_dnsproxy": ["smartdns"],
     "cgroup_noproxy": ["/system.slice/v2ray.service", "/system.slice/clash.service"],
     "cgroup_proxy": [],
+    "cgroup_dnsproxy": ["/system.slice/smartdns.service"],
     "enable_gateway": false,
     "enable_dns": true,
     "enable_udp": true,
@@ -17,6 +18,5 @@
     "fwmark": 39283,
     "hijack_dns": false,
     "hijack_dns_port": 5450,
-    "cgroup_dnsproxy": ["/system.slice/smartdns.service"],
     "block_port": false
 }

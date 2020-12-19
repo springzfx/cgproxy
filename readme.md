@@ -114,10 +114,12 @@ Config file: **/etc/cgproxy/config.json**
 ```json
 {
     "port": 12345,
-    "program_noproxy": ["v2ray", "qv2ray"],
+    "program_noproxy": ["v2ray", "qv2ray", "clash"],
     "program_proxy": [],
-    "cgroup_noproxy": ["/system.slice/v2ray.service"],
+    "program_dnsproxy": ["smartdns"],
+    "cgroup_noproxy": ["/system.slice/v2ray.service", "/system.slice/clash.service"],
     "cgroup_proxy": [],
+    "cgroup_dnsproxy": ["/system.slice/smartdns.service"],
     "enable_gateway": false,
     "enable_dns": true,
     "enable_udp": true,
@@ -125,7 +127,10 @@ Config file: **/etc/cgproxy/config.json**
     "enable_ipv4": true,
     "enable_ipv6": true,
     "table": 10007,
-    "fwmark": 39283
+    "fwmark": 39283,
+    "hijack_dns": false,
+    "hijack_dns_port": 5450,
+    "block_port": false
 }
 
 ```
@@ -136,11 +141,15 @@ Config file: **/etc/cgproxy/config.json**
 
   - **program_proxy**  program need to be proxied
   - **program_noproxy** program that won't be proxied
+  - **program_dnsproxy** program acted as a dns server and need to be proxied
 
 - cgroup level proxy control:
 
   - **cgroup_noproxy** cgroup array that no need to proxy, `/noproxy.slice` is preserved
   - **cgroup_proxy** cgroup array that need to proxy, `/proxy.slice` is preserved
+  - **cgroup_dnsproxy** cgroup array for program acted as a dns server and need to be proxied, `/dnsproxy.slice` is preserved
+
+- **program_dnsproxy** and **cgroup_dnsproxy** is only useful if both **enable_dns** and **hijack_dns** is set to `true`, see below for more explanation.
 
 - **enable_gateway** enable gateway proxy for local devices
 
@@ -156,10 +165,15 @@ Config file: **/etc/cgproxy/config.json**
 
 - **table**, **fwmark** you can specify iptables and route table related parameter in case conflict.
 
+- **hijack_dns**, **hijack_dns_port**:
+  - These options allow you to hijack all system dns request into a specific local dns server. It's useful if the proxy client is `clash`, since `clash` can only recover hostname from transparent proxy's traffic if its dns request go through clash. It's useless if the proxy client is `v2ray`, because `v2ray` already has its own dns hijack method (dns outbound).
+  - If enabled, traffic sent to udp port 53 by programs in `program_proxy` and `cgroup_proxy` but not in `program_dnsproxy` or `cgroup_dnsproxy` will be redirected to `hijack_dns_port`. programs in `program_noproxy` and `cgroup_noproxy` won't be affected.
+  - However, since `clash` doesn't support query dns through proxy. If you want to use `clash` and also want to query dns through proxy, you need to set up a local dns server inside the transparent proxy environment. In this situation you need to put your dns server program in `program_dnsproxy` or `cgroup_dnsproxy`, to allow it query dns through proxy and not be hijacked.
+
 - options priority
 
   ```
-  program_noproxy > program_proxy > cgroup_noproxy > cgroup_proxy
+  program_noproxy > program_proxy > program_dnsproxy > cgroup_noproxy > cgroup_proxy > cgroup_dnsproxy
   enable_ipv6 = enable_ipv4 > enable_dns > enable_tcp = enable_udp
   command cgproxy and cgnoproxy always have highest priority
   ```
@@ -176,19 +190,21 @@ sudo systemctl restart cgproxy.service
 
 - Set `"cgroup_proxy":["/"]`  in configuration, this will proxy all connection
 
-- Allow your proxy program (v2ray) direct to internet to avoid loop. Two ways:
+- Allow your proxy program (v2ray/clash) direct to internet to avoid loop. Two ways:
   
   - active way, run command
     
     example: `cgnoproxy sudo v2ray -config config_file`
     
     example: `cgnoproxy qv2ray`
+
+    example: `cgnoproxy clash`
     
   - passive way,  persistent config
   
-      example:  `"program_noproxy":["v2ray" ,"qv2ray"]`
+      example:  `"program_noproxy":["v2ray" ,"qv2ray", "clash"]`
       
-      example:  `"cgroup_noproxy":["/system.slice/v2ray.service"]`
+      example:  `"cgroup_noproxy":["/system.slice/v2ray.service", "/system.slice/clash.service"]`
   
 - Finally, restart cgproxy service, that's all
 
@@ -211,13 +227,14 @@ sudo systemctl restart cgproxy.service
 
 ## NOTES
 
-- v2ray TPROXY need root or special permission, use [service](/v2ray_config/v2ray.service) or
+- v2ray or clash TPROXY need root or special permission, use [service](/v2ray_config/v2ray.service) or
   
   ```bash
-  sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/lib/v2ray/v2ray
+  sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/bin/v2ray
+  sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/bin/clash
   ```
 
-- Why not outbound mark solution, because in v2ray [when `"localhost"` is used, out-going DNS traffic is not controlled by V2Ray](https://www.v2fly.org/config/dns.html#dnsobject), so no mark at all, that's pity.
+- Why not outbound mark solution, because in v2ray [when `"localhost"` is used, out-going DNS traffic is not controlled by V2Ray](https://www.v2fly.org/config/dns.html#dnsobject), so no mark at all, that's pity, and clash doesn't support outbound mark.
 
 ## TIPS
 

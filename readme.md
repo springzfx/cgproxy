@@ -149,7 +149,7 @@ Config file: **/etc/cgproxy/config.json**
   - **cgroup_proxy** cgroup array that need to proxy, `/proxy.slice` is preserved
   - **cgroup_dnsproxy** cgroup array for program act as a dns server and need to be proxied, `/dnsproxy.slice` is preserved
 
-- **program_dnsproxy** and **cgroup_dnsproxy** is only useful if both **enable_dns** and **hijack_dns** is set to `true`, see below for more explanation.
+- **program_dnsproxy** and **cgroup_dnsproxy** is only useful if  **hijack_dns** is enabled. Otherwise they're equivalent to **program_proxy** and **cgroup_proxy**.
 
 - **enable_gateway** enable gateway proxy for local devices
 
@@ -175,9 +175,12 @@ Config file: **/etc/cgproxy/config.json**
 - options priority
 
   ```
-  program_noproxy > program_proxy > program_dnsproxy > cgroup_noproxy > cgroup_proxy > cgroup_dnsproxy
   enable_ipv6 = enable_ipv4 > enable_dns > enable_tcp = enable_udp
-  command cgproxy and cgnoproxy always have highest priority
+  for proxy:
+    program_noproxy > program_proxy > program_dnsproxy > cgroup_noproxy > cgroup_proxy > cgroup_dnsproxy
+  for dns hijack:
+    program_noproxy > program_dnsproxy > program_proxy >  cgroup_noproxy > cgroup_dnsproxy > cgroup_proxy
+  command cgproxy and cgnoproxy and cgdnsproxy always have highest priority
   ```
 
 **Note**: cgroup in configuration need to be exist, otherwise ignored

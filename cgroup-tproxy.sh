@@ -204,8 +204,8 @@ ip rule add fwmark $fwmark_tproxy table $table_tproxy
 ip route add local default dev lo table $table_tproxy
 # core
 iptables -w 60 -t mangle -N TPROXY_ENT
-iptables -w 60 -t mangle -A TPROXY_ENT -m socket -j MARK --set-mark $fwmark_tproxy
-iptables -w 60 -t mangle -A TPROXY_ENT -m socket -j ACCEPT
+iptables -w 60 -t mangle -A TPROXY_ENT -p tcp -m socket -j MARK --set-mark $fwmark_tproxy
+iptables -w 60 -t mangle -A TPROXY_ENT -p tcp -m socket -j ACCEPT
 iptables -w 60 -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark_tproxy
 iptables -w 60 -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip 127.0.0.1 --on-port $port --tproxy-mark $fwmark_tproxy
 # filter
@@ -239,6 +239,9 @@ done
 for cg in ${cgroup_proxy[@]}; do
 iptables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
 done
+for cg in ${cgroup_dnsproxy[@]}; do
+iptables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
+done
 # hook
 $enable_ipv4 && iptables -w 60 -t mangle -A OUTPUT -j TPROXY_OUT
 
@@ -252,8 +255,8 @@ ip -6 rule add fwmark $fwmark_tproxy table $table_tproxy
 ip -6 route add local default dev lo table $table_tproxy
 # core
 ip6tables -w 60 -t mangle -N TPROXY_ENT
-ip6tables -w 60 -t mangle -A TPROXY_ENT -m socket -j MARK --set-mark $fwmark_tproxy
-ip6tables -w 60 -t mangle -A TPROXY_ENT -m socket -j ACCEPT
+ip6tables -w 60 -t mangle -A TPROXY_ENT -p tcp -m socket -j MARK --set-mark $fwmark_tproxy
+ip6tables -w 60 -t mangle -A TPROXY_ENT -p tcp -m socket -j ACCEPT
 ip6tables -w 60 -t mangle -A TPROXY_ENT -p tcp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark_tproxy
 ip6tables -w 60 -t mangle -A TPROXY_ENT -p udp -j TPROXY --on-ip ::1 --on-port $port --tproxy-mark $fwmark_tproxy
 # filter
@@ -285,6 +288,9 @@ for cg in ${cgroup_noproxy[@]}; do
 ip6tables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
 done
 for cg in ${cgroup_proxy[@]}; do
+ip6tables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
+done
+for cg in ${cgroup_dnsproxy[@]}; do
 ip6tables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j TPROXY_MARK
 done
 # hook

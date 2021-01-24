@@ -6,6 +6,7 @@
     ],
     "files.associations": {
         "regex": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "*.ipp": "cpp"
     }
 }

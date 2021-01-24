@@ -30,6 +30,7 @@ public:
   int hijack_dns_port = 5450;
   bool hijack_dns = false;
   bool block_port = false;
+  bool return_udp_reply = false;
 
   // for iptables
   int table=10007;

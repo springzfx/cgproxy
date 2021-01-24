@@ -163,6 +163,10 @@ Config file: **/etc/cgproxy/config.json**
 
 - **enable_ipv6**
 
+- **return_udp_reply** whether return udp reply packet. No effect if `enable_udp` is disabled.
+  - If disabled, then all udp server (e.g. dns, stunserver, etc) should placed in `program_noproxy` or `cgroup_noproxy`, otherwise their reply packet will have wrong source ip or source port.
+  - If enabled, some udp server can work correctly without placed in `program_noproxy` or `cgroup_noproxy`, but some udp packet send by udp client may be mistakenly excluded from transparent proxy.
+
 - **table**, **fwmark** you can specify iptables and route table related parameter in case conflict.
 
 - **hijack_dns**, **hijack_dns_port**:

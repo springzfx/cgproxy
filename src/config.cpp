@@ -41,6 +41,7 @@ void Config::toEnv() {
   setenv("hijack_dns_port", to_str(hijack_dns_port).c_str(), 1);
   setenv("cgroup_dnsproxy", join2str(cgroup_dnsproxy, ':').c_str(), 1);
   setenv("block_port", to_str(block_port).c_str(), 1);
+  setenv("return_udp_reply", to_str(return_udp_reply).c_str(), 1);
 }
 
 int Config::saveToFile(const string f) {
@@ -73,6 +74,7 @@ string Config::toJsonStr() {
   add2json(hijack_dns_port);
   add2json(cgroup_dnsproxy);
   add2json(block_port);
+  add2json(return_udp_reply);
   return j.dump();
 }
 
@@ -114,6 +116,7 @@ int Config::loadFromJsonStr(const string js) {
   tryassign(hijack_dns_port);
   tryassign(cgroup_dnsproxy);
   tryassign(block_port);
+  tryassign(return_udp_reply);
 
   // e.g. v2ray -> /usr/bin/v2ray -> /usr/lib/v2ray/v2ray
   toRealProgramPath(program_noproxy);
@@ -135,7 +138,7 @@ bool Config::validateJsonStr(const string js) {
   json j = json::parse(js);
   bool status = true;
   const set<string> boolset = {"enable_gateway", "enable_dns",  "enable_tcp",
-                               "enable_udp",     "enable_ipv4", "enable_ipv6", "hijack_dns", "block_port"};
+                               "enable_udp",     "enable_ipv4", "enable_ipv6", "hijack_dns", "block_port", "return_udp_reply"};
   const set<string> allowset = {"program_proxy", "program_noproxy", "program_dnsproxy", "comment", "table", "fwmark", "mark_newin"};
   for (auto &[key, value] : j.items()) {
     if (key == "cgroup_proxy" || key == "cgroup_noproxy" || key == "cgroup_dnsproxy") {

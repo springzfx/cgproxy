@@ -70,6 +70,7 @@ fi
 [ -z ${enable_gateway+x} ] && enable_gateway=false
 [ -z ${hijack_dns+x} ] && hijack_dns=false
 [ -z ${block_port+x} ] && block_port=false
+[ -z ${return_udp_reply+x} ] && return_udp_reply=true
 
 ## mark/route things
 [ -z ${table+x} ]           && table=10007
@@ -232,7 +233,8 @@ $enable_udp && iptables -w 60 -t mangle -A TPROXY_MARK -p udp -j MARK --set-mark
 $enable_tcp && iptables -w 60 -t mangle -A TPROXY_MARK -p tcp -j MARK --set-mark $fwmark_reroute
 # cgroup
 iptables -w 60 -t mangle -N TPROXY_OUT
-iptables -w 60 -t mangle -A TPROXY_OUT -m conntrack --ctdir REPLY -j RETURN
+iptables -w 60 -t mangle -A TPROXY_OUT -p tcp -m conntrack --ctdir REPLY -j RETURN
+$return_udp_reply && iptables -w 60 -t mangle -A TPROXY_OUT -p udp -m conntrack --ctdir REPLY -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
 iptables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
 done
@@ -283,7 +285,8 @@ $enable_udp && ip6tables -w 60 -t mangle -A TPROXY_MARK -p udp -j MARK --set-mar
 $enable_tcp && ip6tables -w 60 -t mangle -A TPROXY_MARK -p tcp -j MARK --set-mark $fwmark_reroute
 # cgroup
 ip6tables -w 60 -t mangle -N TPROXY_OUT
-ip6tables -w 60 -t mangle -A TPROXY_OUT -m conntrack --ctdir REPLY -j RETURN
+ip6tables -w 60 -t mangle -A TPROXY_OUT -p tcp -m conntrack --ctdir REPLY -j RETURN
+$return_udp_reply && ip6tables -w 60 -t mangle -A TPROXY_OUT -p udp -m conntrack --ctdir REPLY -j RETURN
 for cg in ${cgroup_noproxy[@]}; do
 ip6tables -w 60 -t mangle -A TPROXY_OUT -m cgroup --path $cg -j RETURN
 done

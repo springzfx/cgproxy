@@ -7,7 +7,7 @@
 
 #if defined(__x86_64__)
 	#include "x86_64/execsnoop_kern_skel.h"
-#elif defined(__aarch64__)
+#else
 	#include "aarch64/execsnoop_kern_skel.h"
 #endif
 

@@ -64,10 +64,15 @@ int execsnoop() {
 		return err;
 	}
 
+        pb_opts.sz = sizeof(pb_opts);
+
 main_loop:
-	pb_opts.sample_cb = handle_event;
-	pb_opts.lost_cb = handle_lost_events;
-	pb = perf_buffer__new(bpf_map__fd(obj->maps.perf_events), PERF_BUFFER_PAGES, &pb_opts);
+	pb = perf_buffer__new(bpf_map__fd(obj->maps.perf_events),
+                        PERF_BUFFER_PAGES,
+                        handle_event,
+                        handle_lost_events,
+                        nullptr,
+                        &pb_opts);
 	err = libbpf_get_error(pb);
 	if (err) {
 		printf("failed to setup perf_buffer: %d\n", err);

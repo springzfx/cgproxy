@@ -34,18 +34,19 @@ struct syscalls_exit_execve_args {
 	long ret;
 };
 
-struct bpf_map_def SEC("maps") records = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(pid_t),
-    .value_size = sizeof(struct event),
-    .max_entries = 10240,
-};
-struct bpf_map_def SEC("maps") perf_events = {
-    .type = BPF_MAP_TYPE_PERF_EVENT_ARRAY,
-    .key_size = sizeof(u32),
-    .value_size = sizeof(u32),
-    .max_entries = 128,
-};
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 10240);
+    __type(key, pid_t);
+    __type(value, struct event);
+} records SEC(".maps");
+
+struct {
+    __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+    __uint(max_entries, 128);
+    __type(key, u32);
+    __type(value, u32);
+} perf_events SEC(".maps");
 
 SEC("tracepoint/syscalls/sys_enter_execve")
 int syscall_enter_execve(struct syscalls_enter_execve_args *ctx){

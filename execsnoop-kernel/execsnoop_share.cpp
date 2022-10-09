@@ -41,7 +41,8 @@ int bump_memlock_rlimit(void) {
 }
 
 int execsnoop() {
-	struct perf_buffer_opts pb_opts = {};
+	// struct perf_buffer_opts pb_opts = {};
+	// pb_opts.sz = sizeof(size_t);
 	struct perf_buffer *pb;
 	int err;
 	bool notified=false;
@@ -65,9 +66,7 @@ int execsnoop() {
 	}
 
 main_loop:
-	pb_opts.sample_cb = handle_event;
-	pb_opts.lost_cb = handle_lost_events;
-	pb = perf_buffer__new(bpf_map__fd(obj->maps.perf_events), PERF_BUFFER_PAGES, &pb_opts);
+	pb = perf_buffer__new(bpf_map__fd(obj->maps.perf_events), PERF_BUFFER_PAGES, handle_event, handle_lost_events,nullptr, nullptr);
 	err = libbpf_get_error(pb);
 	if (err) {
 		printf("failed to setup perf_buffer: %d\n", err);

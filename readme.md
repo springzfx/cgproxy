@@ -65,7 +65,7 @@ Main feature:
 
 ### build
 
-- before build, install depencies: clang(if to build bpf obj from scratch), nlohmann-json, libbpf
+- before build, install dependencies: clang(if to build bpf obj from scratch), nlohmann-json, libbpf
 - then cmake standard build
 
 ```bash

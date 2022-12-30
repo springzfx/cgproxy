@@ -1,6 +1,7 @@
 find_library(LIBBPF bpf REQUIRED)
 
 # generate execsnoop.skel.h
+if (EXISTS /sys/kernel/btf/vmlinux)
 add_custom_command(OUTPUT execsnoop.skel.h
     COMMAND bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
     COMMAND clang -O2 -g -target bpf -c execsnoop.bpf.c -o execsnoop.bpf.o
@@ -8,6 +9,7 @@ add_custom_command(OUTPUT execsnoop.skel.h
     DEPENDS execsnoop.bpf.c
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
+endif()
 
 if (build_execsnoop_dl)
     add_library(execsnoop MODULE execsnoop_share.cpp execsnoop.skel.h)

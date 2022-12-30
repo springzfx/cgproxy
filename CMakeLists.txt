@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(cgproxy VERSION 0.19)
+project(cgproxy VERSION 1.00)
 
 include(GNUInstallDirs)
 
-add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-result -Wno-unused-parameter -Wl,--no-undefined)
+add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-result -Wno-unused-parameter -Wno-overlength-strings)
 
 # for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -18,7 +18,7 @@ option(build_tools OFF)
 option(build_test "for develop" OFF)
 
 add_subdirectory(src)
-add_subdirectory(execsnoop-kernel)
+add_subdirectory(execsnoop-libbpf)
 add_subdirectory(pack)
 if (build_tools)
     add_subdirectory(tools)

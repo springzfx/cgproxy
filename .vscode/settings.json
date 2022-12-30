@@ -2,6 +2,8 @@
     "cmake.configureOnOpen": true,
     "cmake.configureArgs": [
         "-Dbuild_static=OFF",
-        "-Dbuild_execsnoop_dl=OFF"
+        "-Dbuild_execsnoop_dl=ON",
+        "-Dbuild_tools=ON",
+        "-Dbuild_test=ON"
     ]
 }

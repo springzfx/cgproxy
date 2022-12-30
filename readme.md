@@ -216,6 +216,7 @@ sudo systemctl restart cgproxy.service
   ```bash
   sudo setcap "cap_net_admin,cap_net_bind_service=ep" /usr/lib/v2ray/v2ray
   ```
+- Whenever v2ray-core is updated, you should execute this command again. For archlinux you can install [v2ray-cap-git](https://aur.archlinux.org/packages/v2ray-cap-git/), it can automatic setting of transparent proxy cap.
 
 - Why not outbound mark solution, because in v2ray [when `"localhost"` is used, out-going DNS traffic is not controlled by V2Ray](https://www.v2fly.org/config/dns.html#dnsobject), so no mark at all, that's pity.
 

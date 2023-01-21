@@ -29,6 +29,7 @@ public:
   int table=10007;
   int fwmark=0x9973;
   int mark_newin=0x9967;
+  bool enable_nftables=false;
 
   void toEnv();
   int saveToFile(const string f);

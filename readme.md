@@ -156,6 +156,8 @@ Config file: **/etc/cgproxy/config.json**
 
 - **table**, **fwmark** you can specify iptables and route table related parameter in case conflict.
 
+- **enable_nftables** you can specify to use nft rules if you are using nftables.
+
 - options priority
 
   ```

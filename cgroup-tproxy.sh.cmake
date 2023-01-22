@@ -95,15 +95,15 @@ case $i in
 esac
 done
 
-$enable_nftables && iptables=nftables || iptables=iptables
-source @CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/$iptables.sh
+$enable_nftables && backend=nftables || backend=iptables
+source @CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/$backend.sh
 
 $stop && { stop;exit 0; }
 ## check cgroup_mount_point, create and mount if necessary
-[ -z $cgroup_mount_point ] && { >&2 echo "$iptables: no cgroup2 mount point available"; exit -1; }
+[ -z $cgroup_mount_point ] && { >&2 echo "$backend: no cgroup2 mount point available"; exit -1; }
 [ ! -d $cgroup_mount_point ] && mkdir -p $cgroup_mount_point
 [ "$(findmnt -M $cgroup_mount_point -n -o FSTYPE)" != "cgroup2" ] && mount -t cgroup2 none $cgroup_mount_point
-[ "$(findmnt -M $cgroup_mount_point -n -o FSTYPE)" != "cgroup2" ] && { >&2 echo "$iptables: mount $cgroup_mount_point failed"; exit -1; }
+[ "$(findmnt -M $cgroup_mount_point -n -o FSTYPE)" != "cgroup2" ] && { >&2 echo "$backend: mount $cgroup_mount_point failed"; exit -1; }
 
 ## only create the first one in arrary
 test -d $cgroup_mount_point$cgroup_proxy    || mkdir $cgroup_mount_point$cgroup_proxy   || exit -1; 
@@ -112,14 +112,14 @@ test -d $cgroup_mount_point$cgroup_noproxy  || mkdir $cgroup_mount_point$cgroup_
 ## filter cgroup that not exist
 _cgroup_noproxy=()
 for cg in ${cgroup_noproxy[@]}; do
-    test -d $cgroup_mount_point$cg && _cgroup_noproxy+=($cg) || { >&2 echo "$iptables: $cg not exist, ignore";}
+    test -d $cgroup_mount_point$cg && _cgroup_noproxy+=($cg) || { >&2 echo "$backend: $cg not exist, ignore";}
 done
 unset cgroup_noproxy && cgroup_noproxy=${_cgroup_noproxy[@]}
 
 ## filter cgroup that not exist
 _cgroup_proxy=()
 for cg in ${cgroup_proxy[@]}; do
-    test -d $cgroup_mount_point$cg && _cgroup_proxy+=($cg) || { >&2 echo "$iptables: $cg not exist, ignore";}
+    test -d $cgroup_mount_point$cg && _cgroup_proxy+=($cg) || { >&2 echo "$backend: $cg not exist, ignore";}
 done
 unset cgroup_proxy && cgroup_proxy=${_cgroup_proxy[@]}
 
@@ -127,6 +127,6 @@ start
 
 ## message for user
 cat << DOC
-$iptables: noproxy cgroup: ${cgroup_noproxy[@]}
-$iptables: proxied cgroup: ${cgroup_proxy[@]}
+$backend: noproxy cgroup: ${cgroup_noproxy[@]}
+$backend: proxied cgroup: ${cgroup_proxy[@]}
 DOC

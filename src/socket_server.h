@@ -1,11 +1,9 @@
-#ifndef SOCKET_SERVER_H
-#define SOCKET_SERVER_H
+#pragma once
 
 #include <functional>
 #include <future>
 #include <stdlib.h>
 #include <sys/un.h>
-using namespace std;
 
 namespace CGPROXY::SOCKET {
 
@@ -20,12 +18,10 @@ public:
   int sfd = -1, cfd = -1, flag = -1;
   struct sockaddr_un unix_socket;
 
-  void socketListening(function<int(char *)> callback, promise<void> status);
+  void socketListening(const std::function<int(char *)> &callback, std::promise<void> status);
   ~SocketServer();
 };
 
-void startThread(function<int(char *)> callback, promise<void> status);
+void startThread(const std::function<int(char *)> &callback, std::promise<void> status);
 
 } // namespace CGPROXY::SOCKET
-
-#endif

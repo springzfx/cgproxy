@@ -3,7 +3,6 @@
 #include "socket_client.h"
 #include <nlohmann/json.hpp>
 
-using namespace std;
 using json = nlohmann::json;
 using namespace CGPROXY;
 using namespace CGPROXY::CONFIG;

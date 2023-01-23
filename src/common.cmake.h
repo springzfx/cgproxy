@@ -1,11 +1,9 @@
-#ifndef COMMON_H
-#define COMMON_H 1
+#pragma once
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-using namespace std;
 
 #define TPROXY_IPTABLS_START "@CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/cgroup-tproxy.sh"
 #define TPROXY_IPTABLS_CLEAN "@CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/cgroup-tproxy.sh stop"
@@ -77,36 +75,34 @@ extern bool enable_info;
 #define return_error return -1
 #define return_success return 0
 
-template <typename... T> string to_str(T... args) {
-  stringstream ss;
+template <typename... T> std::string to_str(T... args) {
+  std::stringstream ss;
   ss.clear();
   ss << std::boolalpha;
   (ss << ... << args);
   return ss.str();
 }
 
-string join2str(const vector<string> t, const char delm = ' ');
-string join2str(const int argc, char **argv, const char delm = ' ');
-bool startWith(string prefix);
+std::string join2str(const std::vector<std::string> &t, const char delm = ' ');
+std::string join2str(const int argc, char **argv, const char delm = ' ');
+bool startWith(const std::string &prefix);
 
-bool validCgroup(const string cgroup);
-bool validCgroup(const vector<string> cgroup);
-bool validPid(const string pid);
+bool validCgroup(const std::string &cgroup);
+bool validCgroup(const std::vector<std::string> &cgroup);
+bool validPid(const std::string &pid);
 bool validPort(const int port);
 
-bool fileExist(const string &path);
-bool dirExist(const string &path);
-vector<int> bash_pidof(const string &path);
-string bash_which(const string &name);
-string bash_readlink(const string &path);
-string getRealExistPath(const string &name);
+bool fileExist(const std::string &path);
+bool dirExist(const std::string &path);
+std::vector<int> bash_pidof(const std::string &path);
+std::string bash_which(const std::string &name);
+std::string bash_readlink(const std::string &path);
+std::string getRealExistPath(const std::string &name);
 
 /**
  * whether cg1 belongs to cg2
  */
-bool belongToCgroup(string cg1, string cg2);
-bool belongToCgroup(string cg1, vector<string> cg2);
-string getCgroup(const pid_t &pid);
-string getCgroup(const string &pid);
-
-#endif
+bool belongToCgroup(const std::string &cg1, const std::string &cg2);
+bool belongToCgroup(const std::string &cg1, const std::vector<std::string> &cg2);
+std::string getCgroup(const pid_t &pid);
+std::string getCgroup(const std::string &pid);

@@ -1,8 +1,9 @@
 #include "cgroup_attach.h"
 #include "common.h"
+#include <cstdio>
 #include <cstdlib>
+#include <string>
 #include <unistd.h>
-using namespace std;
 
 void print_usage() { fprintf(stdout, "usage: cgattach <pid> <cgroup>\n"); }
 
@@ -19,8 +20,8 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  string pid = string(argv[1]);
-  string cgroup_target = string(argv[2]);
+  std::string pid(argv[1]);
+  std::string cgroup_target(argv[2]);
 
   if (validPid(pid) && validCgroup(cgroup_target)) {
     CGPROXY::CGROUP::attach(pid, cgroup_target);

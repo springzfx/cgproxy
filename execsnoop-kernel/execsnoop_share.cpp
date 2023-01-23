@@ -5,6 +5,8 @@
 #include <bpf/libbpf.h>
 #include <sys/resource.h>
 
+#include <utility>
+
 #if defined(__x86_64__)
 	#include "x86_64/execsnoop_kern_skel.h"
 #elif defined(__aarch64__)
@@ -23,11 +25,11 @@ struct event {
 	uid_t uid;
 };
 
-function<int(int)> callback = NULL;
-promise<void> status;
+std::function<int(int)> callback = nullptr;
+std::promise<void> status;
 
 static void handle_event(void *ctx, int cpu, void *data, __u32 size) {
-  	auto e = static_cast<event*>(data);
+  	auto *e = static_cast<event*>(data);
   	if (callback) callback(e->pid);
 }
 
@@ -35,7 +37,7 @@ void handle_lost_events(void *ctx, int cpu, __u64 lost_cnt) {
 	fprintf(stderr, "Lost %llu events on CPU #%d!\n", lost_cnt, cpu);
 }
 
-int bump_memlock_rlimit(void) {
+int bump_memlock_rlimit() {
 	struct rlimit rlim_new = { RLIM_INFINITY, RLIM_INFINITY };
 	return setrlimit(RLIMIT_MEMLOCK, &rlim_new);
 }
@@ -87,9 +89,9 @@ main_loop:
 	return err;
 }
 
-void startThread(function<int(int)> c, promise<void> _status) {
-  status = move(_status);
-  callback = c;
+void startThread(std::function<int(int)> c, std::promise<void> _status) {
+  status = std::move(_status);
+  callback = std::move(c);
   execsnoop();
 }
 

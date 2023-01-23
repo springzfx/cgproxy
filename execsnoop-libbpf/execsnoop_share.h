@@ -1,14 +1,12 @@
-#ifndef EXECSNOOP_SHARE_HPP
-#define EXECSNOOP_SHARE_HPP 1
+#pragma once
 
 #include <functional>
 #include <future>
 #include <string>
-using namespace std;
 
 namespace CGPROXY::EXECSNOOP {
 
-extern "C" void startThread(function<int(int)> c, promise<void> _status);
+extern "C" void startThread(std::function<int(int)> c, std::promise<void> _status);
 
 #ifdef BUIlD_EXECSNOOP_DL
 // only for dlsym()
@@ -17,4 +15,3 @@ startThread_t *_startThread;
 #endif
 
 } // namespace CGPROXY::EXECSNOOP
-#endif

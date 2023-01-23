@@ -6,12 +6,12 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <unistd.h>
-using namespace std;
 
 namespace CGPROXY::EXECSNOOP {
 
-const string BPF_PROGRAM = R"(
+const std::string BPF_PROGRAM = R"(
 #include <linux/fs.h>
 #include <linux/sched.h>
 #include <uapi/linux/ptrace.h>
@@ -47,8 +47,8 @@ struct data_t {
   int pid;
 };
 
-function<int(int)> callback = NULL;
-promise<void> status;
+std::function<int(int)> callback = NULL;
+std::promise<void> status;
 
 void handle_events(void *cb_cookie, void *data, int data_size) {
   auto event = static_cast<data_t *>(data);
@@ -68,7 +68,7 @@ int execsnoop() {
     return 1;
   }
 
-  string execve_fnname = bpf.get_syscall_fnname("execve");
+  std::string execve_fnname = bpf.get_syscall_fnname("execve");
   // auto attach_res = bpf.attach_kprobe(execve_fnname, "syscall_execve");
   auto attach_res =
       bpf.attach_kprobe(execve_fnname, "ret_syscall_execve", 0, BPF_PROBE_RETURN);
@@ -95,9 +95,9 @@ int execsnoop() {
   return 0;
 }
 
-void startThread(function<int(int)> c, promise<void> _status) {
-  status = move(_status);
-  callback = c;
+void startThread(std::function<int(int)> c, std::promise<void> _status) {
+  status = std::move(_status);
+  callback = std::move(c);
   execsnoop();
 }
 

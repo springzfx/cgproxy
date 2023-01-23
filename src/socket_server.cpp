@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 
 namespace CGPROXY::SOCKET {
 
-void SocketServer::socketListening(function<int(char *)> callback, promise<void> status) {
+void SocketServer::socketListening(const std::function<int(char *)> &callback, std::promise<void> status) {
   debug("starting socket listening");
   sfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
@@ -22,7 +22,7 @@ void SocketServer::socketListening(function<int(char *)> callback, promise<void>
   unix_socket.sun_family = AF_UNIX;
   strncpy(unix_socket.sun_path, SOCKET_PATH, sizeof(unix_socket.sun_path) - 1);
 
-  bind(sfd, (struct sockaddr *)&unix_socket, sizeof(struct sockaddr_un));
+  bind(sfd, reinterpret_cast<struct sockaddr *>(&unix_socket), sizeof(struct sockaddr_un));
 
   listen(sfd, LISTEN_BACKLOG);
   chmod(SOCKET_PATH, S_IRWXU | S_IRWXG | S_IRWXO);
@@ -40,7 +40,7 @@ void SocketServer::socketListening(function<int(char *)> callback, promise<void>
     flag = read(cfd, &msg_len, sizeof(int));
     continue_if_error(flag, "read length");
     // read msg
-    auto msg = (char *)malloc(msg_len + 1);
+    auto *msg = (char *)malloc(msg_len + 1);
     flag = read(cfd, msg, msg_len * sizeof(char));
     continue_if_error(flag, "read msg");
     msg[msg_len] = '\0';
@@ -59,9 +59,9 @@ SocketServer::~SocketServer() {
   unlink(SOCKET_PATH);
 }
 
-void startThread(function<int(char *)> callback, promise<void> status) {
+void startThread(const std::function<int(char *)> &callback, std::promise<void> status) {
   SocketServer server;
-  server.socketListening(callback, move(status));
+  server.socketListening(callback, std::move(status));
 }
 
 } // namespace CGPROXY::SOCKET

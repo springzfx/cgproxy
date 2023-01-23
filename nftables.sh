@@ -38,7 +38,8 @@ table inet cgproxy {
     chain tproxy_ent {
         # core
         socket wildcard 0 mark set $fwmark_tproxy accept
-        meta l4proto { tcp, udp } tproxy to :$port meta mark set $fwmark_tproxy
+        meta l4proto { tcp, udp } tproxy ip to 127.0.0.1:$port meta mark set $fwmark_tproxy
+        meta l4proto { tcp, udp } tproxy ip6 to [::1]:$port meta mark set $fwmark_tproxy
     }
 
     chain tproxy_pre {

@@ -12,15 +12,15 @@ namespace CGPROXY::CGPROXY {
 
 bool print_help = false, proxy = true;
 bool attach_pid = false;
-string arg_pid;
+std::string arg_pid;
 inline void print_usage() {
   if (proxy) {
-    cout << "Run program with proxy" << endl;
-    cout << "Usage: cgproxy [--help] [--debug] <CMD>" << endl;
+    std::cout << "Run program with proxy" << std::endl;
+    std::cout << "Usage: cgproxy [--help] [--debug] <CMD>" << std::endl;
   } else {
-    cout << "Run program without proxy" << endl;
-    cout << "Usage: cgpnoroxy [--help] [--debug] <CMD>" << endl;
-    cout << "Alias: cgnoproxy = cgproxy --noproxy" << endl;
+    std::cout << "Run program without proxy" << std::endl;
+    std::cout << "Usage: cgpnoroxy [--help] [--debug] <CMD>" << std::endl;
+    std::cout << "Alias: cgnoproxy = cgproxy --noproxy" << std::endl;
   }
 }
 
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   // if just attach pid, return here
   if (attach_pid) return 0;
 
-  string s = join2str(argc - shift, argv + shift, ' ');
+  std::string s = join2str(argc - shift, argv + shift, ' ');
   debug("executing: %s", s.c_str());
   return system(s.c_str());
 }

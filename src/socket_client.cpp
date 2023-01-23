@@ -41,7 +41,7 @@ void send(const char *msg, int &status) {
   close(sfd);
 }
 
-void send(const string &msg, int &status) {
+void send(const std::string &msg, int &status) {
   send(msg.c_str(), status);
   debug("return status: %d", status);
 }

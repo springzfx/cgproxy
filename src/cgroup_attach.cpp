@@ -14,10 +14,10 @@
 
 namespace CGPROXY::CGROUP {
 
-string cgroup2_mount_point = CGROUP2_MOUNT_POINT;
+const std::string cgroup2_mount_point = CGROUP2_MOUNT_POINT;
 
 
-bool validate(const string &pid, const string &cgroup) {
+bool validate(const std::string &pid, const std::string &cgroup) {
   const bool pid_v = validPid(pid);
   const bool cg_v = validCgroup(cgroup);
   if (pid_v && cg_v) return true;
@@ -26,7 +26,7 @@ bool validate(const string &pid, const string &cgroup) {
   return_error;
 }
 
-int attach(const string &pid, const string &cgroup_target) {
+int attach(const std::string &pid, const std::string &cgroup_target) {
   if (getuid() != 0) {
     error("need root to attach cgroup");
     return_error;
@@ -36,8 +36,8 @@ int attach(const string &pid, const string &cgroup_target) {
 
   if (!validate(pid, cgroup_target)) return_error;
   if (cgroup2_mount_point.empty()) return_error;
-  const string cgroup_target_path = cgroup2_mount_point + cgroup_target;
-  const string cgroup_target_procs = cgroup_target_path + "/cgroup.procs";
+  const std::string cgroup_target_path = cgroup2_mount_point + cgroup_target;
+  const std::string cgroup_target_procs = cgroup_target_path + "/cgroup.procs";
 
   // check if exist, we will create it if not exist
   if (!dirExist(cgroup_target_path)) {
@@ -52,7 +52,7 @@ int attach(const string &pid, const string &cgroup_target) {
     // return_error
   }
 
-  string cg;
+  std::string cg;
 
   cg = getCgroup(pid);
   if (cg.empty()) return_success;
@@ -65,7 +65,7 @@ int attach(const string &pid, const string &cgroup_target) {
   if (write2procs(pid, cgroup_target_procs) != 0) return_error;
 
   // wait for small period and check again
-  this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   cg = getCgroup(pid);
   if (cg.empty()) return_success;
   if (cg != cgroup_target && write2procs(pid, cgroup_target_procs) != 0)
@@ -73,13 +73,13 @@ int attach(const string &pid, const string &cgroup_target) {
   return_success;
 }
 
-int write2procs(const string &pid, const string &procspath) {
-  ofstream procs(procspath, ofstream::app);
+int write2procs(const std::string &pid, const std::string &procspath) {
+  std::ofstream procs(procspath, std::ofstream::app);
   if (!procs.is_open()) {
     error("open file %s failed", procspath.c_str());
     return_error;
   }
-  procs << pid.c_str() << endl;
+  procs << pid.c_str() << std::endl;
   procs.close();
 
   // maybe there some write error, for example process pid may not exist
@@ -91,7 +91,7 @@ int write2procs(const string &pid, const string &procspath) {
   return_success;
 }
 
-int attach(const int pid, const string &cgroup_target) {
+int attach(const int pid, const std::string &cgroup_target) {
   return attach(to_str(pid), cgroup_target);
 }
 

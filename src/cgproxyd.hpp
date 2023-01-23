@@ -7,6 +7,7 @@
 #include "execsnoop_share.h"
 #include "socket_server.h"
 #include <algorithm>
+#include <chrono>
 #include <csignal>
 #include <cstdlib>
 #include <dlfcn.h>
@@ -19,7 +20,6 @@
 #include <sys/file.h>
 #include <unistd.h>
 
-using namespace std;
 using json = nlohmann::json;
 using namespace ::CGPROXY::SOCKET;
 using namespace ::CGPROXY::CONFIG;
@@ -43,7 +43,7 @@ bool loadExecsnoopLib() {
     }
     info("dlsym startThread func success");
     return true;
-  } catch (exception &e) {
+  } catch (std::exception &e) {
     debug("exception: %s", e.what());
     return false;
   }
@@ -58,8 +58,8 @@ bool enable_socketserver = true;
 bool enable_execsnoop = false;
 
 class cgproxyd {
-  thread socketserver_thread;
-  thread execsnoop_thread;
+  std::thread socketserver_thread;
+  std::thread execsnoop_thread;
 
   Config config;
 
@@ -81,7 +81,7 @@ class cgproxyd {
   }
 
   int handle_pid(int pid) {
-    unique_ptr<char[], decltype(&free)> path(
+    std::unique_ptr<char[], decltype(&free)> path(
         realpath(to_str("/proc/", pid, "/exe").c_str(), NULL), &free);
     if (path == NULL) {
       debug("execsnoop: pid %d live life too short", pid);
@@ -89,11 +89,11 @@ class cgproxyd {
     }
     debug("execsnoop: %d %s", pid, path.get());
 
-    vector<string> v;
+    std::vector<std::string> v;
 
     v = config.program_noproxy;
     if (find(v.begin(), v.end(), path.get()) != v.end()) {
-      string cg = getCgroup(pid);
+      std::string cg = getCgroup(pid);
       if (cg.empty()) {
         debug("execsnoop: cgroup get failed, ignore: %d %s", pid, path.get());
         return 0;
@@ -117,7 +117,7 @@ class cgproxyd {
 
     v = config.program_proxy;
     if (find(v.begin(), v.end(), path.get()) != v.end()) {
-      string cg = getCgroup(pid);
+      std::string cg = getCgroup(pid);
       if (cg.empty()) {
         debug("execsnoop: cgroup get failed, ignore: %d %s", pid, path.get());
         return 0;
@@ -161,8 +161,8 @@ class cgproxyd {
       error("maybe another cgproxyd is running");
       exit(EXIT_FAILURE);
     } else {
-      ofstream ofs(PID_LOCK_FILE);
-      ofs << getpid() << endl;
+      std::ofstream ofs(PID_LOCK_FILE);
+      ofs << getpid() << std::endl;
       ofs.close();
     }
   }
@@ -176,7 +176,7 @@ class cgproxyd {
     json j;
     try {
       j = json::parse(msg);
-    } catch (exception &e) {
+    } catch (std::exception &e) {
       debug("msg paser error");
       return MSG_ERROR;
     }
@@ -192,7 +192,7 @@ class cgproxyd {
         return status;
         break;
       case MSG_TYPE_CONFIG_PATH:
-        status = config.loadFromFile(j.at("data").get<string>());
+        status = config.loadFromFile(j.at("data").get<std::string>());
         info("process received config path msg");
         if (status == SUCCESS) status = applyConfig();
         return status;
@@ -214,18 +214,18 @@ class cgproxyd {
         return MSG_ERROR;
         break;
       };
-    } catch (out_of_range &e) { return MSG_ERROR; } catch (exception &e) {
+    } catch (std::out_of_range &e) { return MSG_ERROR; } catch (std::exception &e) {
       return ERROR;
     }
   }
 
   void startSocketListeningThread() {
-    promise<void> status;
-    future<void> status_f = status.get_future();
-    thread th(SOCKET::startThread, handle_msg_static, move(status));
-    socketserver_thread = move(th);
+    std::promise<void> status;
+    std::future<void> status_f = status.get_future();
+    std::thread th(SOCKET::startThread, handle_msg_static, std::move(status));
+    socketserver_thread = std::move(th);
 
-    future_status fstatus = status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));
+    std::future_status fstatus = status_f.wait_for(std::chrono::seconds(THREAD_TIMEOUT));
     if (fstatus == std::future_status::ready) {
       info("socketserver thread started");
     } else {
@@ -241,17 +241,17 @@ class cgproxyd {
     }
     #endif
 
-    promise<void> status;
-    future<void> status_f = status.get_future();
+    std::promise<void> status;
+    std::future<void> status_f = status.get_future();
     #ifdef BUIlD_EXECSNOOP_DL
-    thread th(EXECSNOOP::_startThread, handle_pid_static, move(status));
+    std::thread th(EXECSNOOP::_startThread, handle_pid_static, std::move(status));
     #else
     thread th(EXECSNOOP::startThread, handle_pid_static, move(status));
     #endif
 
-    execsnoop_thread = move(th);
+    execsnoop_thread = std::move(th);
 
-    future_status fstatus = status_f.wait_for(chrono::seconds(THREAD_TIMEOUT));
+    std::future_status fstatus = status_f.wait_for(std::chrono::seconds(THREAD_TIMEOUT));
     if (fstatus == std::future_status::ready) {
       info("execsnoop thread started");
       processRunningProgram();
@@ -264,7 +264,7 @@ class cgproxyd {
     debug("process running program");
     for (auto &path : config.program_noproxy)
       for (auto &pid : bash_pidof(path)) {
-        string cg = getCgroup(pid);
+        std::string cg = getCgroup(pid);
         if (cg.empty()) {
           debug("cgroup get failed, ignore: %d %s", pid, path.c_str());
           continue;
@@ -281,7 +281,7 @@ class cgproxyd {
       }
     for (auto &path : config.program_proxy)
       for (auto &pid : bash_pidof(path)) {
-        string cg = getCgroup(pid);
+        std::string cg = getCgroup(pid);
         if (cg.empty()) {
           debug("cgroup get failed, ignore: %d %s", pid, path.c_str());
           continue;
@@ -345,9 +345,9 @@ public:
 cgproxyd *cgproxyd::instance = NULL;
 
 void print_usage() {
-  cout << "Start a daemon with unix socket to accept control" << endl;
-  cout << "Usage: cgproxyd [--help] [--debug]" << endl;
-  cout << "Alias: cgproxyd = cgproxy --daemon" << endl;
+  std::cout << "Start a daemon with unix socket to accept control" << std::endl;
+  std::cout << "Usage: cgproxyd [--help] [--debug]" << std::endl;
+  std::cout << "Alias: cgproxyd = cgproxy --daemon" << std::endl;
 }
 
 void processArgs(const int argc, char *argv[]) {

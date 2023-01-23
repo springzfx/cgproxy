@@ -11,7 +11,7 @@ using json = nlohmann::json;
 #define tryassign(v)                                                                     \
   try {                                                                                  \
     j.at(#v).get_to(v);                                                                  \
-  } catch (exception & e) {}
+  } catch (std::exception & e) {}
 #define merge(v)                                                                         \
   {                                                                                      \
     v.erase(std::remove(v.begin(), v.end(), v##_preserved), v.end());                    \
@@ -38,16 +38,16 @@ void Config::toEnv() const {
   setenv("mark_newin", to_str(mark_newin).c_str(), 1);
 }
 
-int Config::saveToFile(const string &f) {
-  ofstream o(f);
+int Config::saveToFile(const std::string &f) {
+  std::ofstream o(f);
   if (!o.is_open()) return FILE_ERROR;
-  const string js = toJsonStr();
-  o << setw(4) << js << endl;
+  const std::string js = toJsonStr();
+  o << std::setw(4) << js << std::endl;
   o.close();
   return 0;
 }
 
-string Config::toJsonStr() {
+std::string Config::toJsonStr() {
   json j;
   add2json(program_proxy);
   add2json(program_noproxy);
@@ -66,11 +66,11 @@ string Config::toJsonStr() {
   return j.dump();
 }
 
-int Config::loadFromFile(const string &f) {
+int Config::loadFromFile(const std::string &f) {
   debug("loading config: %s", f.c_str());
-  ifstream ifs(f);
+  std::ifstream ifs(f);
   if (ifs.is_open()) {
-    const string js = to_str(ifs.rdbuf());
+    const std::string js = to_str(ifs.rdbuf());
     ifs.close();
     return loadFromJsonStr(js);
   } else {
@@ -79,7 +79,7 @@ int Config::loadFromFile(const string &f) {
   }
 }
 
-int Config::loadFromJsonStr(const string &js) {
+int Config::loadFromJsonStr(const std::string &js) {
   if (!validateJsonStr(js)) {
     error("json validate fail");
     return PARAM_ERROR;
@@ -114,17 +114,17 @@ void Config::mergeReserved() {
   merge(cgroup_noproxy);
 }
 
-bool Config::validateJsonStr(const string &js) {
+bool Config::validateJsonStr(const std::string &js) {
   json j = json::parse(js);
   bool status = true;
-  const set<string> boolset = {"enable_gateway", "enable_dns",  "enable_tcp",
+  const std::set<std::string> boolset = {"enable_gateway", "enable_dns",  "enable_tcp",
                                "enable_udp",     "enable_ipv4", "enable_ipv6"};
-  const set<string> allowset = {"program_proxy", "program_noproxy", "comment", "table", "fwmark", "mark_newin"};
+  const std::set<std::string> allowset = {"program_proxy", "program_noproxy", "comment", "table", "fwmark", "mark_newin"};
   for (const auto &[key, value] : j.items()) {
     if (key == "cgroup_proxy" || key == "cgroup_noproxy") {
-      if (value.is_string() && !validCgroup(string(value))) status = false;
+      if (value.is_string() && !validCgroup(std::string(value))) status = false;
       // TODO what if vector<int> etc.
-      if (value.is_array() && !validCgroup(vector<string>(value))) status = false;
+      if (value.is_array() && !validCgroup(std::vector<std::string>(value))) status = false;
       if (!value.is_string() && !value.is_array()) status = false;
     } else if (key == "port") {
       if (!validPort(value)) status = false;
@@ -152,8 +152,8 @@ void Config::print_summary() const {
   info("table: %d, fwmark: %d, mark_newin: %d", table, fwmark, mark_newin);
 }
 
-void Config::toRealProgramPath(vector<string> &v) {
-  vector<string> tmp;
+void Config::toRealProgramPath(std::vector<std::string> &v) {
+  std::vector<std::string> tmp;
   for (auto &p : v) {
     auto rpath = getRealExistPath(p);
     if (!rpath.empty()) tmp.push_back(rpath);

@@ -18,8 +18,8 @@ struct event {
 	uid_t uid;
 };
 
-function<int(int)> callback = nullptr;
-promise<void> status;
+std::function<int(int)> callback = nullptr;
+std::promise<void> status;
 
 static void handle_event(void *ctx, int cpu, void *data, __u32 size) {
   	auto *ev = static_cast<event*>(data);
@@ -87,9 +87,9 @@ main_loop:
 	return err;
 }
 
-void startThread(function<int(int)> c, promise<void> _status) {
-  status = move(_status);
-  callback = move(c);
+void startThread(std::function<int(int)> c, std::promise<void> _status) {
+  status = std::move(_status);
+  callback = std::move(c);
   execsnoop();
 }
 

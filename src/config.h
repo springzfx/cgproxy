@@ -4,19 +4,18 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-using namespace std;
 
 namespace CGPROXY::CONFIG {
 
 class Config {
 public:
-  const string cgroup_proxy_preserved = CGROUP_PROXY_PRESVERED;
-  const string cgroup_noproxy_preserved = CGROUP_NOPROXY_PRESVERED;
+  const std::string cgroup_proxy_preserved = CGROUP_PROXY_PRESVERED;
+  const std::string cgroup_noproxy_preserved = CGROUP_NOPROXY_PRESVERED;
 
-  vector<string> program_proxy = {cgroup_proxy_preserved};
-  vector<string> program_noproxy = {cgroup_noproxy_preserved};
-  vector<string> cgroup_proxy;
-  vector<string> cgroup_noproxy;
+  std::vector<std::string> program_proxy = {cgroup_proxy_preserved};
+  std::vector<std::string> program_noproxy = {cgroup_noproxy_preserved};
+  std::vector<std::string> cgroup_proxy;
+  std::vector<std::string> cgroup_noproxy;
   bool enable_gateway = false;
   int port = 12345;
   bool enable_dns = true;
@@ -31,16 +30,16 @@ public:
   int mark_newin=0x9967;
 
   void toEnv() const;
-  int saveToFile(const string &f);
-  string toJsonStr();
-  int loadFromFile(const string &f);
-  int loadFromJsonStr(const string &js);
+  int saveToFile(const std::string &f);
+  std::string toJsonStr();
+  int loadFromFile(const std::string &f);
+  int loadFromJsonStr(const std::string &js);
   void print_summary() const;
 
 private:
   void mergeReserved();
-  static bool validateJsonStr(const string &js);
-  static void toRealProgramPath(vector<string> &v);
+  static bool validateJsonStr(const std::string &js);
+  static void toRealProgramPath(std::vector<std::string> &v);
 };
 
 } // namespace CGPROXY::CONFIG

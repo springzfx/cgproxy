@@ -1,5 +1,4 @@
-#ifndef CGPROUP_ATTACH_H
-#define CGPROUP_ATTACH_H
+#pragma once
 
 #include <stdlib.h>
 #include <string>
@@ -12,5 +11,3 @@ int attach(const int pid, const std::string &cgroup_target);
 int write2procs(const std::string &pid, const std::string &procspath);
 
 } // namespace CGPROXY::CGROUP
-
-#endif

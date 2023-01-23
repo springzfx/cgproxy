@@ -1,5 +1,4 @@
-#ifndef EXECSNOOP_SHARE_HPP
-#define EXECSNOOP_SHARE_HPP 1
+#pragma once
 
 #include <functional>
 #include <future>
@@ -16,4 +15,3 @@ startThread_t *_startThread;
 #endif
 
 } // namespace CGPROXY::EXECSNOOP
-#endif

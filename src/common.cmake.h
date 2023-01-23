@@ -1,5 +1,4 @@
-#ifndef COMMON_H
-#define COMMON_H 1
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -107,5 +106,3 @@ bool belongToCgroup(const std::string &cg1, const std::string &cg2);
 bool belongToCgroup(const std::string &cg1, const std::vector<std::string> &cg2);
 std::string getCgroup(const pid_t &pid);
 std::string getCgroup(const std::string &pid);
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef CGPROXYD_HPP
-#define CGPROXYD_HPP
+#pragma once
 
 #include "cgroup_attach.h"
 #include "common.h"
@@ -375,4 +374,3 @@ int main(int argc, char *argv[]) {
   return d.start();
 }
 } // namespace CGPROXY::CGPROXYD
-#endif

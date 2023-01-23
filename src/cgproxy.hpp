@@ -1,3 +1,5 @@
+#pragma once
+
 #include "common.h"
 #include "config.h"
 #include "socket_client.h"

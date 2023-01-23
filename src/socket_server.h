@@ -1,5 +1,4 @@
-#ifndef SOCKET_SERVER_H
-#define SOCKET_SERVER_H
+#pragma once
 
 #include <functional>
 #include <future>
@@ -26,5 +25,3 @@ public:
 void startThread(const std::function<int(char *)> &callback, std::promise<void> status);
 
 } // namespace CGPROXY::SOCKET
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef EXECSNOOP_HPP
-#define EXECSNOOP_HPP 1
+#pragma once
 
 #include <functional>
 #include <future>
@@ -19,4 +18,3 @@ using startThread_t=decltype(startThread);
 startThread_t *_startThread; // only for dlsym()
 
 } // namespace CGPROXY::EXECSNOOP
-#endif

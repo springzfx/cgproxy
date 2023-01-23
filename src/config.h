@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#pragma once
+
 #include "common.h"
 #include <stdlib.h>
 #include <string>
@@ -43,4 +43,3 @@ private:
 };
 
 } // namespace CGPROXY::CONFIG
-#endif

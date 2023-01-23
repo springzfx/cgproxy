@@ -6,6 +6,7 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <unistd.h>
 
 namespace CGPROXY::EXECSNOOP {
@@ -96,7 +97,7 @@ int execsnoop() {
 
 void startThread(std::function<int(int)> c, std::promise<void> _status) {
   status = std::move(_status);
-  callback = c;
+  callback = std::move(c);
   execsnoop();
 }
 

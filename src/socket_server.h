@@ -20,11 +20,11 @@ public:
   int sfd = -1, cfd = -1, flag = -1;
   struct sockaddr_un unix_socket;
 
-  void socketListening(function<int(char *)> callback, promise<void> status);
+  void socketListening(const function<int(char *)> &callback, promise<void> status);
   ~SocketServer();
 };
 
-void startThread(function<int(char *)> callback, promise<void> status);
+void startThread(const function<int(char *)> &callback, promise<void> status);
 
 } // namespace CGPROXY::SOCKET
 

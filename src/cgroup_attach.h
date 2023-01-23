@@ -7,10 +7,10 @@ using namespace std;
 
 namespace CGPROXY::CGROUP {
 extern string cgroup2_mount_point;
-bool validate(string pid, string cgroup);
-int attach(const string pid, const string cgroup_target);
-int attach(const int pid, const string cgroup_target);
-int write2procs(string pid, string procspath);
+bool validate(const string &pid, const string &cgroup);
+int attach(const string &pid, const string &cgroup_target);
+int attach(const int pid, const string &cgroup_target);
+int write2procs(const string &pid, const string &procspath);
 
 } // namespace CGPROXY::CGROUP
 

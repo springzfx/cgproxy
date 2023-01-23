@@ -17,16 +17,16 @@ namespace CGPROXY::CGROUP {
 string cgroup2_mount_point = CGROUP2_MOUNT_POINT;
 
 
-bool validate(string pid, string cgroup) {
-  bool pid_v = validPid(pid);
-  bool cg_v = validCgroup(cgroup);
+bool validate(const string &pid, const string &cgroup) {
+  const bool pid_v = validPid(pid);
+  const bool cg_v = validCgroup(cgroup);
   if (pid_v && cg_v) return true;
 
   error("attach paramater validate error");
   return_error;
 }
 
-int attach(const string pid, const string cgroup_target) {
+int attach(const string &pid, const string &cgroup_target) {
   if (getuid() != 0) {
     error("need root to attach cgroup");
     return_error;
@@ -36,8 +36,8 @@ int attach(const string pid, const string cgroup_target) {
 
   if (!validate(pid, cgroup_target)) return_error;
   if (cgroup2_mount_point.empty()) return_error;
-  string cgroup_target_path = cgroup2_mount_point + cgroup_target;
-  string cgroup_target_procs = cgroup_target_path + "/cgroup.procs";
+  const string cgroup_target_path = cgroup2_mount_point + cgroup_target;
+  const string cgroup_target_procs = cgroup_target_path + "/cgroup.procs";
 
   // check if exist, we will create it if not exist
   if (!dirExist(cgroup_target_path)) {
@@ -73,7 +73,7 @@ int attach(const string pid, const string cgroup_target) {
   return_success;
 }
 
-int write2procs(string pid, string procspath) {
+int write2procs(const string &pid, const string &procspath) {
   ofstream procs(procspath, ofstream::app);
   if (!procs.is_open()) {
     error("open file %s failed", procspath.c_str());
@@ -91,7 +91,7 @@ int write2procs(string pid, string procspath) {
   return_success;
 }
 
-int attach(const int pid, const string cgroup_target) {
+int attach(const int pid, const string &cgroup_target) {
   return attach(to_str(pid), cgroup_target);
 }
 

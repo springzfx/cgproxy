@@ -19,14 +19,14 @@ void send(const char *msg, int &status) {
   status = UNKNOWN_ERROR;
 
   int flag;
-  int sfd = socket(AF_UNIX, SOCK_STREAM, 0);
+  const int sfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
   struct sockaddr_un unix_socket;
   memset(&unix_socket, '\0', sizeof(struct sockaddr_un));
   unix_socket.sun_family = AF_UNIX;
   strncpy(unix_socket.sun_path, SOCKET_PATH, sizeof(unix_socket.sun_path) - 1);
 
-  flag = connect(sfd, (struct sockaddr *)&unix_socket, sizeof(struct sockaddr_un));
+  flag = connect(sfd, reinterpret_cast<struct sockaddr *>(&unix_socket), sizeof(struct sockaddr_un));
   return_if_error(flag, "connect");
 
   int msg_len = strlen(msg);
@@ -41,7 +41,7 @@ void send(const char *msg, int &status) {
   close(sfd);
 }
 
-void send(const string msg, int &status) {
+void send(const string &msg, int &status) {
   send(msg.c_str(), status);
   debug("return status: %d", status);
 }

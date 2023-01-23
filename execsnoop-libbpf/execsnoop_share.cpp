@@ -18,20 +18,20 @@ struct event {
 	uid_t uid;
 };
 
-function<int(int)> callback = NULL;
+function<int(int)> callback = nullptr;
 promise<void> status;
 
 static void handle_event(void *ctx, int cpu, void *data, __u32 size) {
-  	auto e = static_cast<event*>(data);
-  	if (callback) callback(e->pid);
+  	auto *ev = static_cast<event*>(data);
+  	if (callback) callback(ev->pid);
 }
 
 void handle_lost_events(void *ctx, int cpu, __u64 lost_cnt) {
 	fprintf(stderr, "Lost %llu events on CPU #%d!\n", lost_cnt, cpu);
 }
 
-int bump_memlock_rlimit(void) {
-	struct rlimit rlim_new = { RLIM_INFINITY, RLIM_INFINITY };
+int bump_memlock_rlimit() {
+	const struct rlimit rlim_new = { RLIM_INFINITY, RLIM_INFINITY };
 	return setrlimit(RLIMIT_MEMLOCK, &rlim_new);
 }
 
@@ -89,7 +89,7 @@ main_loop:
 
 void startThread(function<int(int)> c, promise<void> _status) {
   status = move(_status);
-  callback = c;
+  callback = move(c);
   execsnoop();
 }
 

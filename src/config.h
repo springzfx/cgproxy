@@ -30,17 +30,17 @@ public:
   int fwmark=0x9973;
   int mark_newin=0x9967;
 
-  void toEnv();
-  int saveToFile(const string f);
+  void toEnv() const;
+  int saveToFile(const string &f);
   string toJsonStr();
-  int loadFromFile(const string f);
-  int loadFromJsonStr(const string js);
-  void print_summary();
+  int loadFromFile(const string &f);
+  int loadFromJsonStr(const string &js);
+  void print_summary() const;
 
 private:
   void mergeReserved();
-  bool validateJsonStr(const string js);
-  void toRealProgramPath(vector<string> &v);
+  static bool validateJsonStr(const string &js);
+  static void toRealProgramPath(vector<string> &v);
 };
 
 } // namespace CGPROXY::CONFIG

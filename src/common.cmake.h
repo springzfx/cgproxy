@@ -85,13 +85,13 @@ template <typename... T> string to_str(T... args) {
   return ss.str();
 }
 
-string join2str(const vector<string> t, const char delm = ' ');
+string join2str(const vector<string> &t, const char delm = ' ');
 string join2str(const int argc, char **argv, const char delm = ' ');
-bool startWith(string prefix);
+bool startWith(const string &prefix);
 
-bool validCgroup(const string cgroup);
-bool validCgroup(const vector<string> cgroup);
-bool validPid(const string pid);
+bool validCgroup(const string &cgroup);
+bool validCgroup(const vector<string> &cgroup);
+bool validPid(const string &pid);
 bool validPort(const int port);
 
 bool fileExist(const string &path);
@@ -104,8 +104,8 @@ string getRealExistPath(const string &name);
 /**
  * whether cg1 belongs to cg2
  */
-bool belongToCgroup(string cg1, string cg2);
-bool belongToCgroup(string cg1, vector<string> cg2);
+bool belongToCgroup(const string &cg1, const string &cg2);
+bool belongToCgroup(const string &cg1, const vector<string> &cg2);
 string getCgroup(const pid_t &pid);
 string getCgroup(const string &pid);
 

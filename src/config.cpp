@@ -20,7 +20,7 @@ using json = nlohmann::json;
 
 namespace CGPROXY::CONFIG {
 
-void Config::toEnv() {
+void Config::toEnv() const {
   setenv("cgroup_mount_point", CGROUP2_MOUNT_POINT, 1);
   setenv("program_proxy", join2str(program_proxy, ':').c_str(), 1);
   setenv("program_noproxy", join2str(program_noproxy, ':').c_str(), 1);
@@ -38,10 +38,10 @@ void Config::toEnv() {
   setenv("mark_newin", to_str(mark_newin).c_str(), 1);
 }
 
-int Config::saveToFile(const string f) {
+int Config::saveToFile(const string &f) {
   ofstream o(f);
   if (!o.is_open()) return FILE_ERROR;
-  string js = toJsonStr();
+  const string js = toJsonStr();
   o << setw(4) << js << endl;
   o.close();
   return 0;
@@ -66,11 +66,11 @@ string Config::toJsonStr() {
   return j.dump();
 }
 
-int Config::loadFromFile(const string f) {
+int Config::loadFromFile(const string &f) {
   debug("loading config: %s", f.c_str());
   ifstream ifs(f);
   if (ifs.is_open()) {
-    string js = to_str(ifs.rdbuf());
+    const string js = to_str(ifs.rdbuf());
     ifs.close();
     return loadFromJsonStr(js);
   } else {
@@ -79,7 +79,7 @@ int Config::loadFromFile(const string f) {
   }
 }
 
-int Config::loadFromJsonStr(const string js) {
+int Config::loadFromJsonStr(const string &js) {
   if (!validateJsonStr(js)) {
     error("json validate fail");
     return PARAM_ERROR;
@@ -114,17 +114,17 @@ void Config::mergeReserved() {
   merge(cgroup_noproxy);
 }
 
-bool Config::validateJsonStr(const string js) {
+bool Config::validateJsonStr(const string &js) {
   json j = json::parse(js);
   bool status = true;
   const set<string> boolset = {"enable_gateway", "enable_dns",  "enable_tcp",
                                "enable_udp",     "enable_ipv4", "enable_ipv6"};
   const set<string> allowset = {"program_proxy", "program_noproxy", "comment", "table", "fwmark", "mark_newin"};
-  for (auto &[key, value] : j.items()) {
+  for (const auto &[key, value] : j.items()) {
     if (key == "cgroup_proxy" || key == "cgroup_noproxy") {
-      if (value.is_string() && !validCgroup((string)value)) status = false;
+      if (value.is_string() && !validCgroup(string(value))) status = false;
       // TODO what if vector<int> etc.
-      if (value.is_array() && !validCgroup((vector<string>)value)) status = false;
+      if (value.is_array() && !validCgroup(vector<string>(value))) status = false;
       if (!value.is_string() && !value.is_array()) status = false;
     } else if (key == "port") {
       if (!validPort(value)) status = false;
@@ -144,7 +144,7 @@ bool Config::validateJsonStr(const string js) {
   return true;
 }
 
-void Config::print_summary() {
+void Config::print_summary() const {
   info("noproxy program: %s", join2str(program_noproxy).c_str());
   info("proxied program: %s", join2str(program_proxy).c_str());
   info("noproxy cgroup: %s", join2str(cgroup_noproxy).c_str());

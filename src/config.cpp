@@ -36,6 +36,7 @@ void Config::toEnv() {
   setenv("table", to_str(table).c_str(), 1);
   setenv("fwmark", to_str(fwmark).c_str(), 1);
   setenv("mark_newin", to_str(mark_newin).c_str(), 1);
+  setenv("enable_nftables", to_str(enable_nftables).c_str(), 1);
 }
 
 int Config::saveToFile(const string f) {
@@ -63,6 +64,7 @@ string Config::toJsonStr() {
   add2json(table);
   add2json(fwmark);
   add2json(mark_newin);
+  add2json(enable_nftables);
   return j.dump();
 }
 
@@ -99,6 +101,7 @@ int Config::loadFromJsonStr(const string js) {
   tryassign(table);
   tryassign(fwmark);
   tryassign(mark_newin);
+  tryassign(enable_nftables);
 
   // e.g. v2ray -> /usr/bin/v2ray -> /usr/lib/v2ray/v2ray
   toRealProgramPath(program_noproxy);
@@ -118,7 +121,7 @@ bool Config::validateJsonStr(const string js) {
   json j = json::parse(js);
   bool status = true;
   const set<string> boolset = {"enable_gateway", "enable_dns",  "enable_tcp",
-                               "enable_udp",     "enable_ipv4", "enable_ipv6"};
+                               "enable_udp",     "enable_ipv4", "enable_ipv6", "enable_nftables"};
   const set<string> allowset = {"program_proxy", "program_noproxy", "comment", "table", "fwmark", "mark_newin"};
   for (auto &[key, value] : j.items()) {
     if (key == "cgroup_proxy" || key == "cgroup_noproxy") {
@@ -150,6 +153,7 @@ void Config::print_summary() {
   info("noproxy cgroup: %s", join2str(cgroup_noproxy).c_str());
   info("proxied cgroup: %s", join2str(cgroup_proxy).c_str());
   info("table: %d, fwmark: %d, mark_newin: %d", table, fwmark, mark_newin);
+  info("interface: %s", enable_nftables ? "nft" : "legacy");
 }
 
 void Config::toRealProgramPath(vector<string> &v) {

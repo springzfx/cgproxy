@@ -25,12 +25,12 @@ string join2str(const int argc, char **argv, const char delm) {
 bool startWith(string s, string prefix) { return s.rfind(prefix, 0) == 0; }
 
 bool validCgroup(const string cgroup) {
-  return regex_match(cgroup, regex("^/[a-zA-Z0-9\\-_./@]*$"));
+  return regex_match(cgroup, regex("^/[a-zA-Z0-9-\\\\_./@]*$"));
 }
 
 bool validCgroup(const vector<string> cgroup) {
   for (auto &e : cgroup) {
-    if (!regex_match(e, regex("^/[a-zA-Z0-9\\-_./@]*$"))) { return false; }
+    if (!regex_match(e, regex("^/[a-zA-Z0-9-\\\\_./@]*$"))) { return false; }
   }
   return true;
 }

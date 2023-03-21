@@ -325,17 +325,17 @@ public:
   }
 
   int applyConfig() {
-    system(TPROXY_IPTABLS_CLEAN);
+    system(CGTPROXY_TEARDOWN);
     config.print_summary();
     config.toEnv();
-    system(TPROXY_IPTABLS_START);
+    system(CGTPROXY_SETUP);
     // no need to track running status
     return 0;
   }
 
   void stop() {
     debug("stopping");
-    system(TPROXY_IPTABLS_CLEAN);
+    system(CGTPROXY_TEARDOWN);
     unlock();
   }
 

@@ -7,8 +7,8 @@
 #include <vector>
 using namespace std;
 
-#define TPROXY_IPTABLS_START "@CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/cgroup-tproxy.sh"
-#define TPROXY_IPTABLS_CLEAN "@CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/cgroup-tproxy.sh stop"
+#define CGTPROXY_SETUP "@CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/cgtproxy.sh setup"
+#define CGTPROXY_TEARDOWN "@CMAKE_INSTALL_FULL_DATADIR@/cgproxy/scripts/cgtproxy.sh teardown"
 
 #define LIBEXECSNOOP_SO "@CMAKE_INSTALL_FULL_LIBDIR@/cgproxy/libexecsnoop.so"
 #define CGROUP2_MOUNT_POINT "/var/run/cgproxy/cgroup2"
